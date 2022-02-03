@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="MarionUpload.Views.vwAgent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="1200">
+    <Grid>
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Import Agents" Command="{Binding CommandImportAgents}"                     
+                                Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
+                <Button Content="Upload Agents" Command="{Binding CommandUploadAgents}"                     
+                                Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
+            </StackPanel>
+            <DataGrid Name="dgAgents" Margin="10" Width="1000" Height="350" HorizontalAlignment="Left"
+                            ItemsSource="{Binding MarionAgents}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="AgentNumber" Binding="{Binding Path=AgentNumber, Mode=OneWay}" />
+                    <DataGridTextColumn Header="AgentName" Binding="{Binding Path=AgentName, Mode=TwoWay}" />
+                    <DataGridTextColumn Header="InCareOf" Binding="{Binding Path=InCareOf, Mode=TwoWay}" />
+                    <DataGridTextColumn Header="StreetAddress" Binding="{Binding Path=StreetAddress, Mode=TwoWay}" />
+                    <DataGridTextColumn Header="City" Binding="{Binding Path=City, Mode=TwoWay}" />
+                    <DataGridTextColumn Header="State" Binding="{Binding Path=State, Mode=TwoWay}" />
+                    <DataGridTextColumn Header="Zip" Binding="{Binding Path=Zip, Mode=TwoWay}" />
+                    <DataGridTextColumn Header="Zip4" Binding="{Binding Path=Zip4, Mode=TwoWay}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </Grid>
+</UserControl>
