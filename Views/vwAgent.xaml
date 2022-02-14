@@ -3,19 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="1200">
+             mc:Ignorable="d" >
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Button Content="Import Agents" Command="{Binding CommandImportAgents}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
-                <Button Content="Upload Agents" Command="{Binding CommandUploadAgents}"                     
+                <Button Content="Upload AgentIDs" Command="{Binding CommandUploadAgentIDs}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
-            <DataGrid Name="dgAgents" Margin="10" Width="1000" Height="350" HorizontalAlignment="Left"
-                            ItemsSource="{Binding MarionAgents}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <DataGrid Name="dgAgents" Margin="10" Width="Auto" Height="800" HorizontalAlignment="Left"
+                            ItemsSource="{Binding MarionAgents}" AutoGenerateColumns="False"  >
                 <DataGrid.Columns>
+                    <DataGridTextColumn Header="NameID" Binding="{Binding Path=NameID, Mode=OneWay}" />
+                    <DataGridTextColumn Header="NameC" Binding="{Binding Path=NameC, Mode=TwoWay}" />
                     <DataGridTextColumn Header="AgentNumber" Binding="{Binding Path=AgentNumber, Mode=OneWay}" />
                     <DataGridTextColumn Header="AgentName" Binding="{Binding Path=AgentName, Mode=TwoWay}" />
                     <DataGridTextColumn Header="InCareOf" Binding="{Binding Path=InCareOf, Mode=TwoWay}" />
@@ -26,6 +27,7 @@
                     <DataGridTextColumn Header="Zip4" Binding="{Binding Path=Zip4, Mode=TwoWay}" />
                 </DataGrid.Columns>
             </DataGrid>
+
         </StackPanel>
     </Grid>
 </UserControl>

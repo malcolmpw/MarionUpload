@@ -1,0 +1,1 @@
+﻿Select Top 0 * into NewTable from OldTable

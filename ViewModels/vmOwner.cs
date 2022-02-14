@@ -18,28 +18,27 @@ namespace MarionUpload.ViewModels
 {
     public class vmOwner
     {
-
         const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
         public ObservableCollection<mMarionOwner> MarionOwners { get; set; }
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
-
-        private void OnUploadOwners()
-        {
-                UploadOwnerToOwnerTable();
-        }
-
-        private void OnImportOwners()
-        {
-            ImportOwnerDataFromMarion();
-        }
 
         public vmOwner()
         {
             MarionOwners = new ObservableCollection<mMarionOwner>();
         }
 
-        void ImportOwnerDataFromMarion()
+        private void OnImportOwners()
+        {
+            SelectOwnerDataFromMarionImportTable();
+        }
+
+        private void OnUploadOwners()
+        {
+            UploadMarionOwnersToTblName();
+        }        
+
+        void SelectOwnerDataFromMarionImportTable()
         {
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
@@ -49,7 +48,7 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        void UploadOwnerToOwnerTable()
+        void UploadMarionOwnersToTblName()
         {
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
