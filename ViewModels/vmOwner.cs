@@ -48,21 +48,31 @@ namespace MarionUpload.ViewModels
             }
         }
 
+        public List<mOwner> OwnersToInsert { get; set; }
+
         void UploadMarionOwnersToTblName()
         {
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
+                string sqlQuery = "Insert Into tblCadOwners(NameID, CadID) Values(@NameID, @CadID)";
                 foreach (var marionOwner in MarionOwners)
                 {
-                    mOwner owner = TranslateToOwner(marionOwner);
-                    var result = db.Insert<mOwner>(owner);
+                    mOwner ownerToInsert = TranslateFrom_mMarionOwnerTo_mOwner(marionOwner);
+                    //OwnersToInsert.Add(ownerToInsert);
                     // Insert resulting NameID and importedMarionOwner.OwnerNumber into a new table called tblMarionToOwner
+                    db.Execute(sqlQuery, ownerToInsert);
                 }
             }
         }
 
-        private mOwner TranslateToOwner(mMarionOwner importedMarionOwner)
+        private DateTime _UpdateDate;
+        private string _UpdateBy;
+
+        private mOwner TranslateFrom_mMarionOwnerTo_mOwner(mMarionOwner importedMarionOwner)
         {
+            _UpdateDate = DateTime.Now;
+            _UpdateBy = "MPW";
+
             var owner = new mOwner();
             owner.AgentID = importedMarionOwner.AgentNumber.Trim();
             owner.Agent_YN = importedMarionOwner.AgentNumber.Trim() != "0";
@@ -80,6 +90,10 @@ namespace MarionUpload.ViewModels
             }
 
             owner.NameSort = importedMarionOwner.OwnerName.Trim();
+            owner.UpdateDate = _UpdateDate;
+            owner.UpdateBy = _UpdateBy;
+            owner.CadID = "MAR";
+            
 
             return owner;
         }

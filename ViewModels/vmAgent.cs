@@ -67,8 +67,7 @@ namespace MarionUpload.ViewModels
 
         public static void InsertMarionAgentNumbers(List<mMarionAgent> agents)
         {
-            // insert marion agent numbers and nameIDs into tblCadOwner
-            //int @NameID; string @CadID; string @CadOwnerID; bool @delflag;
+            // insert marion agent numbers and nameIDs into tblCadOwner            
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
                 string sqlQuery = "Insert Into tblCadOwners(NameID, CadID, CadOwnerID, delflag) Values(@NameID, @CadID, @CadOwnerID, @delflag)";
