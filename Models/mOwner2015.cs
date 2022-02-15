@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MarionUpload.Models
+﻿namespace MarionUpload.Models
 {
     //[Table("tblNameX")]
     public class mOwner2015
