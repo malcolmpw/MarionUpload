@@ -6,13 +6,14 @@ namespace MarionUpload.Models
     public class mMarionOwner
     {
         [Key]
-        public string ImportID { get; set; }
-        //public int OwnerNumber {get; set; }
-        public string OwnerNumber { get; set; }   //BEG   1 - END   3
-        public string OwnerName { get; set; }     //BEG   4 - END  33
-        public string InCareOf { get; set; }      //BEG  34 - END  64
-        public string StreetAddress { get; set; } //BEG  64 - END  93
+        public string ImportID { get; set; }        
+        public string OwnerNumber { get; set; }   
+        public string OwnerName { get; set; }     
+        public string InCareOf { get; set; }      
+        public string StreetAddress { get; set; } 
         public string CityStateZip { get; set; }
-        public string AgentNumber { get; set; }          //BEG 118 - END 121
+        public string AgentNumber { get; set; }  
+        public string NameSortCad { get; set; }
+        public bool NameSel_YN { get; set; }       
     }
 }

@@ -12,7 +12,6 @@ using Dapper;
 using Dapper.Contrib;
 using GalaSoft.MvvmLight.Command;
 using MarionUpload.Models;
-using MarionDistributeImport.Models;
 
 
 namespace MarionUpload.ViewModels

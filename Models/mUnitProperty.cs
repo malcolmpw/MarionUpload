@@ -10,6 +10,6 @@ namespace MarionUpload.Models
     {
         public string UnitID { get; set; }
         public int PropID { get; set; }
-        public double UnitPct { get; set; }        
+        public double UnitPct { get; set; }     
     }
 }

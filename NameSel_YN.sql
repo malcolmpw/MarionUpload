@@ -26,4 +26,4 @@ SELECT distinct
   inner join tblCadOwners c
   on a.NameID=c.NameID 
   where a.cad='MAR' and n.NameSel_YN=1
-  order by n.NameC
+  --order by n.NameC

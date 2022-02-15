@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dapper.Contrib.Extensions;
+﻿using Dapper.Contrib.Extensions;
+using System;
 
 namespace MarionUpload.Models
 {
@@ -23,8 +19,10 @@ namespace MarionUpload.Models
         public string MailCo { get; set; }  // Maps to Country
         public string MailZip { get; set; }  // Maps to CityStateZip
         public string AgentID { get; set; } //BEG 118 - END 121
-        public bool   Agent_YN { get; set; } // based on if AgentNumber is 0 or not.
+        public bool Agent_YN { get; set; } // based on if AgentNumber is 0 or not.
         public DateTime UpdateDate { get; set; }
-        public string UpdateBy { get; set; }       
+        public string UpdateBy { get; set; }   
+        public string NameSortCad { get; set; }
+        public bool NameSel_YN { get; set; }
     }
 }
