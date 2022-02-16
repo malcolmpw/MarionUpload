@@ -33,7 +33,7 @@ namespace MarionUpload.Models
         public string MailCo { get; set; }
         public string MailZip { get; set; }
         public string AgentID { get; set; }
-        public bool Agent_YN { get; set; } 
+        public bool Agnt_YN { get; set; } 
         public string Addr1 { get; set; }
         public DateTime UpdateDate { get; set; }
         public string UpdateBy { get; set; }   

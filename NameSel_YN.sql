@@ -3,23 +3,8 @@ SELECT distinct
 	   n.NameID
       ,a.Cad
 	  ,c.CadOwnerID
-      ,[OwnerID]
-      ,[NameH]
-      ,[NameF]
-      ,[NameM]
-      ,[NameLP]
-      ,[NameL1]
-      ,[NameL2]
-      ,[NameLS]
-      ,[NameT]
-      ,[NameC]
-      ,[NameCP]
       ,[NameSel_YN]
-      ,[Name2]
-      ,[NameSort]
-      ,[NameSortFirst]
       ,[NameSortCad]
-      ,[NameNick]
   FROM [WagData2015].[dbo].[tblName] n 
   inner join tblAccount a 
   on n.NameID=a.NameID 

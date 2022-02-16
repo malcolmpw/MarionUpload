@@ -20,18 +20,28 @@ namespace MarionUpload.ViewModels
     {
         const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
         const string ConnectionString2015 = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=WagData2015;Integrated Security=True;";
+        private const string MarionCounty2015QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
+                                                            "n.NameH, n.NameF, n.NameM, n.NameL1, n.NameL2, n.NameLS, n.NameC, n.NameCP, n.Name2 " +
+                                                             "FROM[WagData2015].[dbo].[tblName] n " +
+                                                             "inner join[WagData2015].[dbo].[tblAccount] a " +
+                                                             "on n.NameID = a.NameID " +
+                                                             "inner join[WagData2015].[dbo].tblProperty p " +
+                                                             "on a.PropID = p.PropID " +
+                                                             "where p.ControlCad = 'MAR' " +
+                                                             "order by n.NameSortCad ";
+
         public static ObservableCollection<mMarionOwner> MarionOwners { get; set; }
-        public static ObservableCollection<mOwner2015> MarionOwners2015 { get; set; }
+        public static ObservableCollection<mOwner> MarionOwners2015 { get; set; }
         public static ObservableCollection<mOwner> InsertedOwners { get; set; }
-        public static Dictionary<string, Tuple<string, bool>> NameSel_YN { get; set; }
+        public static Dictionary<string, mOwner> NameSortCadMap { get; set; }
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
 
         public vmOwner()
         {
             MarionOwners = new ObservableCollection<mMarionOwner>();
-            MarionOwners2015 = new ObservableCollection<mOwner2015>();
-            NameSel_YN = new Dictionary<string, Tuple<string, bool>>();
+            MarionOwners2015 = new ObservableCollection<mOwner>();
+            NameSortCadMap = new Dictionary<string, mOwner>();
         }
 
         private void OnImportOwners()
@@ -44,52 +54,64 @@ namespace MarionUpload.ViewModels
         {
             using (IDbConnection db = new SqlConnection(ConnectionString2015))
             {
-                string queryString = "SELECT distinct n.NameSortCad, n.NameSel_YN " +
-                                                     "FROM[WagData2015].[dbo].[tblName] n " +
-                                                     "inner join[WagData2015].[dbo].[tblAccount] a " +
-                                                     "on n.NameID = a.NameID " +
-                                                     "inner join[WagData2015].[dbo].tblProperty p " +
-                                                     "on a.PropID = p.PropID " +
-                                                     "where p.ControlCad = 'MAR' " +
-                                                     "order by n.NameSortCad ";
-                var results = db.Query<mOwner2015>(queryString);
+                string queryString = MarionCounty2015QueryString;
+                var results = db.Query<mOwner>(queryString);
                 var distinctResults = results.Distinct(new OwnerNumberComparer2015()).ToList();
-                //distinctResults.ForEach(owner => MarionOwners2015.Add(owner));
-                foreach (mOwner2015 dr in distinctResults)
+                CreateNameSelectDictionary(distinctResults);
+
+                // Loop through each marion owner and fill in the NameSelect info.
+                foreach (mMarionOwner marionOwner in MarionOwners)
                 {
-                    var tuplePerson = Tuple.Create(dr.NameSortCad.Trim().ToUpper(), dr.NameSel_YN);
-                    MarionOwners2015.Add(dr);
-                    if (!NameSel_YN.ContainsKey(dr.NameSortCad.Trim().ToUpper()))
+                    var ownerNameTrimmed = marionOwner.OwnerName.Trim().ToUpper();
+                    if (NameSortCadMap.ContainsKey(ownerNameTrimmed))
                     {
-                        NameSel_YN.Add(dr.NameSortCad.Trim().ToUpper(), tuplePerson);
+                        FillMarionOwnerWithNameSelectFlag(marionOwner);
                     }
                 }
-                foreach (mMarionOwner mo in MarionOwners)
+
+            }
+        }
+
+        private static string FillMarionOwnerWithNameSelectFlag(mMarionOwner marionOwner)
+        {
+            string ownerNameTrimmed;
+            {
+                ownerNameTrimmed = marionOwner.OwnerName.Trim().ToUpper();
+                marionOwner.NameSortCad = ownerNameTrimmed;
+                marionOwner.NameSel_YN = NameSortCadMap[ownerNameTrimmed].NameSel_YN;
+            }
+
+            return ownerNameTrimmed;
+        }
+
+        private static void CreateNameSelectDictionary(List<mOwner> distinctResults)
+        {
+            foreach (mOwner dr in distinctResults)
+            {
+                MarionOwners2015.Add(dr);
+                string nameSortCadModified = dr.NameSortCad.Trim().ToUpper();
+                if (!NameSortCadMap.ContainsKey(nameSortCadModified))
                 {
-                    //var Tuple.Create(mo.NameSortCad, mo.NameSel_YN);
-                    var OwnerNameTrimmed = mo.OwnerName.Trim().ToUpper();
-                    if (NameSel_YN.ContainsKey(OwnerNameTrimmed))
-                    {
-                        OwnerNameTrimmed = mo.OwnerName.Trim().ToUpper();
-                        mo.NameSortCad = NameSel_YN[OwnerNameTrimmed].Item1;
-                        mo.NameSel_YN = NameSel_YN[OwnerNameTrimmed].Item2;
-                    }
-                }
-                foreach (mMarionOwner mo in MarionOwners)
-                {
-                    //parse NameSortCad based on NameSel_YN
-
-
-                    //convert upper case strings to First character upper case only
-
-
+                    NameSortCadMap.Add(nameSortCadModified, dr);
                 }
             }
         }
 
         private void OnUploadOwners()
         {
-            UploadMarionOwnersToTblName();
+            return;  // skip insert for now until property and account tables , and tblCadOwner are ready to test
+
+            using (IDbConnection db = new SqlConnection(ConnectionString))
+            {
+                foreach (mMarionOwner m in MarionOwners)
+                {
+                    var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(m);
+                    var primaryKey = db.Insert<mOwner>(populatedOwner);
+                    NameIdMap.Add(populatedOwner.NameSortCad.Trim().ToUpper(), primaryKey);
+                    //add new mOwner into OwnersToInsert
+                }
+            }
+         //   UploadMarionOwnersToTblName();
         }
 
         void SelectOwnerDataFromMarionImportTable()
@@ -103,66 +125,35 @@ namespace MarionUpload.ViewModels
         }
 
         public List<mOwner> OwnersToInsert { get; set; }
+        public IDictionary<string, long> NameIdMap { get; private set; } = new Dictionary<string, long>();
+       
+        
 
-        void UploadMarionOwnersToTblName()
-        {
-            using (IDbConnection db = new SqlConnection(ConnectionString))
-            {
-                string sqlString = "Insert Into tblCadOwners(NameID, CadID) Values(@NameID, @CadID)";
-                foreach (var marionOwner in MarionOwners)
-                {
-                    mOwner ownerToInsert = TranslateFrom_mMarionOwnerTo_mOwner(marionOwner);
-                    //OwnersToInsert.Add(ownerToInsert);
-                    // Insert resulting NameID and importedMarionOwner.OwnerNumber into a new table called tblMarionToOwner
-                    db.Execute(sqlString, ownerToInsert);
-                }
-                string fields = "CadID, NameSort, Mail1 , MailCi ,MailSt, MailSt, MailZ, MailZ4 ,MailCo ,MailZip ,AgentID,Agent_YN,UpdateDate,UpdateBy ,NameSortCad,NameSel_YN ";
-                string parameters = "@CadID, @NameSort, @Mail1 , @MailCi ,@MailSt, @MailSt, @MailZ, @MailZ4 ,@MailCo ,@MailZip ,@AgentID,@Agent_YN,@UpdateDate,@UpdateBy ,@NameSortCad,@NameSel_YN ";
-                string sqlQuery = $"Insert Into tblCadOwners( {fields}) Values({parameters})";
-                var result = db.Query<mOwner>(sqlQuery).ToList();
-                InsertedOwners = new ObservableCollection<mOwner>(result);
-            }
-        }
-
-        private DateTime _UpdateDate;
-        private string _UpdateBy;
+        private DateTime _updateDate;
+        private string _updateBy;
 
         private mOwner TranslateFrom_mMarionOwnerTo_mOwner(mMarionOwner importedMarionOwner)
         {
             NameSorts nsorts = new NameSorts();
-            _UpdateDate = DateTime.Now;
-            _UpdateBy = "MPW";
+            _updateDate = DateTime.Now;
+            _updateBy = "MPW";
 
             var owner = new mOwner();
 
             owner.CadID = "MAR";
             owner.NameSortCad = importedMarionOwner.OwnerName.Trim();
+            var matchingOwner = NameSortCadMap[owner.NameSortCad];
             owner.NameSortFirst = owner.NameSortCad;
-            if (!owner.NameSel_YN)
-            {
-                owner.NameH = "";
-                owner.NameF = "";
-                owner.NameM = "";
-                owner.NameL1 = "";
-                owner.NameL2 = "";
-                owner.NameLS = "";
-                owner.NameC = null;
-                owner.Name2 = "";
-                owner.NameSort = owner.NameL1 + ", " + owner.NameF + owner.NameM;// get this code from WagApp2
-                owner.NameSort = nsorts.RebuildNameSort(owner).NameSort;
-            }
-            else
-            {
-                owner.NameH = null;
-                owner.NameH = null;
-                owner.NameF = null;
-                owner.NameM = null;
-                owner.NameL1 = null;
-                owner.NameL2 = null;
-                owner.NameLS = null;
-                owner.NameC = owner.NameSortCad;
-                owner.Name2 = null;
-            }
+            owner.NameH = matchingOwner.NameH; // search the NameSortCad for titles, use SELECT distinct[NameH] FROM[WagData2015].[dbo].[tblName]                
+            owner.NameF = matchingOwner.NameF; // split and parse
+            owner.NameM = matchingOwner.NameM; // split and parse
+            owner.NameL1 = matchingOwner.NameL1; // split and parse
+            owner.NameL2 = matchingOwner.NameL2; // split and parse
+            owner.NameLS = matchingOwner.NameLS; // search the NameSortCad for titles, use SELECT distinct[NameLS FROM[WagData2015].[dbo].[tblName]
+            owner.NameC = matchingOwner.NameC;
+            owner.NameCP = matchingOwner.NameCP;
+            owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2015].[dbo].[tblName]
+                                // these may be taken from WagData2015 for the old list of marion owners in tblName.               
             owner.Mail1 = importedMarionOwner.StreetAddress.Trim();
             var cityStateZip = importedMarionOwner.CityStateZip.Trim();
             owner.MailCi = cityStateZip.Substring(0, cityStateZip.Length - 7).Trim();
@@ -183,10 +174,10 @@ namespace MarionUpload.ViewModels
             //}
 
             owner.AgentID = importedMarionOwner.AgentNumber.Trim();
-            owner.Agent_YN = importedMarionOwner.AgentNumber.Trim() != "0";
+            owner.Agnt_YN = importedMarionOwner.AgentNumber.Trim() != "0";
 
-            owner.UpdateDate = _UpdateDate;
-            owner.UpdateBy = _UpdateBy;
+            owner.UpdateDate = _updateDate;
+            owner.UpdateBy = _updateBy;
 
             return owner;
         }
@@ -204,14 +195,14 @@ namespace MarionUpload.ViewModels
             return obj.OwnerNumber.GetHashCode();
         }
     }
-    public class OwnerNumberComparer2015 : IEqualityComparer<mOwner2015>
+    public class OwnerNumberComparer2015 : IEqualityComparer<mOwner>
     {
-        public bool Equals(mOwner2015 x, mOwner2015 y)
+        public bool Equals(mOwner x, mOwner y)
         {
             return x.NameSortCad == y.NameSortCad;
         }
 
-        public int GetHashCode(mOwner2015 obj)
+        public int GetHashCode(mOwner obj)
         {
             return obj.NameSortCad.GetHashCode();
         }
