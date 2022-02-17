@@ -8,13 +8,13 @@
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Button Content="Import Property" Command="{Binding CommandImportProperty}" 
+                <Button Content="Import Property" Command="{Binding CommandImportProperties}" 
                             Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
-                <Button Content="Upload Property" Command="{Binding CommandUploadProperty}" 
+                <Button Content="Upload Property" Command="{Binding CommandUploadProperties}" 
                             Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
             <DataGrid Name="dgProperty" Margin="10" Width="600" Height="300" HorizontalAlignment="Left"
-                      ItemsSource="{Binding Property}">
+                      ItemsSource="{Binding MarionProperties}">
             </DataGrid>
         </StackPanel>
     </Grid>

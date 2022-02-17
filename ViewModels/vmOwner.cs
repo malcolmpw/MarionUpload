@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using Dapper;
-using Dapper.Contrib;
-using System.Data.SqlClient;
-using System.Data;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight.Command;
 using MarionUpload.Models;
-using Dapper.Contrib.Extensions;
-using System.Text.RegularExpressions;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Windows.Input;
 
 namespace MarionUpload.ViewModels
 {
@@ -20,7 +16,7 @@ namespace MarionUpload.ViewModels
     {
         const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
         const string ConnectionString2015 = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=WagData2015;Integrated Security=True;";
-        private const string MarionCounty2015QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
+        const string MarionCounty2015QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
                                                             "n.NameH, n.NameF, n.NameM, n.NameL1, n.NameL2, n.NameLS, n.NameC, n.NameCP, n.Name2 " +
                                                              "FROM[WagData2015].[dbo].[tblName] n " +
                                                              "inner join[WagData2015].[dbo].[tblAccount] a " +
@@ -30,10 +26,11 @@ namespace MarionUpload.ViewModels
                                                              "where p.ControlCad = 'MAR' " +
                                                              "order by n.NameSortCad ";
 
-        public static ObservableCollection<mMarionOwner> MarionOwners { get; set; }
-        public static ObservableCollection<mOwner> MarionOwners2015 { get; set; }
-        public static ObservableCollection<mOwner> InsertedOwners { get; set; }
-        public static Dictionary<string, mOwner> NameSortCadMap { get; set; }
+        public ObservableCollection<mMarionOwner> MarionOwners { get; set; }
+        public ObservableCollection<mOwner> MarionOwners2015 { get; set; }
+        public ObservableCollection<mOwner> InsertedOwners { get; set; }
+        public Dictionary<string, mOwner> NameSortCadMap { get; set; }
+
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
 
@@ -50,7 +47,7 @@ namespace MarionUpload.ViewModels
             SelectOwnerDataFromWagData2015();
         }
 
-        private static void SelectOwnerDataFromWagData2015()
+        private void SelectOwnerDataFromWagData2015()
         {
             using (IDbConnection db = new SqlConnection(ConnectionString2015))
             {
@@ -72,7 +69,7 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        private static string FillMarionOwnerWithNameSelectFlag(mMarionOwner marionOwner)
+        private string FillMarionOwnerWithNameSelectFlag(mMarionOwner marionOwner)
         {
             string ownerNameTrimmed;
             {
@@ -84,7 +81,7 @@ namespace MarionUpload.ViewModels
             return ownerNameTrimmed;
         }
 
-        private static void CreateNameSelectDictionary(List<mOwner> distinctResults)
+        private void CreateNameSelectDictionary(List<mOwner> distinctResults)
         {
             foreach (mOwner dr in distinctResults)
             {
@@ -108,7 +105,6 @@ namespace MarionUpload.ViewModels
                     var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(m);
                     var primaryKey = db.Insert<mOwner>(populatedOwner);
                     NameIdMap.Add(populatedOwner.NameSortCad.Trim().ToUpper(), primaryKey);
-                    //add new mOwner into OwnersToInsert
                 }
             }
          //   UploadMarionOwnersToTblName();
