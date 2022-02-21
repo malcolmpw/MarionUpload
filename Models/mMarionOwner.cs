@@ -6,8 +6,8 @@ namespace MarionUpload.Models
     public class mMarionOwner
     {
         [Key]
-        public string ImportID { get; set; }        
-        public string OwnerNumber { get; set; }   
+        public int ImportID { get; set; }        
+        public int OwnerNumber { get; set; }   
         public string OwnerName { get; set; }     
         public string InCareOf { get; set; }      
         public string StreetAddress { get; set; } 

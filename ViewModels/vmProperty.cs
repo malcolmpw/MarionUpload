@@ -46,7 +46,7 @@ namespace MarionUpload.ViewModels
             MarionProperties.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
-                var results = db.Query<mMarionProperty>("Select distinct PropertyType,SPTBCode,Description1,Description2,LeaseName,RRC,OperatorName," +
+                var results = db.Query<mMarionProperty>("Select distinct LeaseNumber, PropertyType,SPTBCode,Description1,Description2,LeaseName,RRC,OperatorName," +
                     "Jurisdiction1, Jurisdiction2, Jurisdiction3, " +
                     "Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
                     "Jurisdiction7, Jurisdiction8, Jurisdiction9, " +
@@ -56,11 +56,8 @@ namespace MarionUpload.ViewModels
                     .ToDictionary(jurisdiction => jurisdiction.Code, val => val.Name);
                 PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub").ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
 
-                var resultList = results.ToList();
+                var resultList = results.Distinct(new LeaseNumberComparer()).ToList();
 
-
-                //var distinctResults = results.Distinct(new OwnerNumberComparer()).ToList();
-                //distinctResults.ForEach(property => MarionProperties.Add(property));
 
                 resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));
              
@@ -68,6 +65,9 @@ namespace MarionUpload.ViewModels
 
             
         }
+
+        public static IDictionary<int, long> PropertyIdMap { get; private set; } = new Dictionary<int, long>();
+
 
         private void OnUploadProperties()
         {
@@ -79,6 +79,7 @@ namespace MarionUpload.ViewModels
                 {
                     var populatedProperty = TranslateFrom_mMarionPropertyTo_mProperty(m);
                     var primaryKey = db.Insert<mProperty>(populatedProperty);
+                    PropertyIdMap.Add(m.LeaseNumber, primaryKey);
                     System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryKey}");
                 }
             }
@@ -169,6 +170,19 @@ namespace MarionUpload.ViewModels
 
             return JurisdictionMap[ISDJurisdiction];
 
+        }
+    }
+
+    public class LeaseNumberComparer : IEqualityComparer<mMarionProperty>
+    {
+        public bool Equals(mMarionProperty x, mMarionProperty y)
+        {
+            return x.LeaseNumber == y.LeaseNumber;
+        }
+
+        public int GetHashCode(mMarionProperty obj)
+        {
+            return obj.LeaseNumber.GetHashCode();
         }
     }
 }

@@ -104,7 +104,7 @@ namespace MarionUpload.ViewModels
                 {
                     var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(m);
                     var primaryKey = db.Insert<mOwner>(populatedOwner);
-                    NameIdMap.Add(populatedOwner.NameSortCad.Trim().ToUpper(), primaryKey);
+                    NameIdMap.Add(m.OwnerNumber, primaryKey);
                 }
             }
          //   UploadMarionOwnersToTblName();
@@ -121,7 +121,7 @@ namespace MarionUpload.ViewModels
         }
 
         public List<mOwner> OwnersToInsert { get; set; }
-        public IDictionary<string, long> NameIdMap { get; private set; } = new Dictionary<string, long>();
+        public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
        
         
 

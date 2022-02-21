@@ -78,6 +78,7 @@
     </ApplicationDefinition>
     <Compile Include="Models\mAccount.cs" />
     <Compile Include="Models\mCadOwner.cs" />
+    <Compile Include="Models\mMarionAccount.cs" />
     <Compile Include="Models\mMarionAgent.cs" />
     <Compile Include="Models\MarionImport.cs" />
     <Compile Include="Models\mMarionOwner.cs" />
