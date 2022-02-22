@@ -54,47 +54,67 @@ namespace MarionUpload.ViewModels
 
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
-                foreach (var m in MarionAccounts)
+                foreach (var _marionAccount in MarionAccounts)
                 {
-                    var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(m);
+                    var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                     var primaryKey = db.Insert<mAccount>(populatedAccount);
+
+                    var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount);
+                    var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
                 }
             }
-
         }
 
-            private mAccount TranslateFrom_mMarionAccountTo_mAccount(mMarionAccount m)
-            {
-               var account = new mAccount();
-               account.PctProp = m.DecimalInterest;
-               account.Protest_YN = m.Protest == "P";
-                account.PTDcode = m.SPTBCode;
-
-
-
-
-            switch (m.InterestType)
-            {
-                case 1:
-                    account.PctType = 'R';
-                    break;
-                case 2:
-                    account.PctType = 'O';
-                    break;
-                case 3:
-                    account.PctType = 'W';
-                    break;
-                default:
-                    account.PctType = 'U';
-                    break;
-            }
-
-            return account;
+        private mCadAccount TranslateFrom_mMarionAccountTo_mCadAccount(mMarionAccount marionAccount)
+        {
+            var cadAccount = new mCadAccount();
+            cadAccount.CadID = "MAR";
+            char _interestType = ConvertInterestType(marionAccount);
+            cadAccount.CadAcctID = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +
+                                   _interestType + "-" + 
+                                   marionAccount.LeaseNumber.ToString().PadLeft(7, '0');
+            cadAccount.Lock_YN = false;
+            cadAccount.ExportCd = "";
+            cadAccount.ExportDate = DateTime.Now;
+            cadAccount.delflag = false;
+            cadAccount.CadAcctID_pre = "";
+            return cadAccount;
 
             // ******* USE this for the tblCadAccount CadAccountId ******
-           // return CadOwnerId.PadLeft(7, '0') + "-" + m.InterestType + "-" +
-           //        CadPropId.PadLeft(7, '0');
+            // return CadOwnerId.PadLeft(7, '0') + "-" + m.InterestType + "-" +
+            //        CadPropId.PadLeft(7, '0');
+        }
 
-          }
+        private mAccount TranslateFrom_mMarionAccountTo_mAccount(mMarionAccount _marionAccount)
+        {
+            var account = new mAccount();
+            account.PctProp = _marionAccount.DecimalInterest;
+            account.Protest_YN = _marionAccount.Protest == "P";
+            account.PTDcode = _marionAccount.SPTBCode;
+            account.PctType = ConvertInterestType(_marionAccount);
+
+            return account;
+        }
+
+        private static char ConvertInterestType(mMarionAccount _marionAccount)
+        {
+            char _intType;
+            switch (_marionAccount.InterestType)
+            {
+                case 1:
+                    _intType = 'R';
+                    break;
+                case 2:
+                    _intType = 'O';
+                    break;
+                case 3:
+                    _intType = 'W';
+                    break;
+                default:
+                    _intType = 'U';
+                    break;
+            }
+            return _intType;
         }
     }
+}

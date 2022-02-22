@@ -1,7 +1,6 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 
-
 namespace MarionUpload.Models
 {
     [Table("tblProperty")]

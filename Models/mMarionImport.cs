@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MarionUpload.Models
+﻿namespace MarionUpload.Models
 {
-    class MarionImport
+    class mMarionImport
     {
      //[Dapper.Key]
      //public int ImportID { get; set; }

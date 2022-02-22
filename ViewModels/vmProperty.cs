@@ -2,6 +2,7 @@
 using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight.Command;
 using MarionUpload.Models;
+using MarionUpLoad.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,6 +44,7 @@ namespace MarionUpload.ViewModels
             // distinct Description1,Description2,PropertyType          and got 647 rows.
             // distinct Description1,Description2,PropertyType,SPTBcode and got 652 rows.
             // I need all these fields so I am using the last query despite some (8) strange duplicates
+
             MarionProperties.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
@@ -58,16 +60,12 @@ namespace MarionUpload.ViewModels
 
                 var resultList = results.Distinct(new LeaseNumberComparer()).ToList();
 
-
-                resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));
-             
-            }
-
-            
+                resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));             
+            }            
         }
 
         public static IDictionary<int, long> PropertyIdMap { get; private set; } = new Dictionary<int, long>();
-
+        //public mCadProperty CadPropertyIdMap { get; private set; }
 
         private void OnUploadProperties()
         {
@@ -75,14 +73,28 @@ namespace MarionUpload.ViewModels
 
             using (IDbConnection db = new SqlConnection(ConnectionString))
             {
-                foreach (mMarionProperty m in MarionProperties)
+                foreach (mMarionProperty _marionProperty in MarionProperties)
                 {
-                    var populatedProperty = TranslateFrom_mMarionPropertyTo_mProperty(m);
-                    var primaryKey = db.Insert<mProperty>(populatedProperty);
-                    PropertyIdMap.Add(m.LeaseNumber, primaryKey);
-                    System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryKey}");
+                    var populatedProperty = TranslateFrom_mMarionPropertyTo_mProperty(_marionProperty);
+                    var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
+                    PropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
+                    System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
+
+                    var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty);
+                    var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
+                    //CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
                 }
             }
+        }
+
+        private mCadProperty TranslateFrom_mMarionPropertyTo_mCadProperty(mMarionProperty marionProperty)
+        {
+            var cadProperty = new mCadProperty();
+            cadProperty.CadID = "MAR";
+            cadProperty.CadPropid = marionProperty.LeaseNumber.ToString();
+            cadProperty.CadPct = 0;
+            cadProperty.delflag = false;
+            return cadProperty;
         }
 
         private mProperty TranslateFrom_mMarionPropertyTo_mProperty(mMarionProperty importedMarionProperty)
@@ -95,6 +107,7 @@ namespace MarionUpload.ViewModels
             var property = new mProperty();
 
             property.PtdClassSub = importedMarionProperty.SPTBCode.Trim();
+
             string sptbCode = importedMarionProperty.SPTBCode.Trim();
             if (sptbCode == "L1" || sptbCode == "L2")
             {
@@ -120,13 +133,14 @@ namespace MarionUpload.ViewModels
                 
                 property.PropType = "M";
                 property.Legal = importedMarionProperty.LeaseName.Trim() + " (" +
-                    rrcNumber + ") " +
-                    importedMarionProperty.OperatorName.Trim();
+                                 rrcNumber + ") " +
+                                 importedMarionProperty.OperatorName.Trim();
             }
             else
             {
                 property.PropType = "P";
-                property.Legal = FetchPTDDescription(sptbCode) + "," + FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
+                property.Legal = FetchPTDDescription(sptbCode) + "," + 
+                                 FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
             }
 
             property.ControlCad = "MAR";
