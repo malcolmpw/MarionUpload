@@ -22,9 +22,9 @@
                 <TabItem Header="tlkpUnit">
                     <view:vwUnit/>
                 </TabItem>
-                <TabItem Header="CadUnit">
+                <!--<TabItem Header="CadUnit">
                     <view:vwCadUnit/>
-                </TabItem>
+                </TabItem>-->
                 <TabItem Header="UnitProperty">
                     <view:vwUnitProperty/>
                 </TabItem>

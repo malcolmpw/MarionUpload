@@ -12,6 +12,8 @@
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
                 <Button Content="Upload Units" Command="{Binding CommandUploadUnits}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
+                <Button Content="Populate TlkpUnit Tables" Command="{Binding CommandPopulateTlkpUnitWithMarion}"                     
+                    Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
             <DataGrid Name="dgUnits" Margin="10" Width="600" Height="300" HorizontalAlignment="Left"
                       ItemsSource="{Binding Units}">

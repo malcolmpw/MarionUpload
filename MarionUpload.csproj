@@ -164,7 +164,7 @@
     <Compile Include="Models\mCadUnit.cs" />
     <Compile Include="Models\mOwner.cs" />
     <Compile Include="Models\mProperty.cs" />
-    <Compile Include="Models\mUnit.cs" />
+    <Compile Include="Models\mTlkpUnit.cs" />
     <Compile Include="Models\mUnitProperty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

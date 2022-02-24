@@ -1,6 +1,6 @@
 ﻿namespace MarionUpload.Models
 {
-    public class mUnit
+    public class mTlkpUnit
     {
         public string UnitID { get; set; }
         public string UnitName { get; set; }

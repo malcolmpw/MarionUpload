@@ -65,7 +65,7 @@ namespace MarionUpload.ViewModels
         }
 
         public static IDictionary<int, long> PropertyIdMap { get; private set; } = new Dictionary<int, long>();
-        //public mCadProperty CadPropertyIdMap { get; private set; }
+        public IDictionary<int, long> CadPropertyIdMap { get; private set; } = new Dictionary<int, long>();
 
         private void OnUploadProperties()
         {
@@ -82,7 +82,7 @@ namespace MarionUpload.ViewModels
 
                     var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty);
                     var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
-                    //CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
+                    CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
                 }
             }
         }

@@ -108,8 +108,7 @@ namespace MarionUpload.ViewModels
 
                     var populatedCadOwner = TranslateFrom_mMarionPropertyTo_mCadOwner(_marionOwner);
                     var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                    //CadOwnerIdMap.Add(_marionOwner.OwnerNumber, primaryCadOwnerKey);
-
+                    OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryCadOwnerKey);
                 }
             }
          //   UploadMarionOwnersToTblName();
@@ -132,7 +131,7 @@ namespace MarionUpload.ViewModels
 
         public List<mOwner> OwnersToInsert { get; set; }
         public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
-        //public mCadOwner CadOwnerIdMap { get; private set; }
+        public IDictionary<int, long> OwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
 
         private DateTime _updateDate;
         private string _updateBy;
