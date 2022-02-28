@@ -11,6 +11,7 @@ using System.Windows.Input;
 using Dapper;
 using Dapper.Contrib;
 using GalaSoft.MvvmLight.Command;
+using MarionDistributeImport.Helpers;
 using MarionUpload.Models;
 
 
@@ -19,7 +20,6 @@ namespace MarionUpload.ViewModels
     public class vmAgent
     {
         static readonly string Path = @"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MA215500.TXT";
-        const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
         //private const string AgentErrorPath = @"c:\temp\marion_agents_not_found.txt";
 
         public vmAgent()
@@ -55,7 +55,7 @@ namespace MarionUpload.ViewModels
         public List<mMarionAgent> marionAgents;
         private List<mMarionAgent> GetMarionAgentIDs()
         {
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 // get marion agents
                 var sql = "Select * from AbMarionAgents";
@@ -67,7 +67,7 @@ namespace MarionUpload.ViewModels
         public static void InsertMarionAgentNumbers(List<mMarionAgent> agents)
         {
             // insert marion agent numbers and nameIDs into tblCadOwner            
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 string sqlQuery = "Insert Into tblCadOwners(NameID, CadID, CadOwnerID, delflag) Values(@NameID, @CadID, @CadOwnerID, @delflag)";
                 foreach (mMarionAgent m in agents)

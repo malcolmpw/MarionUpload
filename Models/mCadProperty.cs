@@ -5,9 +5,9 @@ namespace MarionUpLoad.Models
     [Table("tblCadProperty")]
     class mCadProperty
     {
-        [Key]
+        [ExplicitKey]
         public int PropID { get; set; }
-        [Key]
+        [ExplicitKey]
         public string CadID { get; set; }
         public string CadPropid { get; set; }
         public double CadPct { get; set; }

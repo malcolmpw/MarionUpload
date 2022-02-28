@@ -5,9 +5,9 @@ namespace MarionUpload.Models
     [Table("tblUnitProperty")]
     public class mUnitProperty
     {
-        [Key]
+        [ExplicitKey]
         public string UnitID { get; set; }
-        [Key]
+        [ExplicitKey]
         public int PropID { get; set; }
         public double UnitPct { get; set; }
         public bool delflag { get; set; }

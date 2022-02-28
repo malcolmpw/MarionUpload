@@ -76,6 +76,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\ConnectionStringHelper.cs" />
     <Compile Include="Models\mAccount.cs" />
     <Compile Include="Models\mCadAccount.cs" />
     <Compile Include="Models\mCadOwner.cs" />

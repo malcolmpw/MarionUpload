@@ -9,12 +9,12 @@ using MarionDistributeImport.Models;
 using System.Data;
 using System.Data.SqlClient;
 using Dapper.Contrib.Extensions;
+using MarionDistributeImport.Helpers;
 
 namespace MarionUpload.ViewModels
 {
     public class vmAccount
     {
-        const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
         public ICommand CommandImportAccounts => new RelayCommand(OnImportAccounts);
         public ICommand CommandUploadAccounts => new RelayCommand(OnUploadAccounts);
 
@@ -31,7 +31,7 @@ namespace MarionUpload.ViewModels
             // distinct Description1,Description2,PropertyType,SPTBcode and got 652 rows.
             // I need all these fields so I am using the last query despite some (8) strange duplicates
             MarionAccounts.Clear();
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionAccount>("Select ImportID, OwnerNumber, LeaseNumber, InterestType,SPTBCode,Protest,DecimalInterest,AccountNumber,[AccountSequence]"
                     + " from AbMarionImport"); ;
@@ -50,9 +50,7 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadAccounts()
         {
-            return;  // skip insert for now until property and account tables , and tblCadOwner are ready to test
-
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 foreach (var _marionAccount in MarionAccounts)
                 {

@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight.Command;
+using MarionDistributeImport.Helpers;
 using MarionUpload.Models;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,7 @@ namespace MarionUpload.ViewModels
 {
     public class vmOwner
     {
-        const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
-        const string ConnectionString2015 = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=WagData2015;Integrated Security=True;";
+        
         const string MarionCounty2015QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
                                                             "n.NameH, n.NameF, n.NameM, n.NameL1, n.NameL2, n.NameLS, n.NameC, n.NameCP, n.Name2 " +
                                                              "FROM[WagData2015].[dbo].[tblName] n " +
@@ -49,7 +49,7 @@ namespace MarionUpload.ViewModels
 
         private void SelectOwnerDataFromWagData2015()
         {
-            using (IDbConnection db = new SqlConnection(ConnectionString2015))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2015))
             {
                 string queryString = MarionCounty2015QueryString;
                 var results = db.Query<mOwner>(queryString);
@@ -96,9 +96,7 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadOwners()
         {
-            return;  // skip insert for now until property and account tables , and tblCadOwner are ready to test
-
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 foreach (mMarionOwner _marionOwner in MarionOwners)
                 {
@@ -121,7 +119,7 @@ namespace MarionUpload.ViewModels
 
         void SelectOwnerDataFromMarionImportTable()
         {
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionOwner>("Select ImportID, OwnerNumber, OwnerName, InCareOf, StreetAddress, CityStateZip, AgentNumber From AbMarionImport");
                 var distinctResults = results.Distinct(new OwnerNumberComparer()).ToList();

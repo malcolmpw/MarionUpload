@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight.Command;
+using MarionDistributeImport.Helpers;
 using MarionUpload.Models;
 using MarionUpLoad.Models;
 using System;
@@ -10,13 +11,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Input;
 
 namespace MarionUpload.ViewModels
 {
     public class vmProperty
     {
-        const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
         public ObservableCollection<mMarionProperty> MarionProperties { get; set; }
         //public static ObservableCollection<mMarionOwner> MarionOwners { get; set; }
 
@@ -46,7 +47,7 @@ namespace MarionUpload.ViewModels
             // I need all these fields so I am using the last query despite some (8) strange duplicates
 
             MarionProperties.Clear();
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionProperty>("Select distinct LeaseNumber, PropertyType,SPTBCode,Description1,Description2,LeaseName,RRC,OperatorName," +
                     "Jurisdiction1, Jurisdiction2, Jurisdiction3, " +
@@ -69,9 +70,7 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadProperties()
         {
-            return;  // skip insert for now until property and account tables , and tblCadOwner are ready to test
-
-            using (IDbConnection db = new SqlConnection(ConnectionString))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 foreach (mMarionProperty _marionProperty in MarionProperties)
                 {
@@ -79,20 +78,23 @@ namespace MarionUpload.ViewModels
                     var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
                     PropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
                     System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
-
-                    var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty);
+                    
+                    var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty, primaryPropertyKey);
                     var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
                     CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
                 }
+
+                MessageBox.Show($"Finished uploading {MarionProperties.Count()} properties");
             }
         }
 
-        private mCadProperty TranslateFrom_mMarionPropertyTo_mCadProperty(mMarionProperty marionProperty)
+        private mCadProperty TranslateFrom_mMarionPropertyTo_mCadProperty(mMarionProperty marionProperty, long primaryPropertyKey)
         {
             var cadProperty = new mCadProperty();
             cadProperty.CadID = "MAR";
             cadProperty.CadPropid = marionProperty.LeaseNumber.ToString();
             cadProperty.CadPct = 0;
+            cadProperty.PropID = (int)primaryPropertyKey;
             cadProperty.delflag = false;
             return cadProperty;
         }
