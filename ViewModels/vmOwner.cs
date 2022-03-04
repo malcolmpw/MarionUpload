@@ -1,7 +1,10 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using MarionDistributeImport.Helpers;
+using MarionDistributeImport.Messages;
 using MarionUpload.Models;
 using System;
 using System.Collections.Generic;
@@ -9,13 +12,14 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 
 namespace MarionUpload.ViewModels
 {
-    public class vmOwner
+    public class vmOwner : ViewModelBase
     {
-        
+
         const string MarionCounty2015QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
                                                             "n.NameH, n.NameF, n.NameM, n.NameL1, n.NameL2, n.NameLS, n.NameC, n.NameCP, n.Name2 " +
                                                              "FROM[WagData2015].[dbo].[tblName] n " +
@@ -34,17 +38,24 @@ namespace MarionUpload.ViewModels
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
 
+        public bool OwnerImportEnabled { get => _ownerImportEnabled; set { _ownerImportEnabled = value; RaisePropertyChanged(nameof(OwnerImportEnabled)); } }
+        public bool OwnerUploadEnabled { get => ownerUploadEnabled; set { ownerUploadEnabled = value; RaisePropertyChanged(nameof(ownerUploadEnabled));  } }
         public vmOwner()
         {
             MarionOwners = new ObservableCollection<mMarionOwner>();
             MarionOwners2015 = new ObservableCollection<mOwner>();
             NameSortCadMap = new Dictionary<string, mOwner>();
+            //CommandUploadOwners.CanExecute = false;
+
         }
 
         private void OnImportOwners()
         {
             SelectOwnerDataFromMarionImportTable();
             SelectOwnerDataFromWagData2015();
+
+            OwnerUploadEnabled = true;
+            OwnerImportEnabled = false;
         }
 
         private void SelectOwnerDataFromWagData2015()
@@ -109,7 +120,12 @@ namespace MarionUpload.ViewModels
                     OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryCadOwnerKey);
                 }
             }
-         //   UploadMarionOwnersToTblName();
+
+            OwnerUploadEnabled = false;
+            MessageBox.Show($"Finished uploading {MarionOwners.Count()} owners");
+
+            Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
+            //   UploadMarionOwnersToTblName();
         }
 
         private mCadOwner TranslateFrom_mMarionPropertyTo_mCadOwner(mMarionOwner marionOwner)
@@ -133,6 +149,8 @@ namespace MarionUpload.ViewModels
 
         private DateTime _updateDate;
         private string _updateBy;
+        private bool _ownerImportEnabled = true;
+        private bool ownerUploadEnabled = false;
 
         private mOwner TranslateFrom_mMarionOwnerTo_mOwner(mMarionOwner importedMarionOwner)
         {
@@ -155,7 +173,7 @@ namespace MarionUpload.ViewModels
             owner.NameC = matchingOwner.NameC;
             owner.NameCP = matchingOwner.NameCP;
             owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2015].[dbo].[tblName]
-                                // these may be taken from WagData2015 for the old list of marion owners in tblName.               
+                                               // these may be taken from WagData2015 for the old list of marion owners in tblName.               
             owner.Mail1 = importedMarionOwner.StreetAddress.Trim();
             var cityStateZip = importedMarionOwner.CityStateZip.Trim();
             owner.MailCi = cityStateZip.Substring(0, cityStateZip.Length - 7).Trim();

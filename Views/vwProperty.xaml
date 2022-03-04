@@ -8,9 +8,9 @@
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Button Content="Import Property" Command="{Binding CommandImportProperties}" 
+                <Button Content="Import Property" Command="{Binding CommandImportProperties}" IsEnabled="{Binding PropertyImportEnabled}"
                             Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
-                <Button Content="Upload Property" Command="{Binding CommandUploadProperties}" 
+                <Button Content="Upload Property" Command="{Binding CommandUploadProperties}"  IsEnabled="{Binding PropertyUploadEnabled}"
                             Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
             <DataGrid Name="dgProperty" Margin="10" Width="600" Height="300" HorizontalAlignment="Left"

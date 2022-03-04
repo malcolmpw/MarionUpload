@@ -12,19 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using MarionUpload.ViewModels;
 
 namespace MarionUpload.Views
 {
     /// <summary>
-    /// Interaction logic for vwUnitProperty.xaml
+    /// Interaction logic for vwFinishedScreen.xaml
     /// </summary>
-    public partial class vwUnitProperty : UserControl
+    public partial class vwFinishedScreen : UserControl
     {
-        public vwUnitProperty()
+        public vwFinishedScreen()
         {
             InitializeComponent();
-            DataContext = new vmUnitProperty();
         }
     }
 }

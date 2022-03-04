@@ -10,17 +10,32 @@ using System.Data;
 using System.Data.SqlClient;
 using Dapper.Contrib.Extensions;
 using MarionDistributeImport.Helpers;
+using System.Windows;
+using GalaSoft.MvvmLight.Messaging;
+using MarionDistributeImport.Messages;
+using GalaSoft.MvvmLight;
 
 namespace MarionUpload.ViewModels
 {
-    public class vmAccount
+    public class vmAccount : ViewModelBase
     {
+        private bool accountImportEnabled = true;
+        private bool accountUploadEnabled = false;
+
         public ICommand CommandImportAccounts => new RelayCommand(OnImportAccounts);
         public ICommand CommandUploadAccounts => new RelayCommand(OnUploadAccounts);
 
+        public bool AccountImportEnabled { get => accountImportEnabled; set { accountImportEnabled = value; RaisePropertyChanged(nameof(AccountImportEnabled));  } }
+        public bool AccountUploadEnabled { get => accountUploadEnabled; set { accountUploadEnabled = value; RaisePropertyChanged(nameof(AccountUploadEnabled));  } }
+
+
         private void OnImportAccounts()
         {
+            //CommandImportAccounts.CanExecute(false);
             SelectAccountDataFromImportTable();
+
+            AccountImportEnabled = false;
+            AccountUploadEnabled = true;
         }
 
         private void SelectAccountDataFromImportTable()
@@ -61,6 +76,10 @@ namespace MarionUpload.ViewModels
                     var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
                 }
             }
+
+            MessageBox.Show($"Finished uploading {MarionAccounts.Count()} accounts");
+
+            Messenger.Default.Send<AccountsFinishedMessage>(new AccountsFinishedMessage());
         }
 
         private mCadAccount TranslateFrom_mMarionAccountTo_mCadAccount(mMarionAccount marionAccount)
@@ -69,7 +88,7 @@ namespace MarionUpload.ViewModels
             cadAccount.CadID = "MAR";
             char _interestType = ConvertInterestType(marionAccount);
             cadAccount.CadAcctID = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +
-                                   _interestType + "-" + 
+                                   _interestType + "-" +
                                    marionAccount.LeaseNumber.ToString().PadLeft(7, '0');
             cadAccount.Lock_YN = false;
             cadAccount.ExportCd = "";

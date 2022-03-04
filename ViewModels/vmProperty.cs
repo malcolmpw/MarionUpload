@@ -1,7 +1,10 @@
 ﻿using Dapper;
 using Dapper.Contrib.Extensions;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using MarionDistributeImport.Helpers;
+using MarionDistributeImport.Messages;
 using MarionUpload.Models;
 using MarionUpLoad.Models;
 using System;
@@ -16,8 +19,11 @@ using System.Windows.Input;
 
 namespace MarionUpload.ViewModels
 {
-    public class vmProperty
+    public class vmProperty : ViewModelBase
     {
+        private bool _propertyImportEnabled = true;
+        private bool _propertyUploadEnabled = false;
+
         public ObservableCollection<mMarionProperty> MarionProperties { get; set; }
         //public static ObservableCollection<mMarionOwner> MarionOwners { get; set; }
 
@@ -27,10 +33,15 @@ namespace MarionUpload.ViewModels
         public Dictionary<int, string> JurisdictionMap { get; private set; }
         public Dictionary<string, string> PtdPropMap { get; private set; }
 
+        public bool PropertyImportEnabled { get => _propertyImportEnabled; set { _propertyImportEnabled = value; RaisePropertyChanged(nameof(PropertyImportEnabled)); } }
+        public bool PropertyUploadEnabled { get => _propertyUploadEnabled; set { _propertyUploadEnabled = value; RaisePropertyChanged(nameof(PropertyUploadEnabled)); } }
+
         public vmProperty()
         {
             MarionProperties = new ObservableCollection<mMarionProperty>();
             //MarionOwners = new ObservableCollection<mMarionOwner>();
+
+
         }
 
         private void OnImportProperties()
@@ -61,8 +72,11 @@ namespace MarionUpload.ViewModels
 
                 var resultList = results.Distinct(new LeaseNumberComparer()).ToList();
 
-                resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));             
-            }            
+                resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));
+
+                PropertyImportEnabled = false;
+                PropertyUploadEnabled = true;
+            }
         }
 
         public static IDictionary<int, long> PropertyIdMap { get; private set; } = new Dictionary<int, long>();
@@ -78,13 +92,14 @@ namespace MarionUpload.ViewModels
                     var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
                     PropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
                     System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
-                    
+
                     var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty, primaryPropertyKey);
                     var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
                     CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
                 }
 
                 MessageBox.Show($"Finished uploading {MarionProperties.Count()} properties");
+                Messenger.Default.Send<PropertiesFinishedMessage>(new PropertiesFinishedMessage());
             }
         }
 
@@ -132,7 +147,7 @@ namespace MarionUpload.ViewModels
                 {
                     rrcNumber = match.Groups[0].Value;
                 }
-                
+
                 property.PropType = "M";
                 property.Legal = importedMarionProperty.LeaseName.Trim() + " (" +
                                  rrcNumber + ") " +
@@ -141,7 +156,7 @@ namespace MarionUpload.ViewModels
             else
             {
                 property.PropType = "P";
-                property.Legal = FetchPTDDescription(sptbCode) + "," + 
+                property.Legal = FetchPTDDescription(sptbCode) + "," +
                                  FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
             }
 

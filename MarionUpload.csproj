@@ -77,6 +77,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Helpers\ConnectionStringHelper.cs" />
+    <Compile Include="Messages\AccountsFinishedMessage.cs" />
+    <Compile Include="Messages\OwnerFinishedMessage.cs" />
+    <Compile Include="Messages\PropertiesFinishedMessage.cs" />
+    <Compile Include="Messages\UnitsFinishedMessage.cs" />
     <Compile Include="Models\mAccount.cs" />
     <Compile Include="Models\mCadAccount.cs" />
     <Compile Include="Models\mCadOwner.cs" />
@@ -96,8 +100,8 @@
     <Compile Include="ViewModels\vmMain.cs" />
     <Compile Include="ViewModels\vmOwner.cs" />
     <Compile Include="ViewModels\vmProperty.cs" />
-    <Compile Include="ViewModels\vmUnitProperty.cs" />
     <Compile Include="ViewModels\vmUnit.cs" />
+    <Compile Include="ViewModels\vmLookupUnits.cs" />
     <Compile Include="Views\vwAccount.xaml.cs">
       <DependentUpon>vwAccount.xaml</DependentUpon>
     </Compile>
@@ -107,17 +111,20 @@
     <Compile Include="Views\vwCadUnit.xaml.cs">
       <DependentUpon>vwCadUnit.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\vwFinishedScreen.xaml.cs">
+      <DependentUpon>vwFinishedScreen.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\vwOwner.xaml.cs">
       <DependentUpon>vwOwner.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\vwProperty.xaml.cs">
       <DependentUpon>vwProperty.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\vwLookupUnits.xaml.cs">
+      <DependentUpon>vwLookupUnits.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\vwUnit.xaml.cs">
       <DependentUpon>vwUnit.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\vwUnitProperty.xaml.cs">
-      <DependentUpon>vwUnitProperty.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -143,6 +150,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\vwFinishedScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\vwOwner.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -151,11 +162,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\vwUnit.xaml">
+    <Page Include="Views\vwLookupUnits.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\vwUnitProperty.xaml">
+    <Page Include="Views\vwUnit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

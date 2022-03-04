@@ -8,9 +8,9 @@
     <Grid>
         <StackPanel >
             <StackPanel Orientation="Horizontal">
-                <Button Content="Import Accounts" Command="{Binding CommandImportAccounts}"                                                    
+                <Button Content="Import Accounts" Command="{Binding CommandImportAccounts}"  IsEnabled="{Binding AccountImportEnabled}"                                                  
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
-                <Button Content="Upload Accounts" Command="{Binding CommandUploadAccounts}"                     
+                <Button Content="Upload Accounts" Command="{Binding CommandUploadAccounts}"  IsEnabled="{Binding AccountUploadEnabled}"               
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
             <DataGrid Name="dgAccounts" Margin="10" Width="600" Height="300" HorizontalAlignment="Left"

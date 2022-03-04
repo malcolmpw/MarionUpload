@@ -8,29 +8,34 @@
         Title="MainWindow" >
     <Grid>
         <StackPanel >
-            <TextBlock Text="Chose Task to Upload or Import Data" FontSize="20" Margin="10"/>
-            <TabControl Name="tabImportAndUploadTasks" Margin="10">
-                <TabItem Header="Owners">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Chose Task to Upload or Import Data" FontSize="20" Margin="10"/>
+                <Button HorizontalAlignment="Right" Width="200" Height="40" Margin="150,5" Command="{Binding CommandStartWizard}">Start Import Wizard
+                </Button>
+            </StackPanel>
+            <TabControl Name="tabImportAndUploadTasks" Margin="10" IsEnabled="{Binding IsStarted}" SelectedIndex="{Binding CurrentStep}">
+                <TabItem Header="Owners" IsEnabled="{Binding OwnersEnabled}">
                     <view:vwOwner/>
                 </TabItem>
-                <TabItem Header="Property">
+                <TabItem Header="Property" IsEnabled="{Binding PropertiesEnabled}">
                     <view:vwProperty />
                 </TabItem>
-                <TabItem Header="Account">
+                <TabItem Header="Account" IsEnabled="{Binding AccountsEnabled}">
                     <view:vwAccount/>
                 </TabItem>
-                <TabItem Header="tlkpUnit">
+                <TabItem Header="Units"  IsEnabled="{Binding UnitsEnabled}">
                     <view:vwUnit/>
                 </TabItem>
-                <!--<TabItem Header="CadUnit">
-                    <view:vwCadUnit/>
-                </TabItem>-->
-                <TabItem Header="UnitProperty">
-                    <view:vwUnitProperty/>
+                <TabItem Header="Finished">
+                    <view:vwFinishedScreen />
                 </TabItem>
-                <TabItem Header="Agents">
+                <TabItem Header="Agents" Visibility="Collapsed">
                     <view:vwAgent/>
                 </TabItem>
+                <TabItem Header="tlkpUnit" Visibility="Collapsed">
+                    <view:vwLookupUnits/>
+                </TabItem>
+
             </TabControl>
         </StackPanel>
     </Grid>

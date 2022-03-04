@@ -4,14 +4,14 @@ using MarionUpload.ViewModels;
 namespace MarionUpload.Views
 {
     /// <summary>
-    /// Interaction logic for vwOwner.xaml
+    /// Interaction logic for vwUnit.xaml
     /// </summary>
-    public partial class vwOwner : UserControl
+    public partial class vwLookupUnits : UserControl
     {
-        public vwOwner()
+        public vwLookupUnits()
         {
             InitializeComponent();
-            DataContext = new vmOwner();
+            DataContext = new vmLookupUnits();
         }
     }
 }

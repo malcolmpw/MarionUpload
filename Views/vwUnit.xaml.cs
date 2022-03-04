@@ -17,7 +17,7 @@ using MarionUpload.ViewModels;
 namespace MarionUpload.Views
 {
     /// <summary>
-    /// Interaction logic for vwUnit.xaml
+    /// Interaction logic for vwUnitProperty.xaml
     /// </summary>
     public partial class vwUnit : UserControl
     {

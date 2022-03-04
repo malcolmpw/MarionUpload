@@ -8,9 +8,9 @@
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Button Content="Import Owners" Command="{Binding CommandImportOwners}"                     
+                <Button Content="Import Owners" Command="{Binding CommandImportOwners}" IsEnabled="{Binding OwnerImportEnabled}"                    
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
-                <Button Content="Upload Owners" Command="{Binding CommandUploadOwners}"                     
+                <Button Content="Upload Owners" Command="{Binding CommandUploadOwners}"  IsEnabled="{Binding OwnerUploadEnabled}"                    
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
                 <TextBlock Text="{Binding MarionOwners.Count}" 
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
