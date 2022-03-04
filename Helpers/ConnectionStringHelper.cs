@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,8 +9,8 @@ namespace MarionDistributeImport.Helpers
 {
     public class ConnectionStringHelper
     {
-        public const string ConnectionString = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=wagapp2_2021_Marion;Integrated Security=True;";
+        public static readonly string ConnectionString = ConfigurationManager.ConnectionStrings["MarionConnectionString"].ConnectionString;
 
-        public const string ConnectionString2015 = @"Data Source=WAGSQLSRV01\DEV;Initial Catalog=WagData2015;Integrated Security=True;";
+        public static readonly string ConnectionString2015 = ConfigurationManager.ConnectionStrings["Wag2015ConnectionString"].ConnectionString;
     }
 }
