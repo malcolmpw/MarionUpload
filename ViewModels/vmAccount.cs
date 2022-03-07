@@ -71,7 +71,7 @@ namespace MarionUpload.ViewModels
                     var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                     var primaryKey = db.Insert<mAccount>(populatedAccount);
 
-                    var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount);
+                    var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, primaryKey);
                     var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
                 }
             }
@@ -81,9 +81,10 @@ namespace MarionUpload.ViewModels
             Messenger.Default.Send<AccountsFinishedMessage>(new AccountsFinishedMessage());
         }
 
-        private mCadAccount TranslateFrom_mMarionAccountTo_mCadAccount(mMarionAccount marionAccount)
+        private mCadAccount TranslateFrom_mMarionAccountTo_mCadAccount(mMarionAccount marionAccount, long primaryAccountKey)
         {
             var cadAccount = new mCadAccount();
+            cadAccount.AcctID = (int)primaryAccountKey;
             cadAccount.CadID = "MAR";
             char _interestType = ConvertInterestType(marionAccount);
             cadAccount.CadAcctID = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +

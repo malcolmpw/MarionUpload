@@ -3,6 +3,7 @@ using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using log4net;
 using MarionUpload.Helpers;
 using MarionUpload.Messages;
 using MarionUpload.Models;
@@ -19,6 +20,9 @@ namespace MarionUpload.ViewModels
 {
     public class vmOwner : ViewModelBase
     {
+
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         const string MarionCounty2015QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
                                                    "n.NameH, n.NameF, n.NameM, n.NameL1, n.NameL2, n.NameLS, n.NameC, n.NameCP, n.Name2 " +
@@ -111,25 +115,33 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadOwners()
         {
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+            try
             {
-                foreach (mMarionOwner _marionOwner in MarionOwners)
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
                 {
-                    var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(_marionOwner);
-                    var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
-                    NameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                    foreach (mMarionOwner _marionOwner in MarionOwners)
+                    {
+                        var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(_marionOwner);
+                        var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
+                        NameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
 
-                    var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
-                    var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                    OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
+                        var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
+                        OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                    }
                 }
+
+                OwnerUploadEnabled = false;
+                MessageBox.Show($"Finished uploading {MarionOwners.Count()} owners");
+
+                Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
+                //   UploadMarionOwnersToTblName();
             }
-
-            OwnerUploadEnabled = false;
-            MessageBox.Show($"Finished uploading {MarionOwners.Count()} owners");
-
-            Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
-            //   UploadMarionOwnersToTblName();
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error Uploading Owner Data -> {ex}");
+                Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
+            }
         }
 
         private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionOwner marionOwner, long primaryKey)
@@ -198,8 +210,8 @@ namespace MarionUpload.ViewModels
             }
 
             if (importedMarionOwner.AgentNumber != "")
-            {                
-                owner.AgentID = SelectAgentNameIdFromMarionAgentImportTable(importedMarionOwner.AgentNumber);
+            {
+                owner.AgentID = importedMarionOwner.AgentNumber == "0" ? 0 : SelectAgentNameIdFromMarionAgentImportTable(importedMarionOwner.AgentNumber);
                 owner.Agnt_YN = importedMarionOwner.AgentNumber.Trim() != "0";
 
                 owner.Ntc2Agent_YN = true;
@@ -239,6 +251,14 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var result = db.Query<mMarionAgent>($"Select NameId From AbMarionAgents where AgentId = {marionAgentId} ");
+                
+                if (result.Count() == 0) // could not find this agent in the Marion Agent Table
+                {
+                    Log.Error($"Could not find agent {marionAgentId} in the Marion Agent Table");
+                    // MessageBox.Show($"Could not find agent {marionAgentId} in the Marion Agent Table");
+                    return 0;
+                }
+
                 var AgentNameId = result.FirstOrDefault().NameId;
                 return AgentNameId;
             }

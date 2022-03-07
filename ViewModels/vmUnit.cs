@@ -13,6 +13,7 @@ using System.Windows;
 using MarionUpload.Messages;
 using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight;
+using log4net;
 
 
 //--To populate tblUnitProperty
@@ -43,6 +44,10 @@ namespace MarionUpload.ViewModels
 {
     public class vmUnit : ViewModelBase
     {
+
+        private static readonly ILog Log =
+                    LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private bool _unitImportEnabled = true;
         private bool _unitUploadEnabled = false;
 
@@ -109,7 +114,8 @@ namespace MarionUpload.ViewModels
                         if (jurisdiction == 0) continue;
                         if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
                         {
-                            MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
+                            Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
+                         //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
                             continue;
                         }
                         var unitProperty = TranslateImportPropertyToUnitProperty(property, jurisdiction);
