@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Dapper;
 using GalaSoft.MvvmLight.Command;
-using MarionDistributeImport.Helpers;
+using MarionUpload.Helpers;
 
 namespace MarionUpload.ViewModels
 {

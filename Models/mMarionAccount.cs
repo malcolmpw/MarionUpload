@@ -1,6 +1,6 @@
 ﻿using Dapper.Contrib.Extensions;
 
-namespace MarionDistributeImport.Models
+namespace MarionUpload.Models
 {
     [Table("AbMarionImport")]
     public class mMarionAccount

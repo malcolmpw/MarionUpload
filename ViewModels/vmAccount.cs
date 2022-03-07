@@ -1,19 +1,18 @@
-﻿using GalaSoft.MvvmLight.Command;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
+using MarionUpload.Helpers;
+using MarionUpload.Messages;
+using MarionUpload.Models;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows.Input;
-using Dapper;
-using MarionUpload.Models;
-using MarionDistributeImport.Models;
 using System.Data;
 using System.Data.SqlClient;
-using Dapper.Contrib.Extensions;
-using MarionDistributeImport.Helpers;
+using System.Linq;
 using System.Windows;
-using GalaSoft.MvvmLight.Messaging;
-using MarionDistributeImport.Messages;
-using GalaSoft.MvvmLight;
+using System.Windows.Input;
 
 namespace MarionUpload.ViewModels
 {

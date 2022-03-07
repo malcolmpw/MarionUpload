@@ -5,12 +5,12 @@ using System.Linq;
 using System.Windows.Input;
 using Dapper;
 using GalaSoft.MvvmLight.Command;
-using MarionDistributeImport.Helpers;
+using MarionUpload.Helpers;
 using MarionUpload.Models;
 using System.Collections.ObjectModel;
 using Dapper.Contrib.Extensions;
 using System.Windows;
-using MarionDistributeImport.Messages;
+using MarionUpload.Messages;
 using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight;
 

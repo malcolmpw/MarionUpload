@@ -5,9 +5,9 @@ namespace MarionUpload.Models
     [Table("tblCadOwners")]
     class mCadOwner
     {
-        [Key]
+        [ExplicitKey]
         public int NameID { get; set; }
-        [Key]
+        [ExplicitKey]
         public string CadID { get; set; }
         public string CadOwnerID { get; set; }
         public bool delflag { get; set; }

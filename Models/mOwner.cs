@@ -32,12 +32,12 @@ namespace MarionUpload.Models
         public string MailZ4 { get; set; }
         public string MailCo { get; set; }
         public string MailZip { get; set; }
-        public string AgentID { get; set; }
+        public int AgentID { get; set; }
         public bool Agnt_YN { get; set; } 
         public string Addr1 { get; set; }
         public DateTime UpdateDate { get; set; }
-        public string UpdateBy { get; set; }   
-        
-        
+        public string UpdateBy { get; set; }
+        public bool Ntc2Agent_YN { get; set; }
+        public bool Stmnt2Agent_YN { get; set; }
     }
 }

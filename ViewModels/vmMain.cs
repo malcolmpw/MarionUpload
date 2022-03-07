@@ -9,7 +9,7 @@ using System.Windows.Input;
 using Dapper;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
-using MarionDistributeImport.Messages;
+using MarionUpload.Messages;
 
 namespace MarionUpload.ViewModels
 {

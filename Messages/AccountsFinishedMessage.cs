@@ -1,4 +1,4 @@
-﻿namespace MarionDistributeImport.Messages
+﻿namespace MarionUpload.Messages
 {
     public class  AccountsFinishedMessage
     {

@@ -1,14 +1,14 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 
-namespace MarionDistributeImport.Models
+namespace MarionUpload.Models
 {
     [Table("tblCadAccount")]
     class mCadAccount
     {
-        [Key]
+        [ExplicitKey]
         public int AcctID { get; set; }
-        [Key]
+        [ExplicitKey]
         public string CadID { get; set; }
         public string CadAcctID { get; set; }
         public bool Lock_YN { get; set; }

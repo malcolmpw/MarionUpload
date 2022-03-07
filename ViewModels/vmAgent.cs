@@ -11,7 +11,7 @@ using System.Windows.Input;
 using Dapper;
 using Dapper.Contrib;
 using GalaSoft.MvvmLight.Command;
-using MarionDistributeImport.Helpers;
+using MarionUpload.Helpers;
 using MarionUpload.Models;
 
 
