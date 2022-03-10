@@ -14,6 +14,7 @@ using MarionUpload.Messages;
 using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight;
 using log4net;
+using MarionUpload.Comparers;
 
 
 //--To populate tblUnitProperty
@@ -77,7 +78,7 @@ namespace MarionUpload.ViewModels
 
                 " from AbMarionImport");
 
-                var distinctResults = results.Distinct(new LeaseNumberComparer()).ToList();
+                var distinctResults = results.Distinct(new PropertyComparer()).ToList();
 
                 distinctResults.ForEach(property => MarionProperties.Add(property));
 

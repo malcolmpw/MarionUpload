@@ -21,12 +21,13 @@ namespace MarionUpload.ViewModels
         private bool _accountsEnabled;
         private bool _unitsEnabled;
         private int _currentStep;
-
+        private bool _leasesEnabled;
         private const int OWNER_TAB_INDEX = 0;
         private const int PROPERTY_TAB_INDEX = 1;
         private const int ACCOUNT_TAB_INDEX = 2;
         private const int UNIT_TAB_INDEX = 3;
-        private const int FINISHED_TAB_INDEX = 4;
+        private const int LEASE_TAB_INDEX = 4;
+        private const int FINISHED_TAB_INDEX = 5;
 
         public bool IsStarted { get => _isStarted; set { _isStarted = value; Raise(nameof(IsStarted)); } }
         public ICommand CommandStartWizard => new RelayCommand(OnStartWizard);
@@ -35,6 +36,7 @@ namespace MarionUpload.ViewModels
         public bool PropertiesEnabled { get => _propertiesEnabled; set { _propertiesEnabled = value; Raise(nameof(PropertiesEnabled)); } }
         public bool AccountsEnabled { get => _accountsEnabled; set { _accountsEnabled = value; Raise(nameof(AccountsEnabled)); } }
         public bool UnitsEnabled { get => _unitsEnabled; set { _unitsEnabled = value; Raise(nameof(UnitsEnabled)); } }
+        public bool LeasesEnabled { get => _leasesEnabled; set { _leasesEnabled = value; Raise(nameof(LeasesEnabled)); } }
 
         public int CurrentStep { get => _currentStep; set { _currentStep = value; Raise(nameof(CurrentStep));  } }
 
@@ -66,7 +68,13 @@ namespace MarionUpload.ViewModels
             Messenger.Default.Register<UnitsFinishedMessage>(this, message =>
             {
                 UnitsEnabled = false;
-                PropertiesEnabled = true;
+                LeasesEnabled = true;
+                Navigate(LEASE_TAB_INDEX);
+            });
+
+            Messenger.Default.Register<LeaseFinishedMessage>(this, message =>
+            {
+                LeasesEnabled = false;
                 Navigate(FINISHED_TAB_INDEX);
             });
         }

@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7903A985-C134-4B86-82C9-8B28245EDF75}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>MarionDistributeImport</RootNamespace>
-    <AssemblyName>MarionDistributeImport</AssemblyName>
+    <RootNamespace>MarionUpload</RootNamespace>
+    <AssemblyName>MarionUpload</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -81,6 +81,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Comparers\LeaseComparer.cs" />
     <Compile Include="Helpers\ConnectionStringHelper.cs" />
     <Compile Include="Messages\AccountsFinishedMessage.cs" />
     <Compile Include="Messages\OwnerFinishedMessage.cs" />
@@ -88,20 +89,27 @@
     <Compile Include="Messages\UnitsFinishedMessage.cs" />
     <Compile Include="Models\mAccount.cs" />
     <Compile Include="Models\mCadAccount.cs" />
+    <Compile Include="Models\mCadLease.cs" />
     <Compile Include="Models\mCadOwner.cs" />
     <Compile Include="Models\mCadProperty.cs" />
+    <Compile Include="Models\mLease.cs" />
     <Compile Include="Models\mMarionAccount.cs" />
     <Compile Include="Models\mMarionAgent.cs" />
     <Compile Include="Models\mMarionImport.cs" />
+    <Compile Include="Models\mMarionLease.cs" />
     <Compile Include="Models\mMarionOwner.cs" />
     <Compile Include="Models\mMarionProperty.cs" />
     <Compile Include="Models\mOwner2015.cs" />
     <Compile Include="Models\Dictionary.cs" />
     <Compile Include="Models\mJurisdiction.cs" />
     <Compile Include="Models\mPtdProp.cs" />
+    <Compile Include="Comparers\PropertyComparer.cs" />
+    <Compile Include="Messages\LeaseFinishedMessage.cs" />
+    <Compile Include="Models\mTract.cs" />
     <Compile Include="ViewModels\vmAccount.cs" />
     <Compile Include="ViewModels\vmAgent.cs" />
     <Compile Include="ViewModels\vmCadUnit.cs" />
+    <Compile Include="ViewModels\vmLease.cs" />
     <Compile Include="ViewModels\vmMain.cs" />
     <Compile Include="ViewModels\vmOwner.cs" />
     <Compile Include="ViewModels\vmProperty.cs" />
@@ -127,6 +135,9 @@
     </Compile>
     <Compile Include="Views\vwLookupUnits.xaml.cs">
       <DependentUpon>vwLookupUnits.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\vwLease.xaml.cs">
+      <DependentUpon>vwLease.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\vwUnit.xaml.cs">
       <DependentUpon>vwUnit.xaml</DependentUpon>
@@ -170,6 +181,10 @@
     <Page Include="Views\vwLookupUnits.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\vwLease.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\vwUnit.xaml">
       <SubType>Designer</SubType>

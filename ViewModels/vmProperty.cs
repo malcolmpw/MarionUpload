@@ -3,6 +3,7 @@ using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using MarionUpload.Comparers;
 using MarionUpload.Helpers;
 using MarionUpload.Messages;
 using MarionUpload.Models;
@@ -70,7 +71,7 @@ namespace MarionUpload.ViewModels
                     .ToDictionary(jurisdiction => jurisdiction.Code, val => val.Name);
                 PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub").ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
 
-                var resultList = results.Distinct(new LeaseNumberComparer()).ToList();
+                var resultList = results.Distinct(new PropertyComparer()).ToList();
 
                 resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));
 
@@ -201,19 +202,6 @@ namespace MarionUpload.ViewModels
 
             return JurisdictionMap[ISDJurisdiction];
 
-        }
-    }
-
-    public class LeaseNumberComparer : IEqualityComparer<mMarionProperty>
-    {
-        public bool Equals(mMarionProperty x, mMarionProperty y)
-        {
-            return x.LeaseNumber == y.LeaseNumber;
-        }
-
-        public int GetHashCode(mMarionProperty obj)
-        {
-            return obj.LeaseNumber.GetHashCode();
         }
     }
 }

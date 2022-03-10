@@ -26,6 +26,9 @@
                 <TabItem Header="Units"  IsEnabled="{Binding UnitsEnabled}">
                     <view:vwUnit/>
                 </TabItem>
+                <TabItem Header="Leases"  IsEnabled="{Binding LeasesEnabled}">
+                    <view:vwLease/>
+                </TabItem>
                 <TabItem Header="Finished">
                     <view:vwFinishedScreen />
                 </TabItem>
