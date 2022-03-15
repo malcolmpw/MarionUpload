@@ -24,8 +24,8 @@ namespace MarionUpload.ViewModels
         public ICommand CommandImportAccounts => new RelayCommand(OnImportAccounts);
         public ICommand CommandUploadAccounts => new RelayCommand(OnUploadAccounts);
 
-        public bool AccountImportEnabled { get => accountImportEnabled; set { accountImportEnabled = value; RaisePropertyChanged(nameof(AccountImportEnabled));  } }
-        public bool AccountUploadEnabled { get => accountUploadEnabled; set { accountUploadEnabled = value; RaisePropertyChanged(nameof(AccountUploadEnabled));  } }
+        public bool AccountImportEnabled { get => accountImportEnabled; set { accountImportEnabled = value; RaisePropertyChanged(nameof(AccountImportEnabled)); } }
+        public bool AccountUploadEnabled { get => accountUploadEnabled; set { accountUploadEnabled = value; RaisePropertyChanged(nameof(AccountUploadEnabled)); } }
 
 
         private void OnImportAccounts()
@@ -47,16 +47,14 @@ namespace MarionUpload.ViewModels
             MarionAccounts.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                var results = db.Query<mMarionAccount>("Select ImportID, OwnerNumber, LeaseNumber, InterestType,SPTBCode,Protest,DecimalInterest,AccountNumber,[AccountSequence]"
-                    + " from AbMarionImport"); ;
+                var results = db.Query<mMarionAccount>("Select ImportID, OwnerNumber, LeaseNumber, InterestType, SPTBCode," +
+                                                        " Protest, DecimalInterest, AccountNumber, [AccountSequence]" +
+                                                        " from AbMarionImport"); ;
 
                 var resultList = results.ToList();
 
                 resultList.ForEach(marionAccount => MarionAccounts.Add(marionAccount));
-
             }
-
-
         }
 
 
@@ -85,21 +83,22 @@ namespace MarionUpload.ViewModels
         {
             var cadAccount = new mCadAccount();
             cadAccount.AcctID = (int)primaryAccountKey;
-            cadAccount.CadID = "MAR";
-            char _interestType = ConvertInterestType(marionAccount);
-            cadAccount.CadAcctID = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +
-                                   _interestType + "-" +
-                                   marionAccount.LeaseNumber.ToString().PadLeft(7, '0');
+            cadAccount.CadID = "MAR";            
+            cadAccount.CadAcctID = BuildCadAccountId(marionAccount);
             cadAccount.Lock_YN = false;
             cadAccount.ExportCd = "";
             cadAccount.ExportDate = DateTime.Now;
             cadAccount.delflag = false;
             cadAccount.CadAcctID_pre = "";
             return cadAccount;
+        }
 
-            // ******* USE this for the tblCadAccount CadAccountId ******
-            // return CadOwnerId.PadLeft(7, '0') + "-" + m.InterestType + "-" +
-            //        CadPropId.PadLeft(7, '0');
+        private string BuildCadAccountId(mMarionAccount marionAccount)
+        {
+            var cadAccountId = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +
+                               ConvertInterestType(marionAccount) + "-" +
+                               marionAccount.LeaseNumber.ToString().PadLeft(7, '0');
+            return cadAccountId;
         }
 
         private mAccount TranslateFrom_mMarionAccountTo_mAccount(mMarionAccount _marionAccount)

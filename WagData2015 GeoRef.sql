@@ -9,7 +9,7 @@
 	  ,c.CadAcctID
 	  ,k.CadOwnerID
 	  ,p.CadPropId
-  FROM [WagData2015].[dbo].[tblAccount] a
+  FROM [WagData2017].[dbo].[tblAccount] a
   inner join tblCadAccount c on a.AcctID=c.AcctID
   inner join tblCadProperty p on a.PropID=p.PropID
   inner join tblName n on n.nameid=a.NameID
@@ -22,6 +22,6 @@
   --and a.pcttype<>'W' or a.pcttype='U'
    
   --NOTE!:
- -- I should check if any CadOwnerID and CadPropID in 2015 also exist in AbMarionImport......DONE!  example Norbord
+ -- I should check if any CadOwnerID and CadPropID in 2017 also exist in AbMarionImport......DONE!  example Norbord
 
- -- YES it is the same CadOwnerID 704839 in 2021 and in 2015 
+ -- YES it is the same CadOwnerID 704839 in 2021 and in 2017 

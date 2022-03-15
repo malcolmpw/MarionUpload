@@ -1,7 +1,7 @@
 ﻿SELECT 
 --TOP (1000) 
 	   count(*) 
-  FROM [WagData2015].[dbo].[tblName] n
+  FROM [WagData2017].[dbo].[tblName] n
   inner join tblAccount a
   on n.NameID=a.NameID
   inner join tblProperty p
@@ -35,4 +35,4 @@
   -- Note! All records have one of these PctTypes
 
   -- CONCLUSION: For all PctType='U' assume NameSel_YN=1
-  --             For all others you don't know, so try to check WagData2015
+  --             For all others you don't know, so try to check WagData2017

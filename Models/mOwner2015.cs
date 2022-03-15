@@ -3,7 +3,7 @@
 namespace MarionUpload.Models
 {
     //[Table("tblNameX")]
-    public class mOwner2015
+    public class mOwner2017
     {
         //[Key]
         public string PtdClass { get; set; }

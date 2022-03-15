@@ -24,20 +24,20 @@ namespace MarionUpload.ViewModels
         private static readonly ILog Log =
             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        const string MarionCounty2015QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
+        const string MarionCounty2017QueryString = "SELECT distinct n.NameSortCad, n.NameSel_YN, " +
                                                    "n.NameH, n.NameF, n.NameM, n.NameL1, n.NameL2, n.NameLS, n.NameC, n.NameCP, n.Name2 " +
-                                                   "FROM[WagData2015].[dbo].[tblName] n " +
-                                                   "inner join[WagData2015].[dbo].[tblAccount] a " +
+                                                   "FROM[WagData2017].[dbo].[tblName] n " +
+                                                   "inner join[WagData2017].[dbo].[tblAccount] a " +
                                                    "on n.NameID = a.NameID " +
-                                                   "inner join[WagData2015].[dbo].tblProperty p " +
+                                                   "inner join[WagData2017].[dbo].tblProperty p " +
                                                    "on a.PropID = p.PropID " +
                                                    "where p.ControlCad = 'MAR' " +
                                                    "order by n.NameSortCad ";
 
         public ObservableCollection<mMarionOwner> MarionOwners { get; set; }
-        public ObservableCollection<mOwner> MarionOwners2015 { get; set; }
+        public ObservableCollection<mOwner> MarionOwners2017 { get; set; }
         public ObservableCollection<mOwner> InsertedOwners { get; set; }
-        public Dictionary<string, mOwner> CadOwner2015NameSortMap { get; set; }
+        public Dictionary<string, mOwner> CadOwner2017NameSortMap { get; set; }
 
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
@@ -48,33 +48,33 @@ namespace MarionUpload.ViewModels
         public vmOwner()
         {
             MarionOwners = new ObservableCollection<mMarionOwner>();
-            MarionOwners2015 = new ObservableCollection<mOwner>();
-            CadOwner2015NameSortMap = new Dictionary<string, mOwner>();
+            MarionOwners2017 = new ObservableCollection<mOwner>();
+            CadOwner2017NameSortMap = new Dictionary<string, mOwner>();
         }
 
         private void OnImportOwners()
         {
             SelectOwnerDataFromMarionImportTable();
-            SelectOwnerDataFromWagData2015();
+            SelectOwnerDataFromWagData2017();
 
             OwnerUploadEnabled = true;
             OwnerImportEnabled = false;
         }
 
-        private void SelectOwnerDataFromWagData2015()
+        private void SelectOwnerDataFromWagData2017()
         {
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2015))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
             {
-                string queryString = MarionCounty2015QueryString;
-                var results2015 = db.Query<mOwner>(queryString);
-                var distinctResults2015 = results2015.Distinct(new OwnerNumberComparer2015()).ToList();
-                Create2015NameSelectDictionary(distinctResults2015);
+                string queryString = MarionCounty2017QueryString;
+                var results2017 = db.Query<mOwner>(queryString);
+                var distinctResults2017 = results2017.Distinct(new OwnerNumberComparer2017()).ToList();
+                Create2017NameSelectDictionary(distinctResults2017);
 
                 // Loop through each marion owner and fill in the NameSelect info.
                 foreach (mMarionOwner marionOwner in MarionOwners)
                 {
                     var ownerNameTrimmed = marionOwner.OwnerName.Trim().ToUpper();
-                    if (CadOwner2015NameSortMap.ContainsKey(ownerNameTrimmed))
+                    if (CadOwner2017NameSortMap.ContainsKey(ownerNameTrimmed))
                     {
                         FillMarionOwnerWithNameSelectFlag(marionOwner);
                     }
@@ -89,27 +89,22 @@ namespace MarionUpload.ViewModels
             {
                 ownerNameTrimmed = marionOwner.OwnerName.Trim().ToUpper();
                 marionOwner.NameSortCad = ownerNameTrimmed;
-                marionOwner.NameSel_YN = CadOwner2015NameSortMap[ownerNameTrimmed].NameSel_YN;
+                marionOwner.NameSel_YN = CadOwner2017NameSortMap[ownerNameTrimmed].NameSel_YN;
             }
 
             return ownerNameTrimmed;
         }
 
-        private void Create2015NameSelectDictionary(List<mOwner> distinctResults2015)
+        private void Create2017NameSelectDictionary(List<mOwner> distinctResults2017)
         {
-            foreach (mOwner dr2015 in distinctResults2015)
+            foreach (mOwner dr2017 in distinctResults2017)
             {
-                MarionOwners2015.Add(dr2015);
-                string CadOwner2015NameSortModified = dr2015.NameSortCad.Trim().ToUpper();
-                if (!CadOwner2015NameSortMap.ContainsKey(CadOwner2015NameSortModified))
+                MarionOwners2017.Add(dr2017);
+                string CadOwner2017NameSortModified = dr2017.NameSortCad.Trim().ToUpper();
+                if (!CadOwner2017NameSortMap.ContainsKey(CadOwner2017NameSortModified))
                 {
-                    CadOwner2015NameSortMap.Add(CadOwner2015NameSortModified, dr2015);
-                }
-                //else
-                //{                    
-                //    MessageBox.Show($"Could not add {dr2015.NameSortCad}. NameSort was not in 2015 db. ");
-                //}
-
+                    CadOwner2017NameSortMap.Add(CadOwner2017NameSortModified, dr2017);
+                }                
             }
         }
 
@@ -183,23 +178,23 @@ namespace MarionUpload.ViewModels
 
             owner.CadID = "MAR";
             owner.NameSortCad = importedMarionOwner.OwnerName.Trim();
-            //var matchingOwner = CadOwner2015NameSortMap[owner.NameSortCad];
+            //var matchingOwner = CadOwner2017NameSortMap[owner.NameSortCad];
 
             mOwner matchingOwner;
-            bool hasValue = CadOwner2015NameSortMap.TryGetValue(owner.NameSortCad, out matchingOwner);
+            bool hasValue = CadOwner2017NameSortMap.TryGetValue(owner.NameSortCad, out matchingOwner);
             if (hasValue)
             {
                 owner.NameSortFirst = owner.NameSortCad;
-                owner.NameH = matchingOwner.NameH; // search the NameSortCad for titles, use SELECT distinct[NameH] FROM[WagData2015].[dbo].[tblName]                
+                owner.NameH = matchingOwner.NameH; // search the NameSortCad for titles, use SELECT distinct[NameH] FROM[WagData2017].[dbo].[tblName]                
                 owner.NameF = matchingOwner.NameF; // split and parse
                 owner.NameM = matchingOwner.NameM; // split and parse
                 owner.NameL1 = matchingOwner.NameL1; // split and parse
                 owner.NameL2 = matchingOwner.NameL2; // split and parse
-                owner.NameLS = matchingOwner.NameLS; // search the NameSortCad for titles, use SELECT distinct[NameLS FROM[WagData2015].[dbo].[tblName]
+                owner.NameLS = matchingOwner.NameLS; // search the NameSortCad for titles, use SELECT distinct[NameLS FROM[WagData2017].[dbo].[tblName]
                 owner.NameC = matchingOwner.NameC;
                 owner.NameCP = matchingOwner.NameCP;
-                owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2015].[dbo].[tblName]
-                                                   // these may be taken from WagData2015 for the old list of marion owners in tblName.               
+                owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2017].[dbo].[tblName]
+                                                   // these may be taken from WagData2017 for the old list of marion owners in tblName.               
                 owner.NameSel_YN = matchingOwner.NameSel_YN;
             }
             else
@@ -278,7 +273,7 @@ namespace MarionUpload.ViewModels
         }
     }
 
-    public class OwnerNumberComparer2015 : IEqualityComparer<mOwner>
+    public class OwnerNumberComparer2017 : IEqualityComparer<mOwner>
     {
         public bool Equals(mOwner x, mOwner y)
         {

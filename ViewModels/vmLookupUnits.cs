@@ -17,8 +17,11 @@ namespace MarionUpload.ViewModels
         public ICommand CommandPopulateTlkpUnitWithMarion => new RelayCommand(OnPopulateTlkpUnitWithMarionCounty);
 
 
-        const string ImportIntoTlkpCadUnitTable = "Insert Into [wagapp2_2021_Marion].[dbo].[tlkpCadUnit] SELECT * from [WagData2015].[dbo].[tlkpCadUnit] where CadId = 'MAR' and CadAppraised = 1";
-        const string ImportIntoTlkpUnitTable = "Insert Into [wagapp2_2021_Marion].[dbo].[tlkpUnit] SELECT * from [WagData2015].[dbo].[tlkpUnit] where CadId = 'MAR'";
+        const string ImportIntoTlkpCadUnitTable = "Insert Into [wagapp2_2021_Marion].[dbo].[tlkpCadUnit] SELECT * " +
+                                                    "from [WagData2017].[dbo].[tlkpCadUnit] where CadId = 'MAR' and CadAppraised = 1";
+
+        const string ImportIntoTlkpUnitTable = "Insert Into [wagapp2_2021_Marion].[dbo].[tlkpUnit] SELECT * " +
+                                                    "from [WagData2017].[dbo].[tlkpUnit] where CadId = 'MAR'";
 
         private void OnPopulateTlkpUnitWithMarionCounty()
         {

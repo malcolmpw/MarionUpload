@@ -5,7 +5,7 @@ SELECT distinct
 	  ,c.CadOwnerID
       ,[NameSel_YN]
       ,[NameSortCad]
-  FROM [WagData2015].[dbo].[tblName] n 
+  FROM [WagData2017].[dbo].[tblName] n 
   inner join tblAccount a 
   on n.NameID=a.NameID 
   inner join tblCadOwners c

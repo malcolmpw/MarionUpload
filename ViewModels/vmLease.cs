@@ -36,6 +36,28 @@ namespace MarionUpload.ViewModels
             MarionLeases = new ObservableCollection<mMarionLease>();
         }
 
+        private void OnImportLeases()
+        {
+            SelectLeaseDataFromMarionImportTable();
+        }
+
+        private void SelectLeaseDataFromMarionImportTable()
+        {
+            MarionLeases.Clear();
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+            {
+                var results = db.Query<mMarionLease>("Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode " +
+                                                     "from AbMarionImport where SPTBCode = 'G1' order by LeaseName");
+
+                var distinctResults = results.Distinct(new LeaseComparer()).ToList();
+
+                distinctResults.ForEach(marionLease => MarionLeases.Add(marionLease));
+            }
+
+            LeaseImportEnabled = false;
+            LeaseUploadEnabled = true;
+        }
+
         private void OnUploadLeases()
         {
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
@@ -43,18 +65,15 @@ namespace MarionUpload.ViewModels
                 foreach (var marionLease in MarionLeases)
                 {
                     var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease);
-                    var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionLease);
-                    var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
-
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
+                    var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
                     populatedCadLease.LeaseId = primaryLeaseKey;
-
                     db.Insert<mCadLease>(populatedCadLease);
 
+                    var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionLease);
                     populatedTract.LeaseId = primaryLeaseKey;
                     populatedTract.PropId = vmProperty.PropertyIdMap[marionLease.LeaseNumber];
-
                     db.Insert<mTract>(populatedTract);
                 }
 
@@ -109,28 +128,11 @@ namespace MarionUpload.ViewModels
 
         }
 
-        private void OnImportLeases()
-        {
-
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-            {
-               var results = db.Query<mMarionLease>("Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode from AbMarionImport where SPTBCode = 'G1' order by LeaseName");
-               var distinctResults = results.Distinct(new LeaseComparer()).ToList();
-               distinctResults.ForEach(owner => MarionLeases.Add(owner));
-            }
-
-            LeaseImportEnabled = false;
-            LeaseUploadEnabled = true;
-        }
+       
 
         public bool LeaseImportEnabled { get => _leaseImportEnabled; set { _leaseImportEnabled = value; RaisePropertyChanged(nameof(LeaseImportEnabled)); } }
         public bool LeaseUploadEnabled { get => _leaseUploadEnabled; set { _leaseUploadEnabled = value; RaisePropertyChanged(nameof(LeaseUploadEnabled)); } }
 
-
-
-    
-
   }
 
-  
 }

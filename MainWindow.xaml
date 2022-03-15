@@ -9,7 +9,7 @@
     <Grid>
         <StackPanel >
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Chose Task to Upload or Import Data" FontSize="20" Margin="10"/>
+                <TextBlock Text="Chose Task to Upload or Import Data" FontSize="20" Margin="10" Visibility="Hidden"/>
                 <Button HorizontalAlignment="Right" Width="200" Height="40" Margin="150,5" Command="{Binding CommandStartWizard}">Start Import Wizard
                 </Button>
             </StackPanel>

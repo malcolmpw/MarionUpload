@@ -95,10 +95,10 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
 
-                var unitLookup = db.Query<mCadUnit>("Select [CadID],[UnitID], [CadUnitIDText] ,[CadAppraised], active From tlkpCadUnit where CadID = 'MAR' and CadAppraised = 1");
+                var unitLookup = db.Query<mCadUnit>("Select [CadID], [UnitID], [CadUnitIDText], [CadAppraised], active " +
+                                                    "From tlkpCadUnit where CadID = 'MAR' and CadAppraised = 1");
 
                 CadUnitIDMap = unitLookup.ToDictionary(key => key.CadUnitIDText.Trim(), val => val);
-
 
                 foreach (var property in MarionProperties)
                 {
