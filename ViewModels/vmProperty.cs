@@ -141,7 +141,7 @@ namespace MarionUpload.ViewModels
             var cadProperty = new mCadProperty();
             cadProperty.CadID = "MAR";
             cadProperty.CadPropid = marionProperty.LeaseNumber.ToString();
-            cadProperty.CadPct = 1;
+            cadProperty.CadPct = 1.0;
             cadProperty.PropID = (int)primaryPropertyKey;
             cadProperty.delflag = false;
             return cadProperty;
