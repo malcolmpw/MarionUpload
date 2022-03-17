@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -115,7 +116,8 @@ namespace MarionUpload.ViewModels
         {
             var oppSegment = new mSegment();
             oppSegment.PropID = (int)PropertyIdMap[marionProperty.LeaseNumber];
-            
+            oppSegment.PrsnlID = 1;
+            oppSegment.PrsnlDesc = "1st Segt (added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ")",
             oppSegment.PrsnlCreateDate = DateTime.Now;
             oppSegment.PrsnlCreateBy = "MPW";
             oppSegment.PrsnlCreateWhy = "conversion";
@@ -124,6 +126,10 @@ namespace MarionUpload.ViewModels
             oppSegment.PrsnlStatBy = "MPW";
             oppSegment.PrsnlStatWhy = "conversion";
             oppSegment.PrsnlStat_YN = true;
+
+            oppSegment.PrsnlUnitModifier = 1.0d;
+            oppSegment.PrsnlUtilPct = 1.0d;
+            oppSegment.PrsnlApprMethod = "Schedule";
 
             oppSegment.delflag = false;
 

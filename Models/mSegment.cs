@@ -10,7 +10,8 @@ namespace MarionUpload.Models
         public int PropID { get; set; }
         [ExplicitKey]
         public int PrsnlID { get; set; }        
-                
+        public string PrsnlDesc { get; set; }
+        
         public DateTime PrsnlCreateDate { get; set; }
         public string PrsnlCreateBy { get; set; }
         public string PrsnlCreateWhy { get; set; }
@@ -19,7 +20,11 @@ namespace MarionUpload.Models
         public string PrsnlStatBy { get; set; }
         public string PrsnlStatWhy { get; set; }
         public bool PrsnlStat_YN { get; set; }
-        
+
+        public double PrsnlUnitModifier { get; set; }
+        public double PrsnlUtilPct { get; set; }
+        public string PrsnlApprMethod { get; set; }
+
         public bool delflag { get; set; }
     }
 }
