@@ -117,7 +117,7 @@ namespace MarionUpload.ViewModels
             var oppSegment = new mSegment();
             oppSegment.PropID = (int)PropertyIdMap[marionProperty.LeaseNumber];
             oppSegment.PrsnlID = 1;
-            oppSegment.PrsnlDesc = "1st Segt (added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ")",
+            oppSegment.PrsnlDesc = "1st Segt (added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ")";
             oppSegment.PrsnlCreateDate = DateTime.Now;
             oppSegment.PrsnlCreateBy = "MPW";
             oppSegment.PrsnlCreateWhy = "conversion";
