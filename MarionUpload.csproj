@@ -106,6 +106,7 @@
     <Compile Include="Comparers\PropertyComparer.cs" />
     <Compile Include="Messages\LeaseFinishedMessage.cs" />
     <Compile Include="Models\mTract.cs" />
+    <Compile Include="Models\mSegment.cs" />
     <Compile Include="ViewModels\vmAccount.cs" />
     <Compile Include="ViewModels\vmAgent.cs" />
     <Compile Include="ViewModels\vmCadUnit.cs" />

@@ -1,7 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
 
-namespace MarionUpload.ViewModels
+namespace MarionUpload.Models
 {
     [Table("tblTract")]
     public class mTract

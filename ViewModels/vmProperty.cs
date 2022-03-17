@@ -97,11 +97,23 @@ namespace MarionUpload.ViewModels
                     var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty, primaryPropertyKey);
                     var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
                     CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
+
+                    //Add a first segment to each property where SPTBCode <> 'G1'
+                    var populatedSegment = TranslateFrom_mMarionPropertyTo_mSegment(_marionProperty);
+                    var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
                 }
 
                 MessageBox.Show($"Finished uploading {MarionProperties.Count()} properties");
                 Messenger.Default.Send<PropertiesFinishedMessage>(new PropertiesFinishedMessage());
             }
+        }
+
+        private mSegment TranslateFrom_mMarionPropertyTo_mSegment(mMarionProperty marionProperty)
+        {
+            var oppSegment= new mSegment();
+            //oppSegment.prop
+
+            return oppSegment;
         }
 
         private mCadProperty TranslateFrom_mMarionPropertyTo_mCadProperty(mMarionProperty marionProperty, long primaryPropertyKey)

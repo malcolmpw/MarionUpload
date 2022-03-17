@@ -1,4 +1,4 @@
-﻿namespace MarionUpload.ViewModels
+﻿namespace MarionUpload.Models
 {
     public class mJurisdiction
     {   
