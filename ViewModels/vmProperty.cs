@@ -99,8 +99,11 @@ namespace MarionUpload.ViewModels
                     CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
 
                     //Add a first segment to each property where SPTBCode <> 'G1'
-                    var populatedSegment = TranslateFrom_mMarionPropertyTo_mSegment(_marionProperty);
-                    var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
+                    if (_marionProperty.SPTBCode != "G1")
+                    {
+                        var populatedSegment = TranslateFrom_mMarionPropertyTo_mSegment(_marionProperty);
+                        var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
+                    }
                 }
 
                 MessageBox.Show($"Finished uploading {MarionProperties.Count()} properties");
@@ -110,8 +113,19 @@ namespace MarionUpload.ViewModels
 
         private mSegment TranslateFrom_mMarionPropertyTo_mSegment(mMarionProperty marionProperty)
         {
-            var oppSegment= new mSegment();
-            //oppSegment.prop
+            var oppSegment = new mSegment();
+            oppSegment.PropID = (int)PropertyIdMap[marionProperty.LeaseNumber];
+            
+            oppSegment.PrsnlCreateDate = DateTime.Now;
+            oppSegment.PrsnlCreateBy = "MPW";
+            oppSegment.PrsnlCreateWhy = "conversion";
+
+            oppSegment.PrsnlStatDate = DateTime.Now;
+            oppSegment.PrsnlStatBy = "MPW";
+            oppSegment.PrsnlStatWhy = "conversion";
+            oppSegment.PrsnlStat_YN = true;
+
+            oppSegment.delflag = false;
 
             return oppSegment;
         }
