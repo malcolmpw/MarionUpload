@@ -109,6 +109,7 @@ namespace MarionUpload.ViewModels
             account.Stat_YN = true;
             account.UpdateBy = UpdateByDefault;
             account.UpdateDate = DateTime.Now;
+            account.Cad = "MAR";
             account.PctProp = _marionAccount.DecimalInterest;
             account.Protest_YN = _marionAccount.Protest == "P";
             account.PTDcode = _marionAccount.SPTBCode;

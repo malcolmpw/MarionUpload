@@ -31,6 +31,7 @@ namespace MarionUpload.ViewModels
 
         public ICommand CommandImportProperties => new RelayCommand(OnImportProperties);
         public ICommand CommandUploadProperties => new RelayCommand(OnUploadProperties);
+
         public IDictionary<string, long> PropIdMap { get; private set; } = new Dictionary<string, long>();
         public Dictionary<int, string> JurisdictionMap { get; private set; }
         public Dictionary<string, string> PtdPropMap { get; private set; }
