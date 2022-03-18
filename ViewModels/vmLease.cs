@@ -90,7 +90,7 @@ namespace MarionUpload.ViewModels
             var cadLease = new mCadLease();
             cadLease.CadId = "MAR";
             cadLease.CadLeaseId = marionLease.LeaseNumber;
-
+           
             return cadLease;
         }
 
@@ -117,12 +117,14 @@ namespace MarionUpload.ViewModels
         {
             var lease = new mLease();
             lease.LeaseNameWag = marionLease.LeaseName;
+                                 
             lease.Stat_YN = true;
-            lease.StatReason = "Import";
-            lease.StatDate = DateTime.Now;
             lease.StatBy = UpdateByDefault;
-            lease.UpdateDate = DateTime.Now;
+            lease.StatDate = DateTime.Now;
+            lease.StatReason = "Import";
+                        
             lease.UpdateBy = UpdateByDefault;
+            lease.UpdateDate = DateTime.Now;
 
             return lease;
 

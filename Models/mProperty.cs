@@ -19,5 +19,6 @@ namespace MarionUpload.Models
         public DateTime UpdateDate { get; set; }
         public string CreateWhy { get; set; }
         public DateTime CreateDate { get; set; }
+        public bool Stat_YN { get; set; }
     }
 }

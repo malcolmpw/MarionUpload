@@ -39,5 +39,6 @@ namespace MarionUpload.Models
         public string UpdateBy { get; set; }
         public bool Ntc2Agent_YN { get; set; }
         public bool Stmnt2Agent_YN { get; set; }
+        public bool Stat_YN { get; set; }
     }
 }

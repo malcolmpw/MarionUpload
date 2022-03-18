@@ -12,5 +12,6 @@
         public string State { get; set; }         //BEG 110 - END 111
         public string Zip { get; set; }           //BEG 112 - END 116
         public string Zip4 { get; set; }          //BEG 118 - END 121
+        public bool Stat_YN { get; set; }
     }
 }

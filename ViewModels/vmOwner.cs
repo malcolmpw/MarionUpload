@@ -181,6 +181,7 @@ namespace MarionUpload.ViewModels
             owner.CadID = "MAR";
             owner.NameSortCad = importedMarionOwner.OwnerName.Trim();
             //var matchingOwner = CadOwner2017NameSortMap[owner.NameSortCad];
+            owner.Stat_YN = true;
 
             mOwner matchingOwner;
             bool hasValue = CadOwner2017NameSortMap.TryGetValue(owner.NameSortCad, out matchingOwner);
@@ -229,14 +230,24 @@ namespace MarionUpload.ViewModels
             int zipStartIndex;
             if (cityStateZip.Length > 0)
             {
-                var hyphen = cityStateZip.Substring(cityStateZip.Length - 5, 1);
-                var hasZip4 = hyphen == "-";
-                cityLength = hasZip4 ? cityStateZip.Length - 12 : cityStateZip.Length - 7;
-                owner.MailCi = cityStateZip.Substring(0, cityLength).Trim();
-                zipStartIndex = cityLength;
-                owner.MailSt = cityStateZip.Substring(zipStartIndex, 2);
-                owner.MailZ = cityStateZip.Substring(zipStartIndex + 2, 5);
-                owner.MailZ4 = hasZip4 ? cityStateZip.Substring(zipStartIndex + 8, 4) : "";
+                if (cityStateZip.Trim() != "LONDON" && cityStateZip.Trim() != "ABT0G-2")
+                {
+                    var hyphen = cityStateZip.Substring(cityStateZip.Length - 5, 1);
+                    var hasZip4 = hyphen == "-";
+                    cityLength = hasZip4 ? cityStateZip.Length - 12 : cityStateZip.Length - 7;
+                    owner.MailCi = cityStateZip.Substring(0, cityLength).Trim();
+                    zipStartIndex = cityLength;
+                    owner.MailSt = cityStateZip.Substring(zipStartIndex, 2);
+                    owner.MailZ = cityStateZip.Substring(zipStartIndex + 2, 5);
+                    owner.MailZ4 = hasZip4 ? cityStateZip.Substring(zipStartIndex + 8, 4) : "";
+                }
+                else
+                {
+                    owner.MailCi = cityStateZip.Trim();
+                    owner.MailSt = "";
+                    owner.MailZ = "";
+                    owner.MailZ4 = "";
+                }
             }
             // Example:
             // Land O Lakes TX12345
@@ -252,8 +263,8 @@ namespace MarionUpload.ViewModels
             //}                       
 
             owner.UpdateDate = _updateDate;
-            owner.UpdateBy = _updateBy;
-
+            owner.UpdateBy = _updateBy;            
+            
             owner = NameSorts.RebuildNameSort(owner);
 
             return owner;
@@ -361,10 +372,10 @@ namespace MarionUpload.ViewModels
                 sWorking = "";
 
                 if (Owner.NameL1 != "" && Owner.NameL1 != null) sWorking = Owner.NameL1.Trim();
-                if (Owner.NameF != "" && Owner.NameF != null) sWorking = sWorking + ", " + Owner.NameF.Trim();
-                if (Owner.NameM != "" && Owner.NameM != null) sWorking = sWorking + ", " + Owner.NameM.Trim();
-                if (Owner.NameLS != "" && Owner.NameLS != null) sWorking = sWorking + ", " + Owner.NameLS.Trim();
-                if (Owner.NameL2 != "" && Owner.NameL2 != null) sWorking = sWorking + ", " + Owner.NameL2.Trim();
+                if (Owner.NameF != "" && Owner.NameF != null) sWorking = sWorking + " " + Owner.NameF.Trim();
+                if (Owner.NameM != "" && Owner.NameM != null) sWorking = sWorking + " " + Owner.NameM.Trim();
+                if (Owner.NameLS != "" && Owner.NameLS != null) sWorking = sWorking + " " + Owner.NameLS.Trim();
+                if (Owner.NameL2 != "" && Owner.NameL2 != null) sWorking = sWorking + " " + Owner.NameL2.Trim();
 
                 Owner.NameSortCad = GetTruncatedSubstring(sWorking, 40);
 
@@ -381,7 +392,7 @@ namespace MarionUpload.ViewModels
             {
                 return workingString.Substring(0, trimLength);
             }
-            return null;
+            return workingString;
         }
     }
 }

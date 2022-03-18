@@ -18,6 +18,7 @@ namespace MarionUpload.ViewModels
 {
     public class vmAccount : ViewModelBase
     {
+        private const string UpdateByDefault = "MPW";
         private bool accountImportEnabled = true;
         private bool accountUploadEnabled = false;
 
@@ -104,13 +105,17 @@ namespace MarionUpload.ViewModels
         private mAccount TranslateFrom_mMarionAccountTo_mAccount(mMarionAccount _marionAccount)
         {
             var account = new mAccount();
+
+            account.Stat_YN = true;
+            account.UpdateBy = UpdateByDefault;
+            account.UpdateDate = DateTime.Now;
             account.PctProp = _marionAccount.DecimalInterest;
             account.Protest_YN = _marionAccount.Protest == "P";
             account.PTDcode = _marionAccount.SPTBCode;
             account.PctType = ConvertInterestType(_marionAccount);
             account.PropID = vmProperty.PropertyIdMap[_marionAccount.LeaseNumber];
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
-
+            
             return account;
         }
 

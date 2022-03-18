@@ -156,6 +156,8 @@ namespace MarionUpload.ViewModels
 
             var property = new mProperty();
 
+            property.Stat_YN = true;
+
             property.PtdClassSub = importedMarionProperty.SPTBCode.Trim();
 
             string sptbCode = importedMarionProperty.SPTBCode.Trim();
