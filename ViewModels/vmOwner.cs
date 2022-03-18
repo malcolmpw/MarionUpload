@@ -38,6 +38,7 @@ namespace MarionUpload.ViewModels
         public ObservableCollection<mOwner> MarionOwners2017 { get; set; }
         public ObservableCollection<mOwner> InsertedOwners { get; set; }
         public Dictionary<string, mOwner> CadOwner2017NameSortMap { get; set; }
+        public NameSorts NameSorts { get; set; }
 
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
@@ -50,6 +51,7 @@ namespace MarionUpload.ViewModels
             MarionOwners = new ObservableCollection<mMarionOwner>();
             MarionOwners2017 = new ObservableCollection<mOwner>();
             CadOwner2017NameSortMap = new Dictionary<string, mOwner>();
+            NameSorts = new NameSorts();
         }
 
         private void OnImportOwners()
@@ -196,17 +198,17 @@ namespace MarionUpload.ViewModels
                 owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2017].[dbo].[tblName]
                                                    // these may be taken from WagData2017 for the old list of marion owners in tblName.               
                 owner.NameSel_YN = matchingOwner.NameSel_YN;
-                owner.NameSort = matchingOwner.NameSort;
-                owner.NameSortFirst = matchingOwner.NameSortFirst;
-                owner.NameSortCad = matchingOwner.NameSortCad;
+                //owner.NameSort = matchingOwner.NameSortCad;
+                //owner.NameSortFirst = matchingOwner.NameSortCad;
+                //owner.NameSortCad = matchingOwner.NameSortCad;                
             }
             else
             {
                 owner.NameC = importedMarionOwner.OwnerName;
                 owner.NameSel_YN = true;
-                owner.NameSort = importedMarionOwner.OwnerName;
-                owner.NameSortFirst = importedMarionOwner.OwnerName;
-                owner.NameSortCad = importedMarionOwner.OwnerName;
+                //owner.NameSort = importedMarionOwner.OwnerName;
+                //owner.NameSortFirst = importedMarionOwner.OwnerName;
+                //owner.NameSortCad = importedMarionOwner.OwnerName;
             }
 
             // NO! importedMarionOwner is never an agent.
@@ -223,11 +225,19 @@ namespace MarionUpload.ViewModels
             // Problem: importedMarionOwner address info is for the Agent and not for the owner if importedMarionOwner.InCareOf is not blank
             owner.Mail1 = importedMarionOwner.StreetAddress.Trim();
             var cityStateZip = importedMarionOwner.CityStateZip.Trim();
-            owner.MailCi = cityStateZip.Length < 7 ? "" : cityStateZip.Substring(0, cityStateZip.Length - 7).Trim();
-            var stateZip = cityStateZip.Length <= 7 ? "" : cityStateZip.Substring(cityStateZip.Length - 7).Trim();
-            owner.MailSt = stateZip.Length < 2 ? "" : stateZip.Substring(0, 2);
-            owner.MailZ = stateZip.Length < 3 ? "" : stateZip.Substring(2);
-
+            int cityLength;
+            int zipStartIndex;
+            if (cityStateZip.Length > 0)
+            {
+                var hyphen = cityStateZip.Substring(cityStateZip.Length - 5, 1);
+                var hasZip4 = hyphen == "-";
+                cityLength = hasZip4 ? cityStateZip.Length - 12 : cityStateZip.Length - 7;
+                owner.MailCi = cityStateZip.Substring(0, cityLength).Trim();
+                zipStartIndex = cityLength;
+                owner.MailSt = cityStateZip.Substring(zipStartIndex, 2);
+                owner.MailZ = cityStateZip.Substring(zipStartIndex + 2, 5);
+                owner.MailZ4 = hasZip4 ? cityStateZip.Substring(zipStartIndex + 8, 4) : "";
+            }
             // Example:
             // Land O Lakes TX12345
             // 00000000001111111111
@@ -243,6 +253,8 @@ namespace MarionUpload.ViewModels
 
             owner.UpdateDate = _updateDate;
             owner.UpdateBy = _updateBy;
+
+            owner = NameSorts.RebuildNameSort(owner);
 
             return owner;
         }
