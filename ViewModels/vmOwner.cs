@@ -199,28 +199,27 @@ namespace MarionUpload.ViewModels
                 owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2017].[dbo].[tblName]
                                                    // these may be taken from WagData2017 for the old list of marion owners in tblName.               
                 owner.NameSel_YN = matchingOwner.NameSel_YN;
-                //owner.NameSort = matchingOwner.NameSortCad;
-                //owner.NameSortFirst = matchingOwner.NameSortCad;
-                //owner.NameSortCad = matchingOwner.NameSortCad;                
+                
             }
             else
             {
                 owner.NameC = importedMarionOwner.OwnerName;
                 owner.NameSel_YN = true;
-                //owner.NameSort = importedMarionOwner.OwnerName;
-                //owner.NameSortFirst = importedMarionOwner.OwnerName;
-                //owner.NameSortCad = importedMarionOwner.OwnerName;
             }
 
-            // NO! importedMarionOwner is never an agent.
-            //if (importedMarionOwner.AgentNumber != "")
-            //{
-            //    owner.AgentID = importedMarionOwner.AgentNumber == "0" ? 0 : SelectAgentNameIdFromMarionAgentImportTable(importedMarionOwner.AgentNumber);
-            //    //owner.Agnt_YN = importedMarionOwner.AgentNumber.Trim() != "0";       
+            if (importedMarionOwner.AgentNumber == "")
+            {
+                owner.AgentID = 66864;
+                owner.Ntc2Agent_YN = false;
+                owner.Stmnt2Agent_YN = false;
+            }
+            else
+            {
+                owner.AgentID = SelectAgentNameIdFromMarionAgentImportTable(importedMarionOwner.AgentNumber);               
+                owner.Ntc2Agent_YN = true;
+                owner.Stmnt2Agent_YN = true;
+            }
 
-            //    owner.Ntc2Agent_YN = true;
-            //    owner.Stmnt2Agent_YN = true;
-            //}
 
             // !!!! ASK CW ABOUT IN CARE OF
             // Problem: importedMarionOwner address info is for the Agent and not for the owner if importedMarionOwner.InCareOf is not blank
@@ -280,7 +279,7 @@ namespace MarionUpload.ViewModels
                 {
                     Log.Error($"Could not find agent {marionAgentId} in the Marion Agent Table");
                     // MessageBox.Show($"Could not find agent {marionAgentId} in the Marion Agent Table");
-                    return 0;
+                    return 66864;
                 }
 
                 var AgentNameId = result.FirstOrDefault().NameId;
