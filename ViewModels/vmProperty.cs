@@ -103,7 +103,7 @@ namespace MarionUpload.ViewModels
                     //Add a first segment to each property where SPTBCode <> 'G1'
                     if (_marionProperty.SPTBCode != "G1")
                     {
-                        var populatedSegment = TranslateFrom_mMarionPropertyTo_mSegment(_marionProperty);
+                        var populatedSegment = TranslateFrom_mPropertyTo_mSegment(populatedProperty);
                         var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
                     }
                 }
@@ -113,12 +113,14 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        private mSegment TranslateFrom_mMarionPropertyTo_mSegment(mMarionProperty marionProperty)
+        private mSegment TranslateFrom_mPropertyTo_mSegment(mProperty property)
         {
             var oppSegment = new mSegment();
-            oppSegment.PropID = (int)PropertyIdMap[marionProperty.LeaseNumber];
+
+            oppSegment.PropID = property.PropId;
             oppSegment.PrsnlID = 1;
             oppSegment.PrsnlDesc = "1st Segt (added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ")";
+
             oppSegment.PrsnlCreateDate = DateTime.Now;
             oppSegment.PrsnlCreateBy = "MPW";
             oppSegment.PrsnlCreateWhy = "conversion";
@@ -131,6 +133,10 @@ namespace MarionUpload.ViewModels
             oppSegment.PrsnlUnitModifier = 1.0d;
             oppSegment.PrsnlUtilPct = 1.0d;
             oppSegment.PrsnlApprMethod = "Schedule";
+
+            oppSegment.PrsnlPtdPropClass = property.PtdClass;
+            oppSegment.EqptClassID = 1;//inventory
+            oppSegment.DeprSchedID = 1;// from inventory
 
             oppSegment.delflag = false;
 

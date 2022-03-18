@@ -25,6 +25,10 @@ namespace MarionUpload.Models
         public double PrsnlUtilPct { get; set; }
         public string PrsnlApprMethod { get; set; }
 
+        public string PrsnlPtdPropClass { get; set; }
+        public int EqptClassID { get; set; }
+        public int DeprSchedID { get; set; }
+             
         public bool delflag { get; set; }
     }
 }
