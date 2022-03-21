@@ -88,6 +88,7 @@
     <Compile Include="Messages\PropertiesFinishedMessage.cs" />
     <Compile Include="Messages\UnitsFinishedMessage.cs" />
     <Compile Include="Models\mAccount.cs" />
+    <Compile Include="Models\mAprslAdmin.cs" />
     <Compile Include="Models\mCadAccount.cs" />
     <Compile Include="Models\mCadLease.cs" />
     <Compile Include="Models\mCadOwner.cs" />

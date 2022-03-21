@@ -12,6 +12,7 @@ namespace MarionUpload.Models
         public string PtdClassSub { get; set; }
         public string PropType { get; set; }
         public string Legal { get; set; }
+        public string Location { get; set; }
         public string ControlCad { get; set; }
         public string UpdateWhy { get; set; }
         public string CreateBy { get; set; }

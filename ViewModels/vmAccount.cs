@@ -28,7 +28,6 @@ namespace MarionUpload.ViewModels
         public bool AccountImportEnabled { get => accountImportEnabled; set { accountImportEnabled = value; RaisePropertyChanged(nameof(AccountImportEnabled)); } }
         public bool AccountUploadEnabled { get => accountUploadEnabled; set { accountUploadEnabled = value; RaisePropertyChanged(nameof(AccountUploadEnabled)); } }
 
-
         private void OnImportAccounts()
         {
             //CommandImportAccounts.CanExecute(false);
@@ -49,7 +48,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionAccount>("Select ImportID, OwnerNumber, LeaseNumber, InterestType, SPTBCode," +
-                                                        " Protest, DecimalInterest, AccountNumber, [AccountSequence]" +
+                                                        " Protest, DecimalInterest, AccountNumber, [AccountSequence], Juris2MarketValue" +
                                                         " from AbMarionImport"); ;
 
                 var resultList = results.ToList();
@@ -65,13 +64,33 @@ namespace MarionUpload.ViewModels
         {
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
+                int currentNameId = 0;
+                int previousNameId = 0;
+                mAccount previousPopulatedAccount = new mAccount();
+                decimal sumOfOwnerCadValues = 0;
+
                 foreach (var _marionAccount in MarionAccounts)
                 {
                     var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                     var primaryKey = db.Insert<mAccount>(populatedAccount);
+                    currentNameId = (int)populatedAccount.NameID;
 
                     var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, primaryKey);
                     var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
+
+
+                    if (currentNameId == previousNameId)
+                    {
+                        sumOfOwnerCadValues += populatedAccount.ValAcctCur;
+                    }
+                    else
+                    {
+                        var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(previousPopulatedAccount, sumOfOwnerCadValues);
+                        var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                    }
+
+                    previousNameId = currentNameId;
+                    previousPopulatedAccount = populatedAccount;
                 }
             }
 
@@ -84,7 +103,7 @@ namespace MarionUpload.ViewModels
         {
             var cadAccount = new mCadAccount();
             cadAccount.AcctID = (int)primaryAccountKey;
-            cadAccount.CadID = "MAR";            
+            cadAccount.CadID = "MAR";
             cadAccount.CadAcctID = BuildCadAccountId(marionAccount);
             cadAccount.Lock_YN = false;
             cadAccount.ExportCd = "";
@@ -110,14 +129,44 @@ namespace MarionUpload.ViewModels
             account.UpdateBy = UpdateByDefault;
             account.UpdateDate = DateTime.Now;
             account.Cad = "MAR";
+
             account.PctProp = _marionAccount.DecimalInterest;
+            account.PctType = ConvertInterestType(_marionAccount);
+
             account.Protest_YN = _marionAccount.Protest == "P";
             account.PTDcode = _marionAccount.SPTBCode;
-            account.PctType = ConvertInterestType(_marionAccount);
+
             account.PropID = vmProperty.PropertyIdMap[_marionAccount.LeaseNumber];
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
-            
+
+            account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
+            var interestInfo = " (" + account.PctProp + " - " + account.PctType + ")";
+            if (account.PTDcode == "G") account.AcctLegal += interestInfo;
+
+            account.ValAcctCur = _marionAccount.CountyMarketValue;
+            account.AcctValPrYr = _marionAccount.CountyMarketValue;
+            account.valacctPrYr = _marionAccount.CountyMarketValue;
+
+            string divString = account.PTDcode == "G" ? "U" : "M";
+            account.division = char.Parse(divString.Substring(0,1));
+
             return account;
+        }
+
+
+        private mAprslAdmin TranslateFrom_mOwnerTo_mAprslAdmin(mAccount populatedAccount, decimal sumOfOwnerCadValues)
+        {
+            var aprslAdmin = new mAprslAdmin();
+
+            aprslAdmin.Year = "2022";
+            aprslAdmin.NameID = (int)populatedAccount.NameID;
+            aprslAdmin.CadID = "MAR";
+
+            aprslAdmin.ApprValCad = sumOfOwnerCadValues;
+            aprslAdmin.UpdateBy = "MPW";
+            aprslAdmin.UpdateDate = DateTime.Now;
+
+            return aprslAdmin;
         }
 
         private static char ConvertInterestType(mMarionAccount _marionAccount)

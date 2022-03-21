@@ -124,7 +124,7 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                        OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                        OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);                       
                     }
                 }
 
@@ -140,7 +140,7 @@ namespace MarionUpload.ViewModels
                 Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
             }
         }
-
+       
         private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionOwner marionOwner, long primaryKey)
         {
             var cadOwner = new mCadOwner();

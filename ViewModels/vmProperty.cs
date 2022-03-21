@@ -42,9 +42,6 @@ namespace MarionUpload.ViewModels
         public vmProperty()
         {
             MarionProperties = new ObservableCollection<mMarionProperty>();
-            //MarionOwners = new ObservableCollection<mMarionOwner>();
-
-
         }
 
         private void OnImportProperties()
@@ -83,6 +80,7 @@ namespace MarionUpload.ViewModels
         }
 
         public static IDictionary<int, long> PropertyIdMap { get; private set; } = new Dictionary<int, long>();
+        public static IDictionary<int, string> PropertyLegalMap { get; private set; } = new Dictionary<int, string>();
         public IDictionary<int, long> CadPropertyIdMap { get; private set; } = new Dictionary<int, long>();
 
         private void OnUploadProperties()
@@ -94,6 +92,7 @@ namespace MarionUpload.ViewModels
                     var populatedProperty = TranslateFrom_mMarionPropertyTo_mProperty(_marionProperty);
                     var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
                     PropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
+                    PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
                     System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
 
                     var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty, primaryPropertyKey);
@@ -135,7 +134,7 @@ namespace MarionUpload.ViewModels
             oppSegment.PrsnlApprMethod = "Schedule";
 
             oppSegment.PrsnlPtdPropClass = property.PtdClass;
-            oppSegment.EqptClassID = 1;//inventory
+            oppSegment.EqptClassID = 136;//inventory
             oppSegment.DeprSchedID = 1;// from inventory
 
             oppSegment.delflag = false;
@@ -183,23 +182,38 @@ namespace MarionUpload.ViewModels
                 string pat = @"(\d+)";
                 Regex re = new Regex(pat);
                 var match = re.Match(rrc);
-
                 var rrcNumber = "";
                 if (match.Success)
                 {
                     rrcNumber = match.Groups[0].Value;
                 }
 
-                property.PropType = "M";
+                // MOST LEASE NAME IN MARION IMPORT HAVE A WELL NUMBER SO DO NOT PARSE DESCRIPTION1
+                var wellNumber = "";
+                //string description1 = importedMarionProperty.Description2.Trim();
+                //if (!description1.Contains("WELL") || !description1.Contains("RRC"))
+                //{
+                //    var startOfWellNumber = 4;
+                //    var endOfWellNumber = description1.IndexOf("RRC");
+                //    wellNumber = description1.Substring(startOfWellNumber + 1, endOfWellNumber - startOfWellNumber);
+                //}
+                //else
+                //{
+                //   wellNumber = "";
+                //}
+
                 property.Legal = importedMarionProperty.LeaseName.Trim() + " (" +
-                                 rrcNumber + ") " +
-                                 importedMarionProperty.OperatorName.Trim();
+                                 rrcNumber + "); Opr: " + importedMarionProperty.OperatorName.Trim();
+
+                property.PropType = "M";
             }
             else
             {
                 property.PropType = "P";
-                property.Legal = FetchPTDDescription(sptbCode) + "," +
-                                 FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
+                //property.Legal = FetchPTDDescription(sptbCode) + "," +
+                //                 FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
+                property.Legal = importedMarionProperty.Description1 + "-" + importedMarionProperty.Description2;
+                property.Location = importedMarionProperty.Description2;
             }
 
             property.ControlCad = "MAR";

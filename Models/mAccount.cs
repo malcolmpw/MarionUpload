@@ -8,6 +8,7 @@ namespace MarionUpload.Models
     {
         [Key]
         public int AcctID { get; set; }
+        public string AcctLegal { get; set; }
         public char PctType { get; set; }
         public float PctProp { get; set; }
         public bool Protest_YN { get; set; }
@@ -18,5 +19,9 @@ namespace MarionUpload.Models
         public bool Stat_YN { get; set; }
         public string UpdateBy { get; set; }
         public DateTime UpdateDate { get; set; }
+        public decimal ValAcctCur { get; set; }
+        public decimal valacctPrYr { get; set; }
+        public decimal AcctValPrYr { get; set; }
+        public char division { get; set; }
     }
 }
