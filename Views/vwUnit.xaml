@@ -12,7 +12,7 @@
                 <Button Content="Upload UnitProperty" Command="{Binding CommandUploadUnitProperty}"  IsEnabled="{Binding UnitUploadEnabled}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
-            <DataGrid Name="dgUnitProperty" Margin="10" Width="800" Height="300" HorizontalAlignment="Left"
+            <DataGrid Name="dgUnitProperty" Margin="10" Width="1400" Height="800" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionProperties}">
             </DataGrid>
         </StackPanel>
