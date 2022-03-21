@@ -64,17 +64,24 @@ namespace MarionUpload.ViewModels
             {
                 foreach (var marionLease in MarionLeases)
                 {
-                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease);
-                    var primaryLeaseKey = db.Insert<mLease>(populatedLease);
+                    if (marionLease.SPTBCode.Trim() == "G1")
+                    {
+                        var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease);
+                        var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
-                    var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
-                    populatedCadLease.LeaseId = primaryLeaseKey;
-                    db.Insert<mCadLease>(populatedCadLease);
+                        var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
+                        populatedCadLease.LeaseId = primaryLeaseKey;
+                        db.Insert<mCadLease>(populatedCadLease);
 
-                    var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionLease);
-                    populatedTract.LeaseId = primaryLeaseKey;
-                    populatedTract.PropId = vmProperty.PropertyIdMap[marionLease.LeaseNumber];
-                    db.Insert<mTract>(populatedTract);
+                        var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionLease);
+                        populatedTract.LeaseId = primaryLeaseKey;
+                        populatedTract.PropId = vmProperty.PropertyIdMap[marionLease.LeaseNumber];
+                        db.Insert<mTract>(populatedTract);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"All queried results should have been G1 {marionLease.LeaseNumber} {marionLease.LeaseName}");
+                    }
                 }
 
                 LeaseUploadEnabled = false;

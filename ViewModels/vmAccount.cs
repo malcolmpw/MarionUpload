@@ -174,17 +174,26 @@ namespace MarionUpload.ViewModels
             char _intType;
             switch (_marionAccount.InterestType)
             {
+                case 0:
+                    _intType = 'U';
+                    break;
                 case 1:
                     _intType = 'R';
                     break;
                 case 2:
                     _intType = 'O';
                     break;
-                case 3:
+                case 3:// Not used in Marion Import File
+                    _intType = 'W';
+                    break;
+                case 4:
+                    _intType = 'W';
+                    break;
+                case 5:// Not used in Marion Import File
                     _intType = 'W';
                     break;
                 default:
-                    _intType = 'U';
+                    _intType = 'U';// Should not occur in Marion Import File i.e. _marionAccount.InterestType should never be blank
                     break;
             }
             return _intType;

@@ -165,9 +165,8 @@ namespace MarionUpload.ViewModels
             var property = new mProperty();
 
             property.Stat_YN = true;
-
-            string sptbCode = importedMarionProperty.SPTBCode.Trim();
-            property.PtdClassSub = sptbCode.Substring(0, 2);
+            
+            property.PtdClassSub = importedMarionProperty.SPTBCode.Trim().Substring(0, 2);
 
             if (property.PtdClassSub == "L1" || property.PtdClassSub == "L2")
             {
@@ -178,8 +177,10 @@ namespace MarionUpload.ViewModels
                 property.PtdClass = property.PtdClassSub.Substring(0, 1);
             }
           
-            if (sptbCode == "G1")
+            if (importedMarionProperty.SPTBCode.Trim().Substring(0, 2) == "G1")
             {
+                property.PropType = "M";
+
                 string rrc = importedMarionProperty.RRC.Trim();
                 string pat = @"(\d+)";
                 Regex re = new Regex(pat);
@@ -206,8 +207,7 @@ namespace MarionUpload.ViewModels
 
                 property.Legal = importedMarionProperty.LeaseName.Trim() + " (" +
                                  rrcNumber + "); Opr: " + importedMarionProperty.OperatorName.Trim();
-
-                property.PropType = "M";
+            
             }
             else
             {
