@@ -15,7 +15,7 @@
                 <TextBlock Text="{Binding MarionOwners.Count}" 
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
-            <DataGrid Name="dgOwners" Margin="10" Width="1400" Height="800" HorizontalAlignment="Left"
+            <DataGrid Name="dgOwners" Margin="10" Width="1400" Height="700" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionOwners}"/>
         </StackPanel>
     </Grid>

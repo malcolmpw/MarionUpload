@@ -117,8 +117,10 @@ namespace MarionUpload.ViewModels
             var oppSegment = new mSegment();
 
             oppSegment.PropID = property.PropId;
-            oppSegment.PrsnlID = 1;
-            oppSegment.PrsnlDesc = "1st Segt (added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ")";
+            oppSegment.PrsnlID = 1;            
+            oppSegment.PrsnlDesc = "1st Segt (added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ") ";
+            oppSegment.PrsnlDesc += property.Legal;
+
 
             oppSegment.PrsnlCreateDate = DateTime.Now;
             oppSegment.PrsnlCreateBy = "MPW";
@@ -164,18 +166,18 @@ namespace MarionUpload.ViewModels
 
             property.Stat_YN = true;
 
-            property.PtdClassSub = importedMarionProperty.SPTBCode.Trim();
-
             string sptbCode = importedMarionProperty.SPTBCode.Trim();
-            if (sptbCode == "L1" || sptbCode == "L2")
+            property.PtdClassSub = sptbCode.Substring(0, 2);
+
+            if (property.PtdClassSub == "L1" || property.PtdClassSub == "L2")
             {
-                property.PtdClass = sptbCode;
+                property.PtdClass = property.PtdClassSub;
             }
             else
             {
-                property.PtdClass = sptbCode.Substring(0, 1);
+                property.PtdClass = property.PtdClassSub.Substring(0, 1);
             }
-
+          
             if (sptbCode == "G1")
             {
                 string rrc = importedMarionProperty.RRC.Trim();

@@ -147,7 +147,7 @@ namespace MarionUpload.ViewModels
             account.AcctValPrYr = _marionAccount.Juris2MarketValue;
             account.valacctPrYr = _marionAccount.Juris2MarketValue;
 
-            string divString = account.PTDcode == "G" ? "U" : "M";
+            string divString = account.PTDcode == "G" ? "M" : "U";
             account.division = char.Parse(divString.Substring(0,1));
 
             return account;
