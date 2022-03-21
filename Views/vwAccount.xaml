@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             mc:Ignorable="d" >
     <Grid>
         <StackPanel >
             <StackPanel Orientation="Horizontal">
@@ -13,7 +12,7 @@
                 <Button Content="Upload Accounts" Command="{Binding CommandUploadAccounts}"  IsEnabled="{Binding AccountUploadEnabled}"               
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
-            <DataGrid Name="dgAccounts" Margin="10" Width="600" Height="300" HorizontalAlignment="Left"
+            <DataGrid Name="dgAccounts" Margin="10" Width="1400" Height="800" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionAccounts}">
             </DataGrid>
         </StackPanel>

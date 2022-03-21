@@ -48,7 +48,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionAccount>("Select ImportID, OwnerNumber, LeaseNumber, InterestType, SPTBCode," +
-                                                        " Protest, DecimalInterest, AccountNumber, [AccountSequence], Juris2MarketValue" +
+                                                        " Protest, DecimalInterest, AccountNumber, Juris2MarketValue, [AccountSequence]" +
                                                         " from AbMarionImport"); ;
 
                 var resultList = results.ToList();
@@ -143,9 +143,9 @@ namespace MarionUpload.ViewModels
             var interestInfo = " (" + account.PctProp + " - " + account.PctType + ")";
             if (account.PTDcode == "G") account.AcctLegal += interestInfo;
 
-            account.ValAcctCur = _marionAccount.CountyMarketValue;
-            account.AcctValPrYr = _marionAccount.CountyMarketValue;
-            account.valacctPrYr = _marionAccount.CountyMarketValue;
+            account.ValAcctCur = _marionAccount.Juris2MarketValue;
+            account.AcctValPrYr = _marionAccount.Juris2MarketValue;
+            account.valacctPrYr = _marionAccount.Juris2MarketValue;
 
             string divString = account.PTDcode == "G" ? "U" : "M";
             account.division = char.Parse(divString.Substring(0,1));
