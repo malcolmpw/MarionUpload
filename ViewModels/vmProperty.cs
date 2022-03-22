@@ -117,8 +117,9 @@ namespace MarionUpload.ViewModels
             var oppSegment = new mSegment();
 
             oppSegment.PropID = property.PropId;
-            oppSegment.PrsnlID = 1;            
-            oppSegment.PrsnlDesc = "1st Segt (added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ") ";
+            oppSegment.PrsnlID = 1;
+            oppSegment.PrsnlDesc = "1st Segt: ";
+            //oppSegment.PrsnlDesc += "(added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ") ";
             oppSegment.PrsnlDesc += property.Legal;
 
 
@@ -165,7 +166,7 @@ namespace MarionUpload.ViewModels
             var property = new mProperty();
 
             property.Stat_YN = true;
-            
+
             property.PtdClassSub = importedMarionProperty.SPTBCode.Trim().Substring(0, 2);
 
             if (property.PtdClassSub == "L1" || property.PtdClassSub == "L2")
@@ -176,7 +177,7 @@ namespace MarionUpload.ViewModels
             {
                 property.PtdClass = property.PtdClassSub.Substring(0, 1);
             }
-          
+
             if (importedMarionProperty.SPTBCode.Trim().Substring(0, 2) == "G1")
             {
                 property.PropType = "M";
@@ -188,7 +189,7 @@ namespace MarionUpload.ViewModels
                 var rrcNumber = "";
                 if (match.Success)
                 {
-                    rrcNumber = match.Groups[0].Value;
+                    rrcNumber = (match.Groups[0].Value).Trim();
                 }
 
                 // MOST LEASE NAME IN MARION IMPORT HAVE A WELL NUMBER SO DO NOT PARSE DESCRIPTION1
@@ -205,17 +206,19 @@ namespace MarionUpload.ViewModels
                 //   wellNumber = "";
                 //}
 
-                property.Legal = importedMarionProperty.LeaseName.Trim() + " (" +
-                                 rrcNumber + "); Opr: " + importedMarionProperty.OperatorName.Trim();
-            
+                property.Legal = importedMarionProperty.LeaseName.Trim() +
+                                    " (" + rrcNumber +
+                                    "); Opr: " + importedMarionProperty.OperatorName.Trim();
+
             }
             else
             {
                 property.PropType = "P";
                 //property.Legal = FetchPTDDescription(sptbCode) + "," +
                 //                 FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
-                property.Legal = importedMarionProperty.Description1 + "-" + importedMarionProperty.Description2;
-                property.Location = importedMarionProperty.Description2;
+                property.Legal = (importedMarionProperty.Description1).Trim() + "-" +
+                                    (importedMarionProperty.Description2).Trim();
+                property.Location = (importedMarionProperty.Description2).Trim();
             }
 
             property.ControlCad = "MAR";

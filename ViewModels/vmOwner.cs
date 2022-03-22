@@ -203,7 +203,7 @@ namespace MarionUpload.ViewModels
             }
             else
             {
-                owner.NameC = importedMarionOwner.OwnerName;
+                owner.NameC = (importedMarionOwner.OwnerName).Trim();
                 owner.NameSel_YN = true;
             }
 

@@ -134,7 +134,7 @@ namespace MarionUpload.ViewModels
             account.PctType = ConvertInterestType(_marionAccount);
 
             account.Protest_YN = _marionAccount.Protest == "P";
-            account.PTDcode = _marionAccount.SPTBCode;
+            account.PTDcode = (_marionAccount.SPTBCode).Trim();
 
             account.PropID = vmProperty.PropertyIdMap[_marionAccount.LeaseNumber];
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
