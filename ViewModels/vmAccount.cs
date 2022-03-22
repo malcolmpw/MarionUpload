@@ -116,7 +116,8 @@ namespace MarionUpload.ViewModels
         private string BuildCadAccountId(mMarionAccount marionAccount)
         {
             var cadAccountId = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +
-                               ConvertInterestType(marionAccount) + "-" +
+                               //ConvertInterestType(marionAccount) + "-" +
+                               marionAccount.InterestType.ToString().Trim() + "-" +
                                marionAccount.LeaseNumber.ToString().PadLeft(7, '0');
             return cadAccountId;
         }
