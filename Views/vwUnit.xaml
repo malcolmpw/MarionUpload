@@ -11,6 +11,8 @@
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
                 <Button Content="Upload UnitProperty" Command="{Binding CommandUploadUnitProperty}"  IsEnabled="{Binding UnitUploadEnabled}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
+                <TextBlock Text="{Binding MarionProperties.Count}" 
+                                Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
             <DataGrid Name="dgUnitProperty" Margin="10" Width="1400" Height="700" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionProperties}">

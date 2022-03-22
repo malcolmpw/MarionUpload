@@ -11,6 +11,8 @@
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
                 <Button Content="Upload Leases and Tracts" Command="{Binding CommandUploadLeases}"  IsEnabled="{Binding LeaseUploadEnabled}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
+                <TextBlock Text="{Binding MarionLeases.Count}" 
+                                Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
             <DataGrid Name="dgLeases" Margin="10" Width="1400" Height="700" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionLeases}">
