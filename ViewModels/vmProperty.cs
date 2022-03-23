@@ -60,13 +60,17 @@ namespace MarionUpload.ViewModels
             MarionProperties.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                var results = db.Query<mMarionProperty>("Select distinct LeaseNumber, PropertyType,SPTBCode,Description1,Description2,LeaseName,RRC,OperatorName," +
+                var results = db.Query<mMarionProperty>(
+                    "Select distinct LeaseNumber, PropertyType, SPTBCode, " +
+                    "Description1, Description2," +
+                    "LeaseName,RRC,OperatorName," +
                     "Jurisdiction1, Jurisdiction2, Jurisdiction3, " +
                     "Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
                     "Jurisdiction7, Jurisdiction8, Jurisdiction9, " +
                     "Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
                     "Juris2MarketValue " +
                     "from AbMarionImport");
+
                 JurisdictionMap = db.Query<mJurisdiction>("Select Code,Name from abMariontlkpJurisdiction")
                     .ToDictionary(jurisdiction => jurisdiction.Code, val => val.Name);
                 PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub").ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
@@ -103,7 +107,7 @@ namespace MarionUpload.ViewModels
                     //Add a first segment to each property where SPTBCode <> 'G1'
                     if (_marionProperty.SPTBCode != "G1")
                     {
-                        var populatedSegment = TranslateFrom_mPropertyTo_mSegment(populatedProperty);
+                        var populatedSegment = TranslateFrom_mPropertyTo_mSegment(populatedProperty, _marionProperty);
                         var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
                     }
                 }
@@ -113,7 +117,7 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        private mSegment TranslateFrom_mPropertyTo_mSegment(mProperty property)
+        private mSegment TranslateFrom_mPropertyTo_mSegment(mProperty property, mMarionProperty marionProperty)
         {
             var oppSegment = new mSegment();
 
@@ -141,8 +145,8 @@ namespace MarionUpload.ViewModels
             oppSegment.EqptClassID = 136;//inventory
             oppSegment.DeprSchedID = 1;// from inventory
 
-            oppSegment.PrsnlValCur = property.SegmentValue;
-            oppSegment.PrsnlValFlat = property.SegmentValue;
+            oppSegment.PrsnlValCur = marionProperty.Juris2MarketValue;
+            oppSegment.PrsnlValFlat = marionProperty.Juris2MarketValue;
 
             oppSegment.delflag = false;
 
@@ -237,7 +241,9 @@ namespace MarionUpload.ViewModels
 
         private string FetchISDJurisdictionName(mMarionProperty importedMarionProperty)
         {
-            var jurisdictions = new List<int> {importedMarionProperty.Jurisdiction1,
+            var jurisdictions = new List<int>
+            {
+                importedMarionProperty.Jurisdiction1,
                 importedMarionProperty.Jurisdiction2,
                 importedMarionProperty.Jurisdiction3,
                 importedMarionProperty.Jurisdiction4,
@@ -245,8 +251,11 @@ namespace MarionUpload.ViewModels
                 importedMarionProperty.Jurisdiction6,
                 importedMarionProperty.Jurisdiction7,
                 importedMarionProperty.Jurisdiction8,
-                importedMarionProperty.Jurisdiction9,importedMarionProperty.Jurisdiction10,
-                importedMarionProperty.Jurisdiction11,importedMarionProperty.Jurisdiction12 };
+                importedMarionProperty.Jurisdiction9,
+                importedMarionProperty.Jurisdiction10,
+                importedMarionProperty.Jurisdiction11,
+                importedMarionProperty.Jurisdiction12
+            };
 
             var ISDJurisdiction = jurisdictions.Where(j => (j / 10) * 10 == 30).FirstOrDefault();
 
