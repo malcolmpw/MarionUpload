@@ -64,8 +64,9 @@ namespace MarionUpload.ViewModels
                     "Jurisdiction1, Jurisdiction2, Jurisdiction3, " +
                     "Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
                     "Jurisdiction7, Jurisdiction8, Jurisdiction9, " +
-                    "Jurisdiction10, Jurisdiction11, Jurisdiction12" +
-                    " from AbMarionImport");
+                    "Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
+                    "Juris2MarketValue " +
+                    "from AbMarionImport");
                 JurisdictionMap = db.Query<mJurisdiction>("Select Code,Name from abMariontlkpJurisdiction")
                     .ToDictionary(jurisdiction => jurisdiction.Code, val => val.Name);
                 PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub").ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
@@ -134,11 +135,14 @@ namespace MarionUpload.ViewModels
 
             oppSegment.PrsnlUnitModifier = 1.0d;
             oppSegment.PrsnlUtilPct = 1.0d;
-            oppSegment.PrsnlApprMethod = "Schedule";
+            oppSegment.PrsnlApprMethod = "Flat value";
 
             oppSegment.PrsnlPtdPropClass = property.PtdClass;
             oppSegment.EqptClassID = 136;//inventory
             oppSegment.DeprSchedID = 1;// from inventory
+
+            oppSegment.PrsnlValCur = property.SegmentValue;
+            oppSegment.PrsnlValFlat = property.SegmentValue;
 
             oppSegment.delflag = false;
 
@@ -220,6 +224,8 @@ namespace MarionUpload.ViewModels
                                     (importedMarionProperty.Description2).Trim();
                 property.Location = (importedMarionProperty.Description2).Trim();
             }
+
+            property.SegmentValue = importedMarionProperty.Juris2MarketValue;
 
             property.ControlCad = "MAR";
 

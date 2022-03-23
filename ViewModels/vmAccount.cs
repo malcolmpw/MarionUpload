@@ -67,6 +67,7 @@ namespace MarionUpload.ViewModels
                 int currentNameId = 0;
                 int previousNameId = 0;
                 mAccount previousPopulatedAccount = new mAccount();
+                mAccountPrYr populatedAccountPrYr = new mAccountPrYr();
                 decimal sumOfOwnerCadValues = 0;
 
                 foreach (var _marionAccount in MarionAccounts)
@@ -74,10 +75,13 @@ namespace MarionUpload.ViewModels
                     var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                     var primaryKey = db.Insert<mAccount>(populatedAccount);
                     currentNameId = (int)populatedAccount.NameID;
+                    
+                    populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
+                    populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;
+                    db.Insert<mAccountPrYr>(populatedAccountPrYr);
 
                     var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, primaryKey);
-                    var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
-
+                    var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);                   
 
                     if (currentNameId == previousNameId)
                     {
@@ -98,6 +102,30 @@ namespace MarionUpload.ViewModels
 
             Messenger.Default.Send<AccountsFinishedMessage>(new AccountsFinishedMessage());
         }
+
+        private mAccountPrYr ConvertFromAccountToAccountPrYr(mAccount populatedAccount)
+        {
+            var acctPrYr = new mAccountPrYr();
+            acctPrYr.AcctID = populatedAccount.AcctID;
+            acctPrYr.AcctLegal = populatedAccount.AcctLegal;
+            acctPrYr.PctType = populatedAccount.PctType;
+            acctPrYr.PctProp = populatedAccount.PctProp;
+            acctPrYr.Protest_YN = populatedAccount.Protest_YN;
+            acctPrYr.PTDcode = populatedAccount.PTDcode;
+            acctPrYr.NameID = populatedAccount.NameID;
+            acctPrYr.PropID = populatedAccount.PropID;
+            acctPrYr.Cad = populatedAccount.Cad;
+            acctPrYr.Stat_YN = populatedAccount.Stat_YN;
+            acctPrYr.UpdateBy = populatedAccount.UpdateBy;
+            acctPrYr.UpdateDate = populatedAccount.UpdateDate;
+            acctPrYr.ValAcctCur = populatedAccount.ValAcctCur;
+            acctPrYr.ValAcctCrt = populatedAccount.ValAcctCrt;
+            acctPrYr.valacctPrYr = populatedAccount.valacctPrYr;
+            acctPrYr.AcctValPrYr = populatedAccount.AcctValPrYr;
+            acctPrYr.division = populatedAccount.division;
+
+            return acctPrYr;
+    }
 
         private mCadAccount TranslateFrom_mMarionAccountTo_mCadAccount(mMarionAccount marionAccount, long primaryAccountKey)
         {
@@ -140,7 +168,8 @@ namespace MarionUpload.ViewModels
             account.PropID = vmProperty.PropertyIdMap[_marionAccount.LeaseNumber];
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
 
-            account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
+            //account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
+            account.AcctLegal = _marionAccount.LeaseNumber.ToString();
             var interestInfo = " (" + account.PctProp + " - " + account.PctType + ")";
             if (account.PTDcode == "G") account.AcctLegal += interestInfo;
 
@@ -148,7 +177,7 @@ namespace MarionUpload.ViewModels
             account.AcctValPrYr = _marionAccount.Juris2MarketValue;
             account.valacctPrYr = _marionAccount.Juris2MarketValue;
 
-            string divString = account.PTDcode == "G" ? "M" : "U";
+            string divString = _marionAccount.SPTBCode.Trim() == "G1" ? "M" : "U";
             account.division = char.Parse(divString.Substring(0,1));
 
             return account;

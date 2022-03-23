@@ -3,10 +3,9 @@ using System;
 
 namespace MarionUpload.Models
 {
-    [Table("tblAccount")]
-    public class mAccount
-    {
-        [Key]
+    [Table("tlkpAccountPrYr")]
+    public class mAccountPrYr
+    {     
         public int AcctID { get; set; }
         public string AcctLegal { get; set; }
         public char PctType { get; set; }
