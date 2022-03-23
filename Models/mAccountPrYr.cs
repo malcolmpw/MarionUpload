@@ -1,10 +1,17 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
+using System.ComponentModel.DataAnnotations;
+using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
+//using Dapper.SimpleCRUD;
+//using Dapper.Contrib;
 
 namespace MarionUpload.Models
 {
+    [Table("tlkpAccountPrYr")]
     public class mAccountPrYr
-    {     
+    {
+        [Key]
+        [Required]
         public int AcctID { get; set; }
         public string AcctLegal { get; set; }
         public char PctType { get; set; }
@@ -21,6 +28,7 @@ namespace MarionUpload.Models
         public decimal ValAcctCrt { get; set; }
         public decimal valacctPrYr { get; set; }
         public decimal AcctValPrYr { get; set; }
+        public bool ValAcctLock { get; set; }
         public char division { get; set; }
     }
 }

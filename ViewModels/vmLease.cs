@@ -72,11 +72,11 @@ namespace MarionUpload.ViewModels
                         var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
                         var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
-                        populatedCadLease.LeaseId = primaryLeaseKey;
+                        populatedCadLease.LeaseId = (long)primaryLeaseKey;
                         db.Insert<mCadLease>(populatedCadLease);
 
                         var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionLease);
-                        populatedTract.LeaseId = primaryLeaseKey;
+                        populatedTract.LeaseId = (long)primaryLeaseKey;
                         populatedTract.PropId = vmProperty.PropertyIdMap[marionLease.LeaseNumber];
                         db.Insert<mTract>(populatedTract);
                     }

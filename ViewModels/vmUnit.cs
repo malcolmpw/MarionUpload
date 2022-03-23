@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
+using log4net;
+using MarionUpload.Comparers;
+using MarionUpload.Helpers;
+using MarionUpload.Messages;
+using MarionUpload.Models;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Windows.Input;
-using Dapper;
-using GalaSoft.MvvmLight.Command;
-using MarionUpload.Helpers;
-using MarionUpload.Models;
-using System.Collections.ObjectModel;
-using Dapper.Contrib.Extensions;
 using System.Windows;
-using MarionUpload.Messages;
-using GalaSoft.MvvmLight.Messaging;
-using GalaSoft.MvvmLight;
-using log4net;
-using MarionUpload.Comparers;
+using System.Windows.Input;
 
 
 //--To populate tblUnitProperty

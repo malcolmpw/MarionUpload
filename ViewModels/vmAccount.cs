@@ -81,12 +81,12 @@ namespace MarionUpload.ViewModels
                     var primaryKey = db.Insert<mAccount>(populatedAccount);
                     currentNameId = (int)populatedAccount.NameID;
 
-                    populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
-                    populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;
+                    //populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
+                    //populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;
                     //insertTlkpAccountPrYr(populatedAccountPrYr);
                     //db.Insert<mAccountPrYr>(populatedAccountPrYr);
 
-                    var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, primaryKey);
+                    var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
                     var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
 
                     if (currentNameId == previousNameId)
@@ -205,8 +205,9 @@ namespace MarionUpload.ViewModels
             account.ValAcctCur = _marionAccount.Juris2MarketValue;
             account.AcctValPrYr = _marionAccount.Juris2MarketValue;
             account.valacctPrYr = _marionAccount.Juris2MarketValue;
+            account.ValAcctLock = false;
 
-            string divString = _marionAccount.SPTBCode.Trim() == "G1" ? "M" : "U";
+        string divString = _marionAccount.SPTBCode.Trim() == "G1" ? "M" : "U";
             account.division = char.Parse(divString.Substring(0, 1));
 
             return account;
