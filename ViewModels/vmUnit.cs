@@ -52,11 +52,11 @@ namespace MarionUpload.ViewModels
         private bool _unitImportEnabled = true;
         private bool _unitUploadEnabled = false;
 
-        public ICommand CommandUploadUnitProperty => new RelayCommand(OnUploadUnitProperty);
         public ICommand CommandImportUnitProperty => new RelayCommand(OnImportUnitProperty);
+        public ICommand CommandUploadUnitProperty => new RelayCommand(OnUploadUnitProperty);
 
-        public bool UnitImportEnabled { get => _unitImportEnabled; set { _unitImportEnabled = value; RaisePropertyChanged(nameof(UnitImportEnabled)); } } 
-        public bool UnitUploadEnabled { get => _unitUploadEnabled; set {_unitUploadEnabled = value; RaisePropertyChanged(nameof(UnitUploadEnabled)); } }
+        public bool UnitImportEnabled { get => _unitImportEnabled; set { _unitImportEnabled = value; RaisePropertyChanged(nameof(UnitImportEnabled)); } }
+        public bool UnitUploadEnabled { get => _unitUploadEnabled; set { _unitUploadEnabled = value; RaisePropertyChanged(nameof(UnitUploadEnabled)); } }
 
 
 
@@ -66,17 +66,11 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
 
-                var results = db.Query<mMarionProperty>("Select distinct LeaseNumber, PropertyType,SPTBCode,Description1,Description2,LeaseName,RRC,OperatorName," +
-
-                "Jurisdiction1, Jurisdiction2, Jurisdiction3, " +
-
-                "Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
-
-                "Jurisdiction7, Jurisdiction8, Jurisdiction9, " +
-
-                "Jurisdiction10, Jurisdiction11, Jurisdiction12" +
-
-                " from AbMarionImport");
+                var results = db.Query<mMarionProperty>(
+                "Select distinct LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName, RRC, OperatorName," +
+                "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
+                "Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
+                "from AbMarionImport");
 
                 var distinctResults = results.Distinct(new PropertyComparer()).ToList();
 
@@ -92,6 +86,8 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadUnitProperty()
         {
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
 
@@ -116,7 +112,7 @@ namespace MarionUpload.ViewModels
                         if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
                         {
                             Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
-                         //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
+                            //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
                             continue;
                         }
                         var unitProperty = TranslateImportPropertyToUnitProperty(property, jurisdiction);
@@ -124,6 +120,8 @@ namespace MarionUpload.ViewModels
                     }
 
                 }
+
+                Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
                 MessageBox.Show($"Finished uploading {MarionProperties.Count()} unit properties");
                 Messenger.Default.Send<UnitsFinishedMessage>(new UnitsFinishedMessage());

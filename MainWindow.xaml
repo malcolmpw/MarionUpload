@@ -4,13 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:view="clr-namespace:MarionUpload.Views"
-        mc:Ignorable="d"
-        Title="MainWindow" >
-    <Grid>
+        mc:Ignorable="d" Title="MainWindow" 
+        Height="900">
+    <Grid >
         <StackPanel >
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Chose Task to Upload or Import Data" FontSize="20" Margin="10" Visibility="Hidden"/>
-                <Button HorizontalAlignment="Right" Width="200" Height="40" Margin="150,5" Command="{Binding CommandStartWizard}">Start Import Wizard
+                <Button HorizontalAlignment="Right" Width="200" Height="40" Command="{Binding CommandStartWizard}">Start Import Wizard
                 </Button>
             </StackPanel>
             <TabControl Name="tabImportAndUploadTasks" Margin="10" IsEnabled="{Binding IsStarted}" SelectedIndex="{Binding CurrentStep}">
@@ -24,7 +24,7 @@
                     <view:vwAccount/>
                 </TabItem>
                 <TabItem Header="Units"  IsEnabled="{Binding UnitsEnabled}">
-                    <view:vwUnit/>
+                    <view:vwUnit />
                 </TabItem>
                 <TabItem Header="Leases"  IsEnabled="{Binding LeasesEnabled}">
                     <view:vwLease/>

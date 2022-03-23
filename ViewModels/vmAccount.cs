@@ -30,11 +30,14 @@ namespace MarionUpload.ViewModels
 
         private void OnImportAccounts()
         {
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
             //CommandImportAccounts.CanExecute(false);
             SelectAccountDataFromImportTable();
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
             AccountImportEnabled = false;
             AccountUploadEnabled = true;
+           
         }
 
         private void SelectAccountDataFromImportTable()
@@ -62,6 +65,8 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadAccounts()
         {
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 int currentNameId = 0;
@@ -77,8 +82,8 @@ namespace MarionUpload.ViewModels
                     currentNameId = (int)populatedAccount.NameID;
 
                     populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
-                    populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;                                       
-                    insertTlkpAccountPrYr(populatedAccountPrYr);
+                    populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;
+                    //insertTlkpAccountPrYr(populatedAccountPrYr);
                     //db.Insert<mAccountPrYr>(populatedAccountPrYr);
 
                     var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, primaryKey);
@@ -99,6 +104,8 @@ namespace MarionUpload.ViewModels
                 }
             }
 
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+
             MessageBox.Show($"Finished uploading {MarionAccounts.Count()} accounts");
 
             Messenger.Default.Send<AccountsFinishedMessage>(new AccountsFinishedMessage());
@@ -118,7 +125,7 @@ namespace MarionUpload.ViewModels
                                       "@UpdateBy, @UpdateDate, @ValAcctCur, @ValAcctCrt, @valacctPrYr, @AcctValPrYr, @division)";
 
                     int rowsAffected = db.Execute(sqlQuery, marionAccount);
-                }               
+                }
             }
             catch
             {
@@ -191,7 +198,7 @@ namespace MarionUpload.ViewModels
             account.PropID = vmProperty.PropertyIdMap[_marionAccount.LeaseNumber];
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
 
-            account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];            
+            account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
             var interestInfo = " (" + _marionAccount.DecimalInterest.ToString() + " - " + _marionAccount.InterestType.ToString() + ")";
             if (_marionAccount.SPTBCode.Trim() == "G1") account.AcctLegal += interestInfo;
 

@@ -12,7 +12,7 @@
                 <Button Content="Upload AgentIDs" Command="{Binding CommandUploadAgentIDs}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
-            <DataGrid Name="dgAgents" Margin="10" Width="Auto" Height="800" HorizontalAlignment="Left"
+            <DataGrid Name="dgAgents" Margin="10" Width="Auto" Height="700" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionAgents}" AutoGenerateColumns="False"  >
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="NameID" Binding="{Binding Path=NameID, Mode=OneWay}" />

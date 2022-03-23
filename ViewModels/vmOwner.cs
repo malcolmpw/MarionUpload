@@ -112,6 +112,8 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadOwners()
         {
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+
             try
             {
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
@@ -139,6 +141,8 @@ namespace MarionUpload.ViewModels
                 MessageBox.Show($"Error Uploading Owner Data -> {ex}");
                 Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
             }
+
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
         }
        
         private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionOwner marionOwner, long primaryKey)

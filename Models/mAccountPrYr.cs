@@ -3,7 +3,6 @@ using System;
 
 namespace MarionUpload.Models
 {
-    [Table("tlkpAccountPrYr")]
     public class mAccountPrYr
     {     
         public int AcctID { get; set; }

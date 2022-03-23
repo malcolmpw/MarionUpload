@@ -13,7 +13,7 @@
                 <Button Content="Upload CadUnits" Command="{Binding CommandUploadCadUnits}"                                                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
-            <DataGrid Name="dgCadUnits" Margin="10" Width="600" Height="300" HorizontalAlignment="Left"
+            <DataGrid Name="dgCadUnits" Margin="10" Width="600" Height="700" HorizontalAlignment="Left"
                       ItemsSource="{Binding CadUnits}">
             </DataGrid>
         </StackPanel>

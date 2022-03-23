@@ -90,6 +90,8 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadProperties()
         {
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 foreach (mMarionProperty _marionProperty in MarionProperties)
@@ -111,6 +113,8 @@ namespace MarionUpload.ViewModels
                         var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
                     }
                 }
+
+                Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
                 MessageBox.Show($"Finished uploading {MarionProperties.Count()} properties");
                 Messenger.Default.Send<PropertiesFinishedMessage>(new PropertiesFinishedMessage());

@@ -60,6 +60,8 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadLeases()
         {
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+                                    
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 foreach (var marionLease in MarionLeases)
@@ -83,6 +85,8 @@ namespace MarionUpload.ViewModels
                         MessageBox.Show($"All queried results should have been G1 {marionLease.LeaseNumber} {marionLease.LeaseName}");
                     }
                 }
+
+                Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
                 LeaseUploadEnabled = false;
                 MessageBox.Show($"Finished uploading {MarionLeases.Count()} leases");
