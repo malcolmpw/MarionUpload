@@ -196,23 +196,9 @@ namespace MarionUpload.ViewModels
                     rrcNumber = (match.Groups[0].Value).Trim();
                 }
 
-                // MOST LEASE NAME IN MARION IMPORT HAVE A WELL NUMBER SO DO NOT PARSE DESCRIPTION1
-                var wellNumber = "";
-                //string description1 = importedMarionProperty.Description2.Trim();
-                //if (!description1.Contains("WELL") || !description1.Contains("RRC"))
-                //{
-                //    var startOfWellNumber = 4;
-                //    var endOfWellNumber = description1.IndexOf("RRC");
-                //    wellNumber = description1.Substring(startOfWellNumber + 1, endOfWellNumber - startOfWellNumber);
-                //}
-                //else
-                //{
-                //   wellNumber = "";
-                //}
-
                 property.Legal = importedMarionProperty.LeaseName.Trim() +
-                                    " (" + rrcNumber +
-                                    "); Opr: " + importedMarionProperty.OperatorName.Trim();
+                    " (" + rrcNumber +
+                    "); Opr: " + importedMarionProperty.OperatorName.Trim();
 
             }
             else
@@ -225,7 +211,7 @@ namespace MarionUpload.ViewModels
                 property.Location = (importedMarionProperty.Description2).Trim();
             }
 
-            property.SegmentValue = importedMarionProperty.Juris2MarketValue;
+            //property.SegmentValue = importedMarionProperty.Juris2MarketValue;
 
             property.ControlCad = "MAR";
 

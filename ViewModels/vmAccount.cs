@@ -75,13 +75,14 @@ namespace MarionUpload.ViewModels
                     var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                     var primaryKey = db.Insert<mAccount>(populatedAccount);
                     currentNameId = (int)populatedAccount.NameID;
-                    
+
                     populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
-                    populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;
-                    db.Insert<mAccountPrYr>(populatedAccountPrYr);
+                    populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;                                       
+                    insertTlkpAccountPrYr(populatedAccountPrYr);
+                    //db.Insert<mAccountPrYr>(populatedAccountPrYr);
 
                     var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, primaryKey);
-                    var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);                   
+                    var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
 
                     if (currentNameId == previousNameId)
                     {
@@ -101,6 +102,28 @@ namespace MarionUpload.ViewModels
             MessageBox.Show($"Finished uploading {MarionAccounts.Count()} accounts");
 
             Messenger.Default.Send<AccountsFinishedMessage>(new AccountsFinishedMessage());
+        }
+
+        private void insertTlkpAccountPrYr(mAccountPrYr marionAccount)
+        {
+            try
+            {
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+                {
+                    string sqlQuery = "Insert Into tlkpAccountPrYr " +
+                                      "(AcctID, AcctLegal, PctType, PctProp, Protest_YN, PTDcode, NameID, PropID, Cad, Stat_YN, " +
+                                      "UpdateBy, UpdateDate, ValAcctCur, ValAcctCrt, valacctPrYr, AcctValPrYr, division) " +
+                                      "Values" +
+                                      "(@AcctID, @AcctLegal, @PctType, @PctProp, @Protest_YN, @PTDcode, @NameID, @PropID, @Cad, @Stat_YN, " +
+                                      "@UpdateBy, @UpdateDate, @ValAcctCur, @ValAcctCrt, @valacctPrYr, @AcctValPrYr, @division)";
+
+                    int rowsAffected = db.Execute(sqlQuery, marionAccount);
+                }               
+            }
+            catch
+            {
+                MessageBox.Show($"Insert Failed on account: {marionAccount.AcctID}");
+            }
         }
 
         private mAccountPrYr ConvertFromAccountToAccountPrYr(mAccount populatedAccount)
@@ -125,7 +148,7 @@ namespace MarionUpload.ViewModels
             acctPrYr.division = populatedAccount.division;
 
             return acctPrYr;
-    }
+        }
 
         private mCadAccount TranslateFrom_mMarionAccountTo_mCadAccount(mMarionAccount marionAccount, long primaryAccountKey)
         {
@@ -168,17 +191,16 @@ namespace MarionUpload.ViewModels
             account.PropID = vmProperty.PropertyIdMap[_marionAccount.LeaseNumber];
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
 
-            //account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
-            account.AcctLegal = _marionAccount.LeaseNumber.ToString();
-            var interestInfo = " (" + account.PctProp + " - " + account.PctType + ")";
-            if (account.PTDcode == "G") account.AcctLegal += interestInfo;
+            account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];            
+            var interestInfo = " (" + _marionAccount.DecimalInterest.ToString() + " - " + _marionAccount.InterestType.ToString() + ")";
+            if (_marionAccount.SPTBCode.Trim() == "G1") account.AcctLegal += interestInfo;
 
             account.ValAcctCur = _marionAccount.Juris2MarketValue;
             account.AcctValPrYr = _marionAccount.Juris2MarketValue;
             account.valacctPrYr = _marionAccount.Juris2MarketValue;
 
             string divString = _marionAccount.SPTBCode.Trim() == "G1" ? "M" : "U";
-            account.division = char.Parse(divString.Substring(0,1));
+            account.division = char.Parse(divString.Substring(0, 1));
 
             return account;
         }
