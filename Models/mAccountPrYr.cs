@@ -10,8 +10,6 @@ namespace MarionUpload.Models
     [Table("tlkpAccountPrYr")]
     public class mAccountPrYr
     {
-        [ExplicitKey]
-        public int AcctID { get; set; }
         public string AcctLegal { get; set; }
         public char PctType { get; set; }
         public float PctProp { get; set; }
@@ -29,5 +27,13 @@ namespace MarionUpload.Models
         public decimal AcctValPrYr { get; set; }
         public bool ValAcctLock { get; set; }
         public char division { get; set; }
+        public bool ProtestResolved_YN { get; set; }
+        public bool Supp_YN { get; set; }
+        public bool BatchProtest_YN { get; set; }
+        public bool BatchWithdraw_YN { get; set; }
+        public bool Prc { get; set; }
+        public bool delflag { get; set; }
+        public bool corr_yn { get; set; }
     }
 }
+

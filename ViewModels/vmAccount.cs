@@ -65,61 +65,80 @@ namespace MarionUpload.ViewModels
 
         private void OnUploadAccounts()
         {
-            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
-
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+            try
             {
-                int currentNameId = 0;
-                int previousNameId = 0;
-                int currentPropId = 0;
-                int previousPropId = 0;
-                mAccount previousPopulatedAccount = new mAccount();
-                mAccountPrYr populatedAccountPrYr = new mAccountPrYr();
-                decimal sumOfOwnerCadValues = 0;
-                float sumOfAccountPctPropForThisProperty = 0;
+                Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
 
-                foreach (var _marionAccount in MarionAccounts)
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
                 {
-                    var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
-                    var primaryKey = db.Insert<mAccount>(populatedAccount);
-                    currentNameId = (int)populatedAccount.NameID;
+                    int currentNameId = 0;
+                    int previousNameId = 0;
+                    int currentPropId = 0;
+                    int previousPropId = 0;
+                    mAccount previousPopulatedAccount = new mAccount();
+                    mAccountPrYr populatedAccountPrYr = new mAccountPrYr();
+                    decimal sumOfOwnerCadValues = 0;
+                    float sumOfAccountPctPropForThisProperty = 0;
 
-
-                    populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
-                    db.Insert<mAccountPrYr>(populatedAccountPrYr);
-
-                    var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
-                    var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
-
-                    if (currentNameId == previousNameId)
+                    foreach (var _marionAccount in MarionAccounts)
                     {
-                        sumOfOwnerCadValues += populatedAccount.ValAcctCur;
-                    }
-                    else
-                    {
-                        var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(previousPopulatedAccount, sumOfOwnerCadValues);
-                        var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
-                    }
+                        var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
+                        var primaryKey = db.Insert<mAccount>(populatedAccount);
+                        currentNameId = (int)populatedAccount.NameID;
 
-                    if (currentPropId==previousPropId)
-                    {
-                        sumOfAccountPctPropForThisProperty += populatedAccount.PctProp;
-                    }
-                    else
-                    {
-                        //calculate the AccoountPctProp for each account (the sum of the PctProp for each Account in this Property - should be 1.0)
-                    }
 
-                    previousNameId = currentNameId;
-                    previousPopulatedAccount = populatedAccount;
+                        populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
+                        db.Insert<mAccountPrYr>(populatedAccountPrYr);
+
+                        var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
+                        var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
+
+                        if (currentNameId == previousNameId)
+                        {
+                            sumOfOwnerCadValues += populatedAccount.ValAcctCur;
+                        }
+                        else
+                        {
+                            var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(previousPopulatedAccount, sumOfOwnerCadValues);
+
+                            try
+                            {
+                                var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new Exception($"Error in inserting into Admin Appraisal table {ex.Message}");
+                            }
+                        }
+
+                        if (currentPropId == previousPropId)
+                        {
+                            sumOfAccountPctPropForThisProperty += populatedAccount.PctProp;
+                        }
+                        else
+                        {
+                            //calculate the AccoountPctProp for each account (the sum of the PctProp for each Account in this Property - should be 1.0)
+                        }
+
+                        previousNameId = currentNameId;
+                        previousPopulatedAccount = populatedAccount;
+                    }
                 }
+
+                Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+
+                MessageBox.Show($"Finished uploading {MarionAccounts.Count()} accounts");
+
+                Messenger.Default.Send<AccountsFinishedMessage>(new AccountsFinishedMessage());
             }
-
-            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
-
-            MessageBox.Show($"Finished uploading {MarionAccounts.Count()} accounts");
-
-            Messenger.Default.Send<AccountsFinishedMessage>(new AccountsFinishedMessage());
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+            }
         }
 
         private void insertTlkpAccountPrYr(mAccountPrYr marionAccount)
@@ -140,14 +159,13 @@ namespace MarionUpload.ViewModels
             }
             catch
             {
-                MessageBox.Show($"Insert Failed on account: {marionAccount.AcctID}");
+                MessageBox.Show($"Insert Failed on account with NameID: {marionAccount.NameID}");
             }
         }
 
         private mAccountPrYr ConvertFromAccountToAccountPrYr(mAccount populatedAccount)
         {
             var acctPrYr = new mAccountPrYr();
-            acctPrYr.AcctID = populatedAccount.AcctID;
             acctPrYr.AcctLegal = populatedAccount.AcctLegal;
             acctPrYr.PctType = populatedAccount.PctType;
             acctPrYr.PctProp = populatedAccount.PctProp;
