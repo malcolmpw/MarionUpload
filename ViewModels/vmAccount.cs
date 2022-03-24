@@ -37,7 +37,7 @@ namespace MarionUpload.ViewModels
 
             AccountImportEnabled = false;
             AccountUploadEnabled = true;
-           
+
         }
 
         private void SelectAccountDataFromImportTable()
@@ -71,9 +71,12 @@ namespace MarionUpload.ViewModels
             {
                 int currentNameId = 0;
                 int previousNameId = 0;
+                int currentPropId = 0;
+                int previousPropId = 0;
                 mAccount previousPopulatedAccount = new mAccount();
                 mAccountPrYr populatedAccountPrYr = new mAccountPrYr();
                 decimal sumOfOwnerCadValues = 0;
+                float sumOfAccountPctPropForThisProperty = 0;
 
                 foreach (var _marionAccount in MarionAccounts)
                 {
@@ -81,10 +84,9 @@ namespace MarionUpload.ViewModels
                     var primaryKey = db.Insert<mAccount>(populatedAccount);
                     currentNameId = (int)populatedAccount.NameID;
 
-                    //populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
-                    //populatedAccountPrYr.ValAcctCrt = populatedAccount.ValAcctCur;
-                    //insertTlkpAccountPrYr(populatedAccountPrYr);
-                    //db.Insert<mAccountPrYr>(populatedAccountPrYr);
+
+                    populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
+                    db.Insert<mAccountPrYr>(populatedAccountPrYr);
 
                     var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
                     var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
@@ -97,6 +99,15 @@ namespace MarionUpload.ViewModels
                     {
                         var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(previousPopulatedAccount, sumOfOwnerCadValues);
                         var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                    }
+
+                    if (currentPropId==previousPropId)
+                    {
+                        sumOfAccountPctPropForThisProperty += populatedAccount.PctProp;
+                    }
+                    else
+                    {
+                        //calculate the AccoountPctProp for each account (the sum of the PctProp for each Account in this Property - should be 1.0)
                     }
 
                     previousNameId = currentNameId;
@@ -203,11 +214,11 @@ namespace MarionUpload.ViewModels
             if (_marionAccount.SPTBCode.Trim() == "G1") account.AcctLegal += interestInfo;
 
             account.ValAcctCur = _marionAccount.Juris2MarketValue;
-            account.AcctValPrYr = _marionAccount.Juris2MarketValue;
-            account.valacctPrYr = _marionAccount.Juris2MarketValue;
-            account.ValAcctLock = false;
+            account.ValAcctCrt = _marionAccount.Juris2MarketValue;
+            //account.AcctValPrYr = _marionAccount.Juris2MarketValue;
+            //account.valacctPrYr = _marionAccount.Juris2MarketValue;
 
-        string divString = _marionAccount.SPTBCode.Trim() == "G1" ? "M" : "U";
+            string divString = _marionAccount.SPTBCode.Trim() == "G1" ? "M" : "U";
             account.division = char.Parse(divString.Substring(0, 1));
 
             return account;

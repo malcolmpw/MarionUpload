@@ -10,8 +10,7 @@ namespace MarionUpload.Models
     [Table("tlkpAccountPrYr")]
     public class mAccountPrYr
     {
-        [Key]
-        [Required]
+        [ExplicitKey]
         public int AcctID { get; set; }
         public string AcctLegal { get; set; }
         public char PctType { get; set; }

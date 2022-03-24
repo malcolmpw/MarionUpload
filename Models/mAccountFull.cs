@@ -3,7 +3,7 @@ using System;
 
 namespace MarionUpload.Models
 {
-    [Table("tblAccount")]
+    [Table("tblAccountFull")]
     public class mAccountFull
     {
         [Key]
