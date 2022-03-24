@@ -88,7 +88,12 @@ namespace MarionUpload.ViewModels
 
 
                         populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
-                        db.Insert<mAccountPrYr>(populatedAccountPrYr);
+                        var priorPrimaryKey = db.Insert<mAccountPrYr>(populatedAccountPrYr);
+
+                        if (priorPrimaryKey != primaryKey)
+                        {
+                            throw new Exception($"tblAccount and tlkpAccountPrYr are out of sync. PK tblAccount = {primaryKey} and PK tlkpAccountPrYr = {priorPrimaryKey}");                            
+                        }
 
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
                         var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
