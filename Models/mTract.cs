@@ -12,6 +12,7 @@ namespace MarionUpload.Models
         public string TractId { get;  set; }
         public long LeaseId { get; set; }
         public string CadId { get; set; }
+        public double LeasePct { get; set; }
         public DateTime UpdateDate { get; set; }
         public string   UpdateBy { get; set; }
         public bool Stat_YN { get; set; }

@@ -92,7 +92,7 @@ namespace MarionUpload.ViewModels
 
                         if (priorPrimaryKey != primaryKey)
                         {
-                            throw new Exception($"tblAccount and tlkpAccountPrYr are out of sync. PK tblAccount = {primaryKey} and PK tlkpAccountPrYr = {priorPrimaryKey}");                            
+                            throw new Exception($"tblAccount and tlkpAccountPrYr are out of sync. PK tblAccount = {primaryKey} and PK tlkpAccountPrYr = {priorPrimaryKey}");
                         }
 
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
@@ -223,7 +223,7 @@ namespace MarionUpload.ViewModels
             account.UpdateDate = DateTime.Now;
             account.Cad = "MAR";
 
-            account.PctProp = _marionAccount.DecimalInterest;
+            account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" ? _marionAccount.DecimalInterest  * 10.0 : 1.0);
             account.PctType = ConvertInterestType(_marionAccount);
 
             account.Protest_YN = _marionAccount.Protest == "P";

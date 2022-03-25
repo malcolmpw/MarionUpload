@@ -15,6 +15,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using MarionUpload.Comparers;
+using System.Collections.Generic;
 
 namespace MarionUpload.ViewModels
 {
@@ -29,29 +30,29 @@ namespace MarionUpload.ViewModels
         public ICommand CommandImportLeases => new RelayCommand(OnImportLeases);
         public ICommand CommandUploadLeases => new RelayCommand(OnUploadLeases);
 
-        public ObservableCollection<mMarionLease> MarionLeases { get; set; }
+        public ObservableCollection<mMarionLease> MarionMineralAccounts { get; set; }
 
         public vmLease()
         {
-            MarionLeases = new ObservableCollection<mMarionLease>();
+            MarionMineralAccounts = new ObservableCollection<mMarionLease>();
         }
 
         private void OnImportLeases()
         {
-            SelectLeaseDataFromMarionImportTable();
+            SelectMineralDataFromMarionImportTable();
         }
 
-        private void SelectLeaseDataFromMarionImportTable()
+        private void SelectMineralDataFromMarionImportTable()
         {
-            MarionLeases.Clear();
+            MarionMineralAccounts.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                var results = db.Query<mMarionLease>("Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode " +
-                                                     "from AbMarionImport where SPTBCode = 'G1' order by LeaseName");
+                var results = db.Query<mMarionLease>("Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode, Acres " +
+                                                     "from AbMarionImport where Trim(SPTBCode) = 'G1' order by LeaseName");
 
                 var distinctResults = results.Distinct(new LeaseComparer()).ToList();
 
-                distinctResults.ForEach(marionLease => MarionLeases.Add(marionLease));
+                distinctResults.ForEach(marionLease => MarionMineralAccounts.Add(marionLease));
             }
 
             LeaseImportEnabled = false;
@@ -61,39 +62,49 @@ namespace MarionUpload.ViewModels
         private void OnUploadLeases()
         {
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
-                                    
+
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                foreach (var marionLease in MarionLeases)
+                var marionLeases = MarionMineralAccounts.GroupBy(m => m.RRC).Select(g => g.FirstOrDefault()).ToList();
+                foreach (var marionLease in marionLeases)
                 {
-                    if (marionLease.SPTBCode.Trim() == "G1")
-                    {
-                        var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease);
-                        var primaryLeaseKey = db.Insert<mLease>(populatedLease);
+                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease);
+                    var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
-                        var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
-                        populatedCadLease.LeaseId = (long)primaryLeaseKey;
-                        db.Insert<mCadLease>(populatedCadLease);
+                    var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
+                    populatedCadLease.LeaseId = (long)primaryLeaseKey;
+                    db.Insert<mCadLease>(populatedCadLease);
 
-                        var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionLease);
-                        populatedTract.LeaseId = (long)primaryLeaseKey;
-                        populatedTract.PropId = vmProperty.PropertyIdMap[marionLease.LeaseNumber];
-                        db.Insert<mTract>(populatedTract);
-                    }
-                    else
-                    {
-                        MessageBox.Show($"All queried results should have been G1 {marionLease.LeaseNumber} {marionLease.LeaseName}");
-                    }
+                    InsertTracts(db, marionLease, populatedLease, primaryLeaseKey);
                 }
+
 
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
                 LeaseUploadEnabled = false;
-                MessageBox.Show($"Finished uploading {MarionLeases.Count()} leases");
+                MessageBox.Show($"Finished uploading {MarionMineralAccounts.Count()} leases");
 
                 Messenger.Default.Send<LeaseFinishedMessage>(new LeaseFinishedMessage());
             }
 
+        }
+
+        private void InsertTracts(IDbConnection db, mMarionLease thisMarionLease, mLease thisLease, long thisLeaseId)
+        {
+            var marionTracts = MarionMineralAccounts.GroupBy(m => m.LeaseNumber).Select(g => g.FirstOrDefault()).ToList();
+            int tractId = 0;
+            foreach (var marionTract in marionTracts)
+            {
+                tractId++;
+                var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionTract,tractId);
+                populatedTract.LeaseId = (long)thisLeaseId;
+                populatedTract.PropId = vmProperty.PropertyIdMap[thisMarionLease.LeaseNumber];
+
+                var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == thisMarionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
+                var leaseAcres = (from m in MarionMineralAccounts where m.RRC == thisMarionLease.RRC select m.Acres).Sum();//sum of tract acres in lease
+                populatedTract.LeasePct = leaseAcres != 0 ? tractAcres / leaseAcres : 0.0;
+                db.Insert<mTract>(populatedTract);
+            }
         }
 
         private mCadLease TranslateFrom_mMarionLeaseTo_mCadLease(mMarionLease marionLease)
@@ -101,14 +112,14 @@ namespace MarionUpload.ViewModels
             var cadLease = new mCadLease();
             cadLease.CadId = "MAR";
             cadLease.CadLeaseId = marionLease.LeaseNumber;
-           
+
             return cadLease;
         }
 
-        private mTract TranslateFrom_mMarionLeaseTo_mTract(mMarionLease marionLease)
+        private mTract TranslateFrom_mMarionLeaseTo_mTract(mMarionLease marionLease,int tractId)
         {
             var tract = new mTract();
-            tract.TractId = "00";
+            tract.TractId = tractId.ToString().Trim().Substring(0,2);
             tract.CadId = "MAR";
             tract.delflag = false;
 
@@ -128,12 +139,12 @@ namespace MarionUpload.ViewModels
         {
             var lease = new mLease();
             lease.LeaseNameWag = marionLease.LeaseName;
-                                 
+
             lease.Stat_YN = true;
             lease.StatBy = UpdateByDefault;
             lease.StatDate = DateTime.Now;
             lease.StatReason = "Import";
-                        
+
             lease.UpdateBy = UpdateByDefault;
             lease.UpdateDate = DateTime.Now;
 
@@ -141,11 +152,11 @@ namespace MarionUpload.ViewModels
 
         }
 
-       
+
 
         public bool LeaseImportEnabled { get => _leaseImportEnabled; set { _leaseImportEnabled = value; RaisePropertyChanged(nameof(LeaseImportEnabled)); } }
         public bool LeaseUploadEnabled { get => _leaseUploadEnabled; set { _leaseUploadEnabled = value; RaisePropertyChanged(nameof(LeaseUploadEnabled)); } }
 
-  }
+    }
 
 }

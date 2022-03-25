@@ -9,5 +9,6 @@
         public string LeaseName { get; set; }
         public string OperatorName { get; set; }
         public string SPTBCode { get; set; }
+        public float Acres { get; set; }
     }
 }
