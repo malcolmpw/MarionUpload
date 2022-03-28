@@ -92,13 +92,28 @@ namespace MarionUpload.ViewModels
 
         private void InsertTracts(IDbConnection db, mMarionLease thisMarionLease, mLease thisLease, long thisLeaseId)
         {
-            var marionTracts = MarionMineralAccounts.GroupBy(m => m.LeaseNumber).Select(g => g.FirstOrDefault()).ToList();
-            int tractId = 0;
-            foreach (var marionTract in marionTracts)
-            {                
-                tractId++;
-                var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionTract,tractId);
-                populatedTract.LeaseId = (long)thisLeaseId;
+            //   var marionTracts = MarionMineralAccounts.Where(l => l.SPTBCode.Trim() == "G1").Select(m => new { m.RRC, m.LeaseNumber }).Distinct().ToList();
+            var marionMineralRows = MarionMineralAccounts.Where(a => a.SPTBCode.Trim() == "G1").GroupBy(m => new { m.RRC, m.LeaseNumber })
+                .Select(group => group.FirstOrDefault())
+                .ToList();
+
+            var tractId = 0;
+            var currentRRC = "";
+            foreach (var marionMineralRow in marionMineralRows)
+            {
+                if (marionMineralRow.RRC != currentRRC)
+                {
+                    currentRRC = marionMineralRow.RRC;
+                    tractId = 1;
+                }
+                else
+                {
+                    tractId++;
+                    if (tractId > 2) MessageBox.Show($"The current multi-tract lease(RRC) = {marionMineralRow.RRC} and tractid = {marionMineralRow.LeaseNumber} / {tractId}. ");
+                }
+
+                var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionMineralRow, tractId);
+                populatedTract.LeaseId = (long)thisLease.LeaseID;
                 populatedTract.PropId = vmProperty.PropertyIdMap[thisMarionLease.LeaseNumber];
 
                 var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == thisMarionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
@@ -117,7 +132,7 @@ namespace MarionUpload.ViewModels
             return cadLease;
         }
 
-        private mTract TranslateFrom_mMarionLeaseTo_mTract(mMarionLease marionLease,int tractId)
+        private mTract TranslateFrom_mMarionLeaseTo_mTract(mMarionLease marionLease, int tractId)
         {
             var tract = new mTract();
 
