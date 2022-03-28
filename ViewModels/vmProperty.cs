@@ -69,11 +69,12 @@ namespace MarionUpload.ViewModels
                     "Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
                     "Juris2MarketValue " +
                     "from AbMarionImport");
+                //MessageBox.Show($"sptb code = --{results.FirstOrDefault().SPTBCode}--");
 
                 JurisdictionMap = db.Query<mJurisdiction>("Select Code,Name from abMariontlkpJurisdiction")
                     .ToDictionary(jurisdiction => jurisdiction.Code, val => val.Name);
                 PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub").ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
-
+                
                 var resultList = results.Distinct(new PropertyComparer()).ToList();
 
                 resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));
@@ -105,8 +106,8 @@ namespace MarionUpload.ViewModels
                     var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
                     CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
 
-                    //Add a first segment to each property where SPTBCode <> 'G1'
-                    if (_marionProperty.SPTBCode != "G1")
+                    //Add a first segment to each property where SPTBCode <> 'G1' and SPTBCode <> 'XV'
+                    if (_marionProperty.SPTBCode != "G1" && _marionProperty.SPTBCode != "XV")
                     {
                         var populatedSegment = TranslateFrom_mPropertyTo_mSegment(populatedProperty, _marionProperty);
                         var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
@@ -189,7 +190,7 @@ namespace MarionUpload.ViewModels
                 property.PtdClass = property.PtdClassSub.Substring(0, 1);
             }
 
-            if (importedMarionProperty.SPTBCode.Trim().Substring(0, 2) == "G1")
+            if (importedMarionProperty.SPTBCode.Trim().Substring(0, 2) == "G1" || importedMarionProperty.SPTBCode.Trim().Substring(0, 2) == "XV")
             {
                 property.PropType = "M";
 

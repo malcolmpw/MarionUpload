@@ -90,10 +90,10 @@ namespace MarionUpload.ViewModels
                         populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
                         var priorPrimaryKey = db.Insert<mAccountPrYr>(populatedAccountPrYr);
 
-                        if (priorPrimaryKey != primaryKey)
-                        {
-                            throw new Exception($"tblAccount and tlkpAccountPrYr are out of sync. PK tblAccount = {primaryKey} and PK tlkpAccountPrYr = {priorPrimaryKey}");
-                        }
+                        //if (priorPrimaryKey != primaryKey)
+                        //{
+                        //    throw new Exception($"tblAccount and tlkpAccountPrYr are out of sync. PK tblAccount = {primaryKey} and PK tlkpAccountPrYr = {priorPrimaryKey}");
+                        //}
 
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
                         var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
@@ -223,7 +223,7 @@ namespace MarionUpload.ViewModels
             account.UpdateDate = DateTime.Now;
             account.Cad = "MAR";
 
-            account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" ? _marionAccount.DecimalInterest  * 10.0 : 1.0);
+            account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ? _marionAccount.DecimalInterest  * 10.0 : 1.0);
             account.PctType = ConvertInterestType(_marionAccount);
 
             account.Protest_YN = _marionAccount.Protest == "P";
@@ -234,14 +234,14 @@ namespace MarionUpload.ViewModels
 
             account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
             var interestInfo = " (" + _marionAccount.DecimalInterest.ToString() + " - " + _marionAccount.InterestType.ToString() + ")";
-            if (_marionAccount.SPTBCode.Trim() == "G1") account.AcctLegal += interestInfo;
+            if (_marionAccount.SPTBCode.Trim() == "G1"|| _marionAccount.SPTBCode.Trim() == "XV") account.AcctLegal += interestInfo;
 
             account.ValAcctCur = _marionAccount.Juris2MarketValue;
-            account.ValAcctCrt = _marionAccount.Juris2MarketValue;
+            //account.ValAcctCrt = _marionAccount.Juris2MarketValue;
             //account.AcctValPrYr = _marionAccount.Juris2MarketValue;
             //account.valacctPrYr = _marionAccount.Juris2MarketValue;
 
-            string divString = _marionAccount.SPTBCode.Trim() == "G1" ? "M" : "U";
+            string divString = _marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ? "M" : "U";
             account.division = char.Parse(divString.Substring(0, 1));
 
             return account;

@@ -9,6 +9,6 @@ namespace MarionUpload.Models
         public string CadId { get; set; }
         [ExplicitKey]
         public long LeaseId { get; set; }
-        public int CadLeaseId { get; internal set; }
+        public string CadLeaseId { get; internal set; }
     }
 }

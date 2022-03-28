@@ -48,9 +48,10 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionLease>("Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode, Acres " +
-                                                     "from AbMarionImport where Trim(SPTBCode) = 'G1' order by LeaseName");
+                                                     "from AbMarionImport where SPTBCode = 'G1 ' or SPTBCode = 'XV ' order by LeaseName");
 
                 var distinctResults = results.Distinct(new LeaseComparer()).ToList();
+                //distinctResults = distinctResults.Where(x => x.SPTBCode == "G1" || x.SPTBCode == "XV").ToList();
 
                 distinctResults.ForEach(marionLease => MarionMineralAccounts.Add(marionLease));
             }
@@ -94,7 +95,7 @@ namespace MarionUpload.ViewModels
             var marionTracts = MarionMineralAccounts.GroupBy(m => m.LeaseNumber).Select(g => g.FirstOrDefault()).ToList();
             int tractId = 0;
             foreach (var marionTract in marionTracts)
-            {
+            {                
                 tractId++;
                 var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionTract,tractId);
                 populatedTract.LeaseId = (long)thisLeaseId;
@@ -111,7 +112,7 @@ namespace MarionUpload.ViewModels
         {
             var cadLease = new mCadLease();
             cadLease.CadId = "MAR";
-            cadLease.CadLeaseId = marionLease.LeaseNumber;
+            cadLease.CadLeaseId = marionLease.RRC.Trim().Substring(4);
 
             return cadLease;
         }
@@ -119,7 +120,8 @@ namespace MarionUpload.ViewModels
         private mTract TranslateFrom_mMarionLeaseTo_mTract(mMarionLease marionLease,int tractId)
         {
             var tract = new mTract();
-            tract.TractId = tractId.ToString().Trim().Substring(0,2);
+
+            tract.TractId = tractId.ToString().Trim().PadLeft(3, '0');
             tract.CadId = "MAR";
             tract.delflag = false;
 
