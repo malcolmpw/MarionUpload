@@ -36,7 +36,7 @@ namespace MarionUpload.ViewModels
 
         public ObservableCollection<mMarionOwner> MarionOwners { get; set; }
         public ObservableCollection<mOwner> MarionOwners2017 { get; set; }
-        public ObservableCollection<mOwner> InsertedOwners { get; set; }
+        public ObservableCollection<mOwner> InsertedOwners { get; set; }        
         public Dictionary<string, mOwner> CadOwner2017NameSortMap { get; set; }
         public NameSorts NameSorts { get; set; }
 

@@ -89,6 +89,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Comparers\LeaseComparer.cs" />
+    <Compile Include="Comparers\OperatorComparer.cs" />
     <Compile Include="Helpers\ConnectionStringHelper.cs" />
     <Compile Include="Messages\AccountsFinishedMessage.cs" />
     <Compile Include="Messages\OwnerFinishedMessage.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="Models\mMarionAgent.cs" />
     <Compile Include="Models\mMarionImport.cs" />
     <Compile Include="Models\mMarionLease.cs" />
+    <Compile Include="Models\mMarionOperator.cs" />
     <Compile Include="Models\mMarionOwner.cs" />
     <Compile Include="Models\mMarionProperty.cs" />
     <Compile Include="Models\mOwner2015.cs" />

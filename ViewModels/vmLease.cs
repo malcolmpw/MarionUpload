@@ -26,20 +26,43 @@ namespace MarionUpload.ViewModels
             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private bool _leaseImportEnabled = true;
         private bool _leaseUploadEnabled = false;
+       
+        public ObservableCollection<mMarionLease> MarionMineralAccounts { get; set; }
+        public ObservableCollection<mMarionOperator> MarionOperators { get; set; }
 
         public ICommand CommandImportLeases => new RelayCommand(OnImportLeases);
         public ICommand CommandUploadLeases => new RelayCommand(OnUploadLeases);
 
-        public ObservableCollection<mMarionLease> MarionMineralAccounts { get; set; }
+
 
         public vmLease()
         {
             MarionMineralAccounts = new ObservableCollection<mMarionLease>();
+            MarionOperators = new ObservableCollection<mMarionOperator>();
         }
 
         private void OnImportLeases()
         {
+            SelectOperatorDataFromMarionImportTableAndWagOwners();
             SelectMineralDataFromMarionImportTable();
+        }
+
+        private static void SelectOperatorDataFromMarionImportTableAndWagOwners()
+        {
+            //vmLease.MarionOperators.Clear();
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+            {
+                var results = db.Query<mMarionOperator>("SELECT distinct a.[OperatorName], substring(n.NameC, 1, 12), " +
+                                                        "n.NameC, n.NameID, n.Oper_YN, SelectedWagNameID, Stat_YN" +
+                                                        "FROM[wagapp2_2021_Marion].[dbo].[AbMarionImport] a" +
+                                                        "Left join tblName n on substring(a.OperatorName, 1, 12) +" +
+                                                        "like substring(n.NameC, 1, 12)" +
+                                                        "where substring(a.SPTBCode, 1, 2) = 'G1' " +
+                                                        "order by a.OperatorName");
+                //var results = results.Distinct(new OperatorComparer()).ToList();
+                //distinctResults.ForEach(marionOperator => MarionOperators.Add(marionOperator));
+                //results.ForEach(marionOperator => MarionOperators.Add(marionOperator));
+            }
         }
 
         private void SelectMineralDataFromMarionImportTable()
@@ -181,6 +204,7 @@ namespace MarionUpload.ViewModels
         {
             var lease = new mLease();
             lease.LeaseNameWag = marionLease.LeaseName;
+            lease.LeaseOprID = 0;// marionLease.OperatorName;
 
             lease.Stat_YN = true;
             lease.StatBy = UpdateByDefault;
