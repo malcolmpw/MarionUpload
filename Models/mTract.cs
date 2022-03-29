@@ -7,11 +7,11 @@ namespace MarionUpload.Models
     public class mTract
     {        
         [ExplicitKey]
-        public long PropId { get;  set; }
+        public long PropID { get;  set; }
         [ExplicitKey]
-        public string TractId { get;  set; }
-        public long LeaseId { get; set; }
-        public string CadId { get; set; }
+        public string TractID { get;  set; }
+        public long LeaseID { get; set; }
+        public string CadID { get; set; }
         public double LeasePct { get; set; }
         public DateTime UpdateDate { get; set; }
         public string   UpdateBy { get; set; }

@@ -76,7 +76,32 @@ namespace MarionUpload.ViewModels
                     populatedCadLease.LeaseId = (long)primaryLeaseKey;
                     db.Insert<mCadLease>(populatedCadLease);
 
-                    InsertTracts(db, marionLease, populatedLease, primaryLeaseKey);
+                    //InsertTracts(db, marionLease, populatedLease, primaryLeaseKey);
+                    var marionTracts = MarionMineralAccounts.Where(a => a.RRC == populatedCadLease.CadLeaseId).ToList();
+                    var tractId = 0; var currentLeaseNumber = 0;
+                    foreach (var marionTract in marionTracts)
+                    {
+                        if (currentLeaseNumber != marionTract.LeaseNumber)
+                        {
+                            currentLeaseNumber = marionTract.LeaseNumber;
+                            tractId = 1;
+                        }
+                        else
+                        {
+                            tractId++;
+                            if (tractId > 2) MessageBox.Show($"The current multi-tract lease(RRC) = {marionTract.RRC} and tractid = {marionTract.LeaseNumber} / {tractId}. ");
+
+                        }
+
+                        var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionTract, tractId);
+                        populatedTract.LeaseID = (long)primaryLeaseKey;
+                        populatedTract.PropID = vmProperty.PropertyIdMap[marionTract.LeaseNumber];
+
+                        var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == marionTract.LeaseNumber).FirstOrDefault().Acres; //tract acres
+                        var leaseAcres = (from m in MarionMineralAccounts where m.RRC == marionTract.RRC select m.Acres).Sum();//sum of tract acres in lease
+                        populatedTract.LeasePct = leaseAcres != 0 ? tractAcres / leaseAcres : 0.0;
+                        db.Insert<mTract>(populatedTract);
+                    }
                 }
 
 
@@ -113,8 +138,8 @@ namespace MarionUpload.ViewModels
                 }
 
                 var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionMineralRow, tractId);
-                populatedTract.LeaseId = (long)thisLease.LeaseID;
-                populatedTract.PropId = vmProperty.PropertyIdMap[thisMarionLease.LeaseNumber];
+                populatedTract.LeaseID = (long)thisLeaseId;
+                populatedTract.PropID = vmProperty.PropertyIdMap[thisMarionLease.LeaseNumber];
 
                 var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == thisMarionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
                 var leaseAcres = (from m in MarionMineralAccounts where m.RRC == thisMarionLease.RRC select m.Acres).Sum();//sum of tract acres in lease
@@ -136,8 +161,8 @@ namespace MarionUpload.ViewModels
         {
             var tract = new mTract();
 
-            tract.TractId = tractId.ToString().Trim().PadLeft(3, '0');
-            tract.CadId = "MAR";
+            tract.TractID = tractId.ToString().Trim().PadLeft(3, '0');
+            tract.CadID = "MAR";
             tract.delflag = false;
 
             tract.StatDate = DateTime.Now;
