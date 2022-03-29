@@ -77,7 +77,7 @@ namespace MarionUpload.ViewModels
                     db.Insert<mCadLease>(populatedCadLease);
 
                     //InsertTracts(db, marionLease, populatedLease, primaryLeaseKey);
-                    var marionTracts = MarionMineralAccounts.Where(a => a.RRC == populatedCadLease.CadLeaseId).ToList();
+                    var marionTracts = MarionMineralAccounts.Where(a => a.RRC == marionLease.RRC).ToList();
                     var tractId = 0; var currentLeaseNumber = 0;
                     foreach (var marionTract in marionTracts)
                     {
