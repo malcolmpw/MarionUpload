@@ -2,11 +2,11 @@
 {
     public class mMarionOperator
     {
-        public string MarionOperatorName { get; set; }
-        public string WagNameC { get; set; }
-        public int WagNameID { get; set; }
-        public bool WagOper_YN { get; set; }
-        public int SelectedWagNameID { get; set; }
-        public bool Stat_YN { get; set; }
+        public string OperatorName { get; set; }
+        public string OperatorNameSub { get; set; }
+        public string CompanyName { get; set; }
+        public int CompanyID { get; set; }
+        public bool OperatorFlag { get; set; }
+        public bool Active { get; set; }
     }
 }

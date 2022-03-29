@@ -7,12 +7,12 @@ namespace MarionUpload.Comparers
     {
         public bool Equals(mMarionOperator x, mMarionOperator y)
         {
-            return x.MarionOperatorName == y.MarionOperatorName;
+            return x.OperatorName == y.OperatorName;
         }
 
         public int GetHashCode(mMarionOperator obj)
         {
-            return obj.MarionOperatorName.GetHashCode();
+            return obj.OperatorName.GetHashCode();
         }
     }
 }
