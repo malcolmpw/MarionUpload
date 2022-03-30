@@ -74,7 +74,7 @@ namespace MarionUpload.ViewModels
 
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
                 {                    
-                    AccountList.Clear();
+                    AccountList= new List<mAccount>();
                     foreach (var _marionAccount in MarionAccounts)
                     {
                         var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
@@ -97,11 +97,10 @@ namespace MarionUpload.ViewModels
                                                             
                     foreach (var acct in AccountList)
                     {
-
                         decimal sumOfOwnerCadValues = 0;
                         foreach (var innerAcct in AccountList)
                         {
-                            if (innerAcct.AcctID == acct.AcctID) sumOfOwnerCadValues += innerAcct.ValAcctCur;
+                            if (innerAcct.NameID == acct.NameID) sumOfOwnerCadValues += innerAcct.ValAcctCur;
                         }
 
 
@@ -109,14 +108,14 @@ namespace MarionUpload.ViewModels
 
                         try
                         {
-                            var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                            // test to see if populatedAprslAdmin already exists.
+                            // var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
                         }
                         catch (Exception ex)
                         {
                             throw new Exception($"Error in inserting into Admin Appraisal table {ex.Message}");
                         }
-
-                    }
+                   }
                 }
 
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);

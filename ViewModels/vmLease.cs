@@ -54,15 +54,16 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var operatorResults = db.Query<mMarionOperator>(
-                    "SELECT * from AbMarionOperators order by a.OperatorName Where Active=1");
+                    "SELECT * from AbMarionOperators Where Active=1 order by OperatorName ");
                 var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();
                 //var operatorDistinctResults = operatorResults;
                 operatorDistinctResults.ForEach(marionOperator => MarionOperators.Add(marionOperator));
 
-                var operatorLookup = db.Query<mMarionOperator>("Select OperatorName, CompanyID " +
-                                                     "From AbMarionOperators Where Active = 1");
-                OperatorNameIdMap = operatorLookup
-                    .ToDictionary(oper => oper.CompanyName, val => (long)val.CompanyID);
+                foreach (mMarionOperator oper in operatorDistinctResults)
+                {
+                    OperatorNameIdMap = operatorDistinctResults
+                        .ToDictionary(op => op.CompanyName, val => (long)val.CompanyID);
+                }
             }
         }
 
@@ -203,7 +204,6 @@ namespace MarionUpload.ViewModels
 
             tract.UpdateBy = UpdateByDefault;
             tract.UpdateDate = DateTime.Now;
-
 
             return tract;
         }
