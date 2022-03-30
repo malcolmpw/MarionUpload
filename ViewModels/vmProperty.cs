@@ -73,8 +73,9 @@ namespace MarionUpload.ViewModels
 
                 JurisdictionMap = db.Query<mJurisdiction>("Select Code,Name from abMariontlkpJurisdiction")
                     .ToDictionary(jurisdiction => jurisdiction.Code, val => val.Name);
-                PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub").ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
-                
+                PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub")
+                    .ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
+
                 var resultList = results.Distinct(new PropertyComparer()).ToList();
 
                 resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));
@@ -193,16 +194,7 @@ namespace MarionUpload.ViewModels
             if (importedMarionProperty.SPTBCode.Trim().Substring(0, 2) == "G1" || importedMarionProperty.SPTBCode.Trim().Substring(0, 2) == "XV")
             {
                 property.PropType = "M";
-
-                string rrc = importedMarionProperty.RRC.Trim();
-                string pat = @"(\d+)";
-                Regex re = new Regex(pat);
-                var match = re.Match(rrc);
-                var rrcNumber = "";
-                if (match.Success)
-                {
-                    rrcNumber = (match.Groups[0].Value).Trim();
-                }
+                string rrcNumber = GetRRCnumberFromImportRRCstring(importedMarionProperty);
 
                 property.Legal = importedMarionProperty.LeaseName.Trim() +
                     " (" + rrcNumber +
@@ -231,6 +223,21 @@ namespace MarionUpload.ViewModels
             property.CreateDate = _updateDate;
 
             return property;
+        }
+
+        private static string GetRRCnumberFromImportRRCstring(mMarionProperty importedMarionProperty)
+        {
+            string rrc = importedMarionProperty.RRC.Trim();
+            string pat = @"(\d+)";
+            Regex re = new Regex(pat);
+            var match = re.Match(rrc);
+            var rrcNumber = "";
+            if (match.Success)
+            {
+                rrcNumber = (match.Groups[0].Value).Trim();
+            }
+
+            return rrcNumber;
         }
 
         private string FetchPTDDescription(string sptbCode)

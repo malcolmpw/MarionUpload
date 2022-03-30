@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL scripts", "SQL scripts"
 		PctType counts.sql = PctType counts.sql
 		SqlQuery_1.sql = SqlQuery_1.sql
 		TestForNameT.sql = TestForNameT.sql
+		Update Owners Operator Flag.sql = Update Owners Operator Flag.sql
 		WagData2015 GeoRef.sql = WagData2015 GeoRef.sql
 	EndProjectSection
 EndProject

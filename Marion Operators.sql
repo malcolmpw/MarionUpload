@@ -14,6 +14,7 @@ Active bit
 
 Insert Into AbMarionOperators
 SELECT distinct a.[OperatorName] as OperatorName
+                , a.RRC
 				, substring(n.NameC, 1, 10) as CompanyNameSub
                 , n.NameC as CompanyName 
 				, n.NameID as CompanyID 

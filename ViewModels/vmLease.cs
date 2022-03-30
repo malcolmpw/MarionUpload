@@ -16,6 +16,7 @@ using System.Windows;
 using System.Windows.Input;
 using MarionUpload.Comparers;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace MarionUpload.ViewModels
 {
@@ -33,12 +34,12 @@ namespace MarionUpload.ViewModels
         public ICommand CommandImportLeases => new RelayCommand(OnImportLeases);
         public ICommand CommandUploadLeases => new RelayCommand(OnUploadLeases);
 
-
-
+        public static IDictionary<string, long> OperatorNameIdMap { get; private set; }
+        
         public vmLease()
         {
             MarionMineralAccounts = new ObservableCollection<mMarionLease>();
-            MarionOperators = new ObservableCollection<mMarionOperator>();
+            MarionOperators = new ObservableCollection<mMarionOperator>();            
         }
 
         private void OnImportLeases()
@@ -57,7 +58,11 @@ namespace MarionUpload.ViewModels
                 var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();
                 //var operatorDistinctResults = operatorResults;
                 operatorDistinctResults.ForEach(marionOperator => MarionOperators.Add(marionOperator));                
-                MarionOperators = new ObservableCollection<mMarionOperator>(operatorDistinctResults);
+                
+                var operatorLookup = db.Query<mMarionOperator>("Select OperatorName, CompanyID " +
+                                                     "From AbMarionOperators Where Active = 1");              
+                OperatorNameIdMap = operatorLookup
+                    .ToDictionary(oper => oper.CompanyName, val => (long)val.CompanyID);
             }
         }
 
@@ -170,7 +175,7 @@ namespace MarionUpload.ViewModels
         {
             var cadLease = new mCadLease();
             cadLease.CadId = "MAR";
-            cadLease.CadLeaseId = marionLease.RRC.Trim().Substring(4);
+            cadLease.CadLeaseId = GetRRCnumberFromImportRRCstring(marionLease);
 
             return cadLease;
         }
@@ -198,8 +203,8 @@ namespace MarionUpload.ViewModels
         private mLease TranslateFrom_mMarionLeaseTo_mLease(mMarionLease marionLease)
         {
             var lease = new mLease();
-            lease.LeaseNameWag = marionLease.LeaseName;
-            lease.LeaseOprID = 0;// marionLease.OperatorName;
+            lease.LeaseNameWag = GetRRCnumberFromImportRRCstring(marionLease);
+            lease.LeaseOprID = (int)OperatorNameIdMap[marionLease.OperatorName];
 
             lease.Stat_YN = true;
             lease.StatBy = UpdateByDefault;
@@ -213,7 +218,20 @@ namespace MarionUpload.ViewModels
 
         }
 
+        private static string GetRRCnumberFromImportRRCstring(mMarionLease marionLease )
+        {
+            string rrc = marionLease.RRC.Trim();
+            string pat = @"(\d+)";
+            Regex re = new Regex(pat);
+            var match = re.Match(rrc);
+            var rrcNumber = "";
+            if (match.Success)
+            {
+                rrcNumber = (match.Groups[0].Value).Trim();
+            }
 
+            return rrcNumber;
+        }
 
         public bool LeaseImportEnabled { get => _leaseImportEnabled; set { _leaseImportEnabled = value; RaisePropertyChanged(nameof(LeaseImportEnabled)); } }
         public bool LeaseUploadEnabled { get => _leaseUploadEnabled; set { _leaseUploadEnabled = value; RaisePropertyChanged(nameof(LeaseUploadEnabled)); } }
