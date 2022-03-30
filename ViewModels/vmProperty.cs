@@ -128,10 +128,11 @@ namespace MarionUpload.ViewModels
 
             oppSegment.PropID = property.PropId;
             oppSegment.PrsnlID = 1;
-            oppSegment.PrsnlDesc = "1st Segt: ";
+            //commented out per CRW Mar 29,2022 email
+            //oppSegment.PrsnlDesc = "1st Segt: ";
             //oppSegment.PrsnlDesc += "(added: " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + ") ";
-            oppSegment.PrsnlDesc += property.Legal;
-
+            //oppSegment.PrsnlDesc += property.Legal;
+            oppSegment.PrsnlDesc = property.Legal;
 
             oppSegment.PrsnlCreateDate = DateTime.Now;
             oppSegment.PrsnlCreateBy = "MPW";

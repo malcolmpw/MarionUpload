@@ -55,15 +55,16 @@ namespace MarionUpload.ViewModels
             {
                 var operatorResults = db.Query<mMarionOperator>(
                     "SELECT * from AbMarionOperators Where Active=1 order by OperatorName ");
-                var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();
-                //var operatorDistinctResults = operatorResults;
+                var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();                
                 operatorDistinctResults.ForEach(marionOperator => MarionOperators.Add(marionOperator));
-
-                foreach (mMarionOperator oper in operatorDistinctResults)
-                {
-                    OperatorNameIdMap = operatorDistinctResults
-                        .ToDictionary(op => op.CompanyName, val => (long)val.CompanyID);
-                }
+                
+                //foreach (mMarionOperator oper in MarionOperators)
+                //{
+                //    if (!OperatorNameIdMap.ContainsKey(oper.CompanyName))
+                //    {
+                //        OperatorNameIdMap = MarionOperators.ToDictionary(op => op.CompanyName, val => (long)val.CompanyID);
+                //    }
+                //}
             }
         }
 
@@ -94,7 +95,7 @@ namespace MarionUpload.ViewModels
                 var marionLeases = MarionMineralAccounts.GroupBy(m => m.RRC).Select(g => g.FirstOrDefault()).ToList();
                 foreach (var marionLease in marionLeases)
                 {
-                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease);
+                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease,MarionOperators);
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
                     var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
@@ -208,11 +209,14 @@ namespace MarionUpload.ViewModels
             return tract;
         }
 
-        private mLease TranslateFrom_mMarionLeaseTo_mLease(mMarionLease marionLease)
+        private mLease TranslateFrom_mMarionLeaseTo_mLease(mMarionLease marionLease, ObservableCollection<mMarionOperator> marionOperators)
         {
             var lease = new mLease();
             lease.LeaseNameWag = GetRRCnumberFromImportRRCstring(marionLease);
-            lease.LeaseOprID = (int)OperatorNameIdMap[marionLease.OperatorName];
+            //var id = MarionOperators.Where(x => x.CompanyName == marionLease.OperatorName).FirstOrDefault().CompanyID;
+            lease.LeaseOprID = 0;
+            //(int)OperatorNameIdMap[marionLease.OperatorName];
+            lease.LeaseOprID = 0;
 
             lease.Stat_YN = true;
             lease.StatBy = UpdateByDefault;

@@ -81,20 +81,43 @@ namespace MarionUpload.ViewModels
                         var primaryKey = db.Insert<mAccount>(populatedAccount);
                         AccountList.Add(populatedAccount);
 
-
-                        var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
-                        var priorPrimaryKey = db.Insert<mAccountPrYr>(populatedAccountPrYr);
-
-                        //if (priorPrimaryKey != primaryKey)
-                        //{
-                        //    throw new Exception($"tblAccount and tlkpAccountPrYr are out of sync. PK tblAccount = {primaryKey} and PK tlkpAccountPrYr = {priorPrimaryKey}");
-                        //}
-
+                        var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);                        
+                       
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
                         var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
                     }
 
-                                                            
+                    // copy tblAccount rows just inserted into tlkp
+                    string sqlStringForTlkpAccountPrYr1 =
+                        "insert INTO tlkpAccountPrYr " +
+                        "(CadParcelId,PropID,CadRealID,NameID,AcctLegal,ChgCode,SeqNmbr,PctProp,PctType" +
+                        ",ValImpAppr,ValImpHsNo,ValImpHsYes,ValLandAppr,ValLandHsNo,ValLandHsYes,ValLandMkt,ValLandAg,ValPrsnlAppr,ValPrsnlHsNo" +
+                        ",ValPrsnlHsYes,ValMnrlCalc,ValMnrlAppr,ValNpmAppr,ValAcctCur,ValAcctNtc,ValAcctLock,ValueLocked,NtcDate,LastProtDate" +
+                        ",ValAcctCrt,valacctPrYr,AcctValPrYr,ValAcctPryr5,CrtDate,Stat_YN,Protest_YN,ProtestResolved_YN,Supp_YN,UpdateDate" +
+                        ",UpdateBy,Memo,ProtStat,ProtStatDate,ProtDate,ProtCause,CrtStat,ResStat,ResStatDate,BatchProtest_YN" +
+                        ",BatchWithdraw_YN,ConveyTransactionNo,Prc,crtNote,Cad,ValidationNote,delflag,PTDcode,GeoRef,corr_yn" +
+                        ",AcctValPryr5,division)" +
+                        "SELECT " +
+                        "CadParcelId,PropID,CadRealID,NameID,AcctLegal,ChgCode,SeqNmbr,PctProp,PctType" +
+                        ",ValImpAppr,ValImpHsNo,ValImpHsYes,ValLandAppr,ValLandHsNo,ValLandHsYes,ValLandMkt,ValLandAg,ValPrsnlAppr,ValPrsnlHsNo" +
+                        ",ValPrsnlHsYes,ValMnrlCalc,ValMnrlAppr,ValNpmAppr,ValAcctCur,ValAcctNtc,ValAcctLock,ValueLocked,NtcDate,LastProtDate" +
+                        ",ValAcctCrt,valacctPrYr,AcctValPrYr,ValAcctPryr5,CrtDate,Stat_YN,Protest_YN,ProtestResolved_YN,Supp_YN,UpdateDate" +
+                        ",UpdateBy,Memo,ProtStat,ProtStatDate,ProtDate,ProtCause,CrtStat,ResStat,ResStatDate,BatchProtest_YN" +
+                        ",BatchWithdraw_YN,ConveyTransactionNo,Prc,crtNote,Cad,ValidationNote,delflag,PTDcode,GeoRef,corr_yn" +
+                        ",AcctValPryr5,division " +
+                        "from tblAccount where tblAccount.PropID = tlkpAccountPrYr.PropID and tblAccount.NameID = tlkpAccountPrYr.NameID " +
+                        "and tblAccount.Cad='MAR'";
+
+                        var affectedRows = db.Execute(sqlStringForTlkpAccountPrYr1);
+
+                    // update tlkpAccountPrYr with values in tblAccount
+                    string sqlStringForTlkpAccountPrYr2 =
+                        "UPDATE tlkpAccountPrYr SET ValAcctCrt = tblAccount.ValAcctCur " +
+                        "WHERE tblAccount.PropID = tlkpAccountPrYr.PropID " +
+                        "AND tblAccount.NameID = tlkpAccountPrYr.NameID";
+                    
+                    var affectedRows2 = db.Execute(sqlStringForTlkpAccountPrYr2);
+
                     foreach (var acct in AccountList)
                     {
                         decimal sumOfOwnerCadValues = 0;
@@ -102,7 +125,6 @@ namespace MarionUpload.ViewModels
                         {
                             if (innerAcct.NameID == acct.NameID) sumOfOwnerCadValues += innerAcct.ValAcctCur;
                         }
-
 
                         var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(acct, sumOfOwnerCadValues);
 
@@ -211,7 +233,9 @@ namespace MarionUpload.ViewModels
             account.UpdateDate = DateTime.Now;
             account.Cad = "MAR";
 
-            account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ? _marionAccount.DecimalInterest * 10.0 : 1.0);
+            account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ?
+                _marionAccount.DecimalInterest * 10.0 : 1.0);
+            account.PctProp = (float)Math.Round(account.PctProp, 9);
             account.PctType = ConvertInterestType(_marionAccount);
 
             account.Protest_YN = _marionAccount.Protest == "P";
@@ -221,13 +245,13 @@ namespace MarionUpload.ViewModels
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
 
             account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
-            var interestInfo = " (" + _marionAccount.DecimalInterest.ToString() + " - " + _marionAccount.InterestType.ToString() + ")";
+            var interestDecimalsFormatted = String.Format("0:0.000000000", _marionAccount.DecimalInterest.ToString());
+            var interestInfo = " ( " + interestDecimalsFormatted + " - " + account.PctType.ToString() + ")";
             if (_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV") account.AcctLegal += interestInfo;
 
             account.ValAcctCur = _marionAccount.Juris2MarketValue;
-            //account.ValAcctCrt = _marionAccount.Juris2MarketValue;
-            //account.AcctValPrYr = _marionAccount.Juris2MarketValue;
-            //account.valacctPrYr = _marionAccount.Juris2MarketValue;
+            account.valacctPrYr = _marionAccount.Juris2MarketValue;
+            account.AcctValPrYr = _marionAccount.Juris2MarketValue;
 
             string divString = _marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ? "M" : "U";
             account.division = char.Parse(divString.Substring(0, 1));
