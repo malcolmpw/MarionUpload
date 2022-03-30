@@ -7,6 +7,7 @@ using MarionUpload.Helpers;
 using MarionUpload.Messages;
 using MarionUpload.Models;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
@@ -27,6 +28,8 @@ namespace MarionUpload.ViewModels
 
         public bool AccountImportEnabled { get => accountImportEnabled; set { accountImportEnabled = value; RaisePropertyChanged(nameof(AccountImportEnabled)); } }
         public bool AccountUploadEnabled { get => accountUploadEnabled; set { accountUploadEnabled = value; RaisePropertyChanged(nameof(AccountUploadEnabled)); } }
+
+        public List<mAccount> AccountList { get; set; }
 
         private void OnImportAccounts()
         {
@@ -70,24 +73,16 @@ namespace MarionUpload.ViewModels
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
 
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-                {
-                    int currentNameId = 0;
-                    int previousNameId = 0;
-                    int currentPropId = 0;
-                    int previousPropId = 0;
-                    mAccount previousPopulatedAccount = new mAccount();
-                    mAccountPrYr populatedAccountPrYr = new mAccountPrYr();
-                    decimal sumOfOwnerCadValues = 0;
-                    float sumOfAccountPctPropForThisProperty = 0;
-
+                {                    
+                    AccountList.Clear();
                     foreach (var _marionAccount in MarionAccounts)
                     {
                         var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                         var primaryKey = db.Insert<mAccount>(populatedAccount);
-                        currentNameId = (int)populatedAccount.NameID;
+                        AccountList.Add(populatedAccount);
 
 
-                        populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
+                        var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
                         var priorPrimaryKey = db.Insert<mAccountPrYr>(populatedAccountPrYr);
 
                         //if (priorPrimaryKey != primaryKey)
@@ -97,36 +92,30 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
                         var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
+                    }
 
-                        if (currentNameId == previousNameId)
-                        {
-                            sumOfOwnerCadValues += populatedAccount.ValAcctCur;
-                        }
-                        else
-                        {
-                            var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(previousPopulatedAccount, sumOfOwnerCadValues);
+                                                            
+                    foreach (var acct in AccountList)
+                    {
 
-                            try
-                            {
-                                var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
-                            }
-                            catch (Exception ex)
-                            {
-                                throw new Exception($"Error in inserting into Admin Appraisal table {ex.Message}");
-                            }
+                        decimal sumOfOwnerCadValues = 0;
+                        foreach (var innerAcct in AccountList)
+                        {
+                            if (innerAcct.AcctID == acct.AcctID) sumOfOwnerCadValues += innerAcct.ValAcctCur;
                         }
 
-                        if (currentPropId == previousPropId)
+
+                        var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(acct, sumOfOwnerCadValues);
+
+                        try
                         {
-                            sumOfAccountPctPropForThisProperty += populatedAccount.PctProp;
+                            var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            //calculate the AccoountPctProp for each account (the sum of the PctProp for each Account in this Property - should be 1.0)
+                            throw new Exception($"Error in inserting into Admin Appraisal table {ex.Message}");
                         }
 
-                        previousNameId = currentNameId;
-                        previousPopulatedAccount = populatedAccount;
                     }
                 }
 
@@ -223,7 +212,7 @@ namespace MarionUpload.ViewModels
             account.UpdateDate = DateTime.Now;
             account.Cad = "MAR";
 
-            account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ? _marionAccount.DecimalInterest  * 10.0 : 1.0);
+            account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ? _marionAccount.DecimalInterest * 10.0 : 1.0);
             account.PctType = ConvertInterestType(_marionAccount);
 
             account.Protest_YN = _marionAccount.Protest == "P";
@@ -234,7 +223,7 @@ namespace MarionUpload.ViewModels
 
             account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
             var interestInfo = " (" + _marionAccount.DecimalInterest.ToString() + " - " + _marionAccount.InterestType.ToString() + ")";
-            if (_marionAccount.SPTBCode.Trim() == "G1"|| _marionAccount.SPTBCode.Trim() == "XV") account.AcctLegal += interestInfo;
+            if (_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV") account.AcctLegal += interestInfo;
 
             account.ValAcctCur = _marionAccount.Juris2MarketValue;
             //account.ValAcctCrt = _marionAccount.Juris2MarketValue;

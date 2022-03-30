@@ -27,7 +27,7 @@ namespace MarionUpload.ViewModels
             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private bool _leaseImportEnabled = true;
         private bool _leaseUploadEnabled = false;
-       
+
         public ObservableCollection<mMarionLease> MarionMineralAccounts { get; set; }
         public static ObservableCollection<mMarionOperator> MarionOperators { get; set; }
 
@@ -35,11 +35,11 @@ namespace MarionUpload.ViewModels
         public ICommand CommandUploadLeases => new RelayCommand(OnUploadLeases);
 
         public static IDictionary<string, long> OperatorNameIdMap { get; private set; }
-        
+
         public vmLease()
         {
             MarionMineralAccounts = new ObservableCollection<mMarionLease>();
-            MarionOperators = new ObservableCollection<mMarionOperator>();            
+            MarionOperators = new ObservableCollection<mMarionOperator>();
         }
 
         private void OnImportLeases()
@@ -57,10 +57,10 @@ namespace MarionUpload.ViewModels
                     "SELECT * from AbMarionOperators order by a.OperatorName Where Active=1");
                 var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();
                 //var operatorDistinctResults = operatorResults;
-                operatorDistinctResults.ForEach(marionOperator => MarionOperators.Add(marionOperator));                
-                
+                operatorDistinctResults.ForEach(marionOperator => MarionOperators.Add(marionOperator));
+
                 var operatorLookup = db.Query<mMarionOperator>("Select OperatorName, CompanyID " +
-                                                     "From AbMarionOperators Where Active = 1");              
+                                                     "From AbMarionOperators Where Active = 1");
                 OperatorNameIdMap = operatorLookup
                     .ToDictionary(oper => oper.CompanyName, val => (long)val.CompanyID);
             }
@@ -99,7 +99,7 @@ namespace MarionUpload.ViewModels
                     var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
                     populatedCadLease.LeaseId = (long)primaryLeaseKey;
                     db.Insert<mCadLease>(populatedCadLease);
-                    
+
                     var marionTracts = MarionMineralAccounts.Where(a => a.RRC == marionLease.RRC).ToList();
                     var tractId = 0; var currentLeaseNumber = 0;
                     foreach (var marionTract in marionTracts)
@@ -127,6 +127,14 @@ namespace MarionUpload.ViewModels
                     }
                 }
 
+                // For all operators in AbMarionOperators change their Oper_YN in tblName to true.
+                string sqlString = "update wagapp2_2021_Marion.dbo.tblName" +
+                                   "set tblName.Oper_YN = o.CompanyID" +
+                                   "from wagapp2_2021_Marion.dbo.AbMarionOperators o " +
+                                   "inner join wagapp2_2021_Marion.dbo.tblName n " +
+                                   "on o.CompanyID = n.NameID " +
+                                   "where o.Active = 1";
+                var affectedRows = db.Execute(sqlString);
 
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
@@ -218,7 +226,7 @@ namespace MarionUpload.ViewModels
 
         }
 
-        private static string GetRRCnumberFromImportRRCstring(mMarionLease marionLease )
+        private static string GetRRCnumberFromImportRRCstring(mMarionLease marionLease)
         {
             string rrc = marionLease.RRC.Trim();
             string pat = @"(\d+)";
