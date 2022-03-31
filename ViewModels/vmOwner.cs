@@ -135,7 +135,7 @@ namespace MarionUpload.ViewModels
                     }
 
                     // also update all the owner ids in the Marion Operator Table
-                    var marionOperators = db.Query<mMarionOperator>("SELECT OperatorName, CompanyNameSub, CompanyName, CompanyID, OperatorFlag, Active, MarionOperatorId From [wagapp2_2021_Marion].[dbo].[AbMarionOperators] where OperatorFlag = 1");
+                    var marionOperators = db.Query<mMarionOperator>("SELECT OperatorName, CompanyNameSub, CompanyName, CompanyID, OperatorFlag, Active From [wagapp2_2021_Marion].[dbo].[AbMarionOperators] where OperatorFlag = 1");
                     foreach (var marionOperator in marionOperators)
                     {
                         if (NameSortCadMap.ContainsKey(marionOperator.CompanyName.Trim().ToUpper()))
