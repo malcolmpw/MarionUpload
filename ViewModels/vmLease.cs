@@ -44,7 +44,7 @@ namespace MarionUpload.ViewModels
 
         private void OnImportLeases()
         {
-            SelectOperatorDataFromMarionImportTableAndWagOwners();
+            //SelectOperatorDataFromMarionImportTableAndWagOwners();
             SelectMineralDataFromMarionImportTable();
         }
 
@@ -73,7 +73,7 @@ namespace MarionUpload.ViewModels
             MarionMineralAccounts.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                var results = db.Query<mMarionLease>("Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode, Acres " +
+                var results = db.Query<mMarionLease>("use wagapp2_2021_Marion Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode, Acres " +
                                                      "from AbMarionImport where SPTBCode = 'G1 ' or SPTBCode = 'XV ' order by LeaseName");
 
                 var distinctResults = results.Distinct(new LeaseComparer()).ToList();
@@ -251,7 +251,7 @@ namespace MarionUpload.ViewModels
         {
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
             {
-                string operatorNamesQueryString = "Select distinct OperatorName from AbMarionImport where sptbCode='G1 ' order by OperatorName ";
+                string operatorNamesQueryString = "use wagapp2_2021_Marion Select distinct OperatorName from AbMarionImport where sptbCode='G1 ' order by OperatorName ";
                 OperatorNamesFromMarionImport = db.Query<string>(operatorNamesQueryString).ToList();
             }
         }
