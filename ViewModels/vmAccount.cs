@@ -105,17 +105,19 @@ namespace MarionUpload.ViewModels
                         ",UpdateBy,Memo,ProtStat,ProtStatDate,ProtDate,ProtCause,CrtStat,ResStat,ResStatDate,BatchProtest_YN" +
                         ",BatchWithdraw_YN,ConveyTransactionNo,Prc,crtNote,Cad,ValidationNote,delflag,PTDcode,GeoRef,corr_yn" +
                         ",AcctValPryr5,division " +
-                        "from tblAccount where tblAccount.PropID = tlkpAccountPrYr.PropID and tblAccount.NameID = tlkpAccountPrYr.NameID " +
+                        "from tblAccount where tblAccount.PropID = PropID and tblAccount.NameID = NameID " +
                         "and tblAccount.Cad='MAR'";
 
                         var affectedRows = db.Execute(sqlStringForTlkpAccountPrYr1);
 
                     // update tlkpAccountPrYr with values in tblAccount
                     string sqlStringForTlkpAccountPrYr2 =
-                        "UPDATE tlkpAccountPrYr SET ValAcctCrt = tblAccount.ValAcctCur " +
-                        "WHERE tblAccount.PropID = tlkpAccountPrYr.PropID " +
-                        "AND tblAccount.NameID = tlkpAccountPrYr.NameID";
-                    
+                        "UPDATE tlkpAccountPrYr " +
+                        "SET tlkpAccountPrYr.ValAcctCrt = cur.ValAcctCur " +
+                        "From tlkpAccountPrYr pr inner join tblAccount cur " +
+                        "on pr.NameID = cur.NameID and pr.PropID = cur.PropID " +
+                        "where cur.cad = 'MAR'";
+
                     var affectedRows2 = db.Execute(sqlStringForTlkpAccountPrYr2);
 
                     foreach (var acct in AccountList)

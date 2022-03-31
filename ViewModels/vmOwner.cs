@@ -124,13 +124,31 @@ namespace MarionUpload.ViewModels
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
                         NameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
 
+                        if (!NameSortCadMap.ContainsKey(populatedOwner.NameSortCad.Trim().ToUpper()))
+                        {
+                            NameSortCadMap.Add(populatedOwner.NameSortCad.Trim().ToUpper(), primaryOwnerKey);
+                        }
+
                         var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                        OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);                       
+                        OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                    }
+
+                    // also update all the owner ids in the Marion Operator Table
+                    var marionOperators = db.Query<mMarionOperator>("SELECT OperatorName, CompanyNameSub, CompanyName, CompanyID, OperatorFlag, Active, MarionOperatorId From [wagapp2_2021_Marion].[dbo].[AbMarionOperators] where OperatorFlag = 1");
+                    foreach (var marionOperator in marionOperators)
+                    {
+                        if (NameSortCadMap.ContainsKey(marionOperator.CompanyName.Trim().ToUpper()))
+                        {
+                            marionOperator.CompanyID = (int)NameSortCadMap[marionOperator.CompanyName.Trim().ToUpper()];
+                        }
+
+                        db.Update<mMarionOperator>(marionOperator);
                     }
                 }
 
-                OwnerUploadEnabled = false;
+
+                    OwnerUploadEnabled = false;
                 MessageBox.Show($"Finished uploading {MarionOwners.Count()} owners");
 
                 Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
@@ -168,6 +186,7 @@ namespace MarionUpload.ViewModels
         public List<mOwner> OwnersToInsert { get; set; }
         public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
         public IDictionary<int, long> OwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
+        public static IDictionary<string, long> NameSortCadMap { get; private set; } = new Dictionary<string, long>();
 
         private DateTime _updateDate;
         private string _updateBy;

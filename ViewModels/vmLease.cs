@@ -130,8 +130,8 @@ namespace MarionUpload.ViewModels
                 }
 
                 // For all operators in AbMarionOperators change their Oper_YN in tblName to true.
-                string sqlString = "update wagapp2_2021_Marion.dbo.tblName" +
-                                   "set tblName.Oper_YN = o.CompanyID" +
+                string sqlString = "update wagapp2_2021_Marion.dbo.tblName " +
+                                   "set tblName.Oper_YN = o.OperatorFlag " +
                                    "from wagapp2_2021_Marion.dbo.AbMarionOperators o " +
                                    "inner join wagapp2_2021_Marion.dbo.tblName n " +
                                    "on o.CompanyID = n.NameID " +
