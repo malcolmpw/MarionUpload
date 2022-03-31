@@ -36,9 +36,11 @@ namespace MarionUpload.ViewModels
 
         public ObservableCollection<mMarionOwner> MarionOwners { get; set; }
         public ObservableCollection<mOwner> MarionOwners2017 { get; set; }
-        public ObservableCollection<mOwner> InsertedOwners { get; set; }        
+        public ObservableCollection<mOwner> InsertedOwners { get; set; }
         public Dictionary<string, mOwner> CadOwner2017NameSortMap { get; set; }
+        public ObservableCollection<string> MarionOwnerNames { get; set; }
         public NameSorts NameSorts { get; set; }
+        public static ObservableCollection<string> MarionOperatorNames { get; set; }
 
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
@@ -56,11 +58,22 @@ namespace MarionUpload.ViewModels
 
         private void OnImportOwners()
         {
-            SelectOwnerDataFromMarionImportTable();
+            GetMarionOperatorNamesFromImport();
             SelectOwnerDataFromWagData2017();
+            SelectOwnerDataFromMarionImportTable();
 
             OwnerUploadEnabled = true;
             OwnerImportEnabled = false;
+        }
+
+        private void GetMarionOperatorNamesFromImport()
+        {
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
+            {
+                string operatorNamesQueryString = "use wagapp2_2021_Marion Select distinct OperatorName from AbMarionImport where sptbCode='G1 ' order by OperatorName ";
+                var marionOperatorNames = db.Query<string>(operatorNamesQueryString).ToList();
+                MarionOperatorNames = new  ObservableCollection<string>(marionOperatorNames);
+            }
         }
 
         private void SelectOwnerDataFromWagData2017()
@@ -121,6 +134,7 @@ namespace MarionUpload.ViewModels
                     foreach (mMarionOwner _marionOwner in MarionOwners)
                     {
                         var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(_marionOwner);
+                        if (MarionOperatorNames.Contains(_marionOwner.OwnerName)) populatedOwner.Oper_YN = true;
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
                         NameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
 
@@ -131,24 +145,26 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                        OwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                        MarionOwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+
                     }
 
-                    // also update all the owner ids in the Marion Operator Table
-                    var marionOperators = db.Query<mMarionOperator>("SELECT OperatorName, CompanyNameSub, CompanyName, CompanyID, OperatorFlag, Active From [wagapp2_2021_Marion].[dbo].[AbMarionOperators] where OperatorFlag = 1");
-                    foreach (var marionOperator in marionOperators)
-                    {
-                        if (NameSortCadMap.ContainsKey(marionOperator.CompanyName.Trim().ToUpper()))
-                        {
-                            marionOperator.CompanyID = (int)NameSortCadMap[marionOperator.CompanyName.Trim().ToUpper()];
-                        }
+                    //THE FOLLOWING IS NOT NEEDED. WE WILL USE THE MarionOperatorNames.Contains() INSTEAD
+                    //// also update all the owner ids in the Marion Operator Table
+                    //var marionOperators = db.Query<mMarionOperator>("SELECT OperatorName, CompanyNameSub, CompanyName, CompanyID, OperatorFlag, Active From [wagapp2_2021_Marion].[dbo].[AbMarionOperators] where OperatorFlag = 1");
+                    //foreach (var marionOperator in marionOperators)
+                    //{
+                    //    if (NameSortCadMap.ContainsKey(marionOperator.CompanyName.Trim().ToUpper()))
+                    //    {
+                    //        marionOperator.CompanyID = (int)NameSortCadMap[marionOperator.CompanyName.Trim().ToUpper()];
+                    //    }
 
-                        db.Update<mMarionOperator>(marionOperator);
-                    }
+                    //    db.Update<mMarionOperator>(marionOperator);
+                    //}
                 }
 
 
-                    OwnerUploadEnabled = false;
+                OwnerUploadEnabled = false;
                 MessageBox.Show($"Finished uploading {MarionOwners.Count()} owners");
 
                 Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
@@ -162,7 +178,7 @@ namespace MarionUpload.ViewModels
 
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
         }
-       
+
         private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionOwner marionOwner, long primaryKey)
         {
             var cadOwner = new mCadOwner();
@@ -185,7 +201,7 @@ namespace MarionUpload.ViewModels
 
         public List<mOwner> OwnersToInsert { get; set; }
         public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
-        public IDictionary<int, long> OwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
+        public IDictionary<int, long> MarionOwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
         public static IDictionary<string, long> NameSortCadMap { get; private set; } = new Dictionary<string, long>();
 
         private DateTime _updateDate;
@@ -222,7 +238,7 @@ namespace MarionUpload.ViewModels
                 owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2017].[dbo].[tblName]
                                                    // these may be taken from WagData2017 for the old list of marion owners in tblName.               
                 owner.NameSel_YN = matchingOwner.NameSel_YN;
-                
+
             }
             else
             {
@@ -238,7 +254,7 @@ namespace MarionUpload.ViewModels
             }
             else
             {
-                owner.AgentID = SelectAgentNameIdFromMarionAgentImportTable(importedMarionOwner.AgentNumber);               
+                owner.AgentID = SelectAgentNameIdFromMarionAgentImportTable(importedMarionOwner.AgentNumber);
                 owner.Ntc2Agent_YN = true;
                 owner.Stmnt2Agent_YN = true;
             }
@@ -285,8 +301,8 @@ namespace MarionUpload.ViewModels
             //}                       
 
             owner.UpdateDate = _updateDate;
-            owner.UpdateBy = _updateBy;            
-            
+            owner.UpdateBy = _updateBy;
+
             owner = NameSorts.RebuildNameSort(owner);
 
             return owner;

@@ -35,7 +35,7 @@ namespace MarionUpload.ViewModels
         public ICommand CommandUploadLeases => new RelayCommand(OnUploadLeases);
 
         public static IDictionary<string, long> OperatorNameIdMap { get; private set; }
-
+        public List<string> OperatorNamesFromMarionImport { get; private set; }
         public vmLease()
         {
             MarionMineralAccounts = new ObservableCollection<mMarionLease>();
@@ -93,9 +93,11 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var marionLeases = MarionMineralAccounts.GroupBy(m => m.RRC).Select(g => g.FirstOrDefault()).ToList();
+                GetOperatorNamesFromMarionImport();
                 foreach (var marionLease in marionLeases)
                 {
                     var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease,MarionOperators);
+                    if (OperatorNamesFromMarionImport.Contains(marionLease.OperatorName)) populatedLease.LeaseOprID= 0;
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
                     var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
@@ -243,6 +245,15 @@ namespace MarionUpload.ViewModels
             }
 
             return rrcNumber;
+        }
+
+        private void GetOperatorNamesFromMarionImport()
+        {
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
+            {
+                string operatorNamesQueryString = "Select distinct OperatorName from AbMarionImport where sptbCode='G1 ' order by OperatorName ";
+                OperatorNamesFromMarionImport = db.Query<string>(operatorNamesQueryString).ToList();
+            }
         }
 
         public bool LeaseImportEnabled { get => _leaseImportEnabled; set { _leaseImportEnabled = value; RaisePropertyChanged(nameof(LeaseImportEnabled)); } }
