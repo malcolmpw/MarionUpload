@@ -23,28 +23,36 @@ namespace MarionUpload.ViewModels
         static readonly string Path = @"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MA215500.TXT";
         //private const string AgentErrorPath = @"c:\temp\marion_agents_not_found.txt";
 
-        public vmAgent()
-        {
-            MarionAgents = new ObservableCollection<mMarionAgent>();
+        public bool AgentImportEnabled { get => agentImportEnabled; set { agentImportEnabled = value; RaisePropertyChanged(nameof(AgentImportEnabled)); } }
+        public bool AgentUploadEnabled { get => agentUploadEnabled; set { agentUploadEnabled = value; RaisePropertyChanged(nameof(AgentUploadEnabled)); } }
+        private bool agentImportEnabled = true;
+        private bool agentUploadEnabled = false;
 
-        }
         public ObservableCollection<mMarionAgent> MarionAgents { get; set; }
         private mAgent Agent { get; set; }
         public static IDictionary<int, int> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, int>();
 
         public ICommand CommandImportAgents => new RelayCommand(OnImportAgents);
-        public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgentIDs);
+        public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgents);
 
         private DateTime _updateDate;
         private string _updateBy;
 
+        public vmAgent()
+        {
+            MarionAgents = new ObservableCollection<mMarionAgent>();
+            agentImportEnabled = true;
+            agentUploadEnabled = false;
+        }
+
         public void OnImportAgents()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
         {
             ReadMarionAgentsFlatFileIntoMarionAgents();
-            // GetMatchingTblNameData(); // NOT USED
+            agentImportEnabled = false;
+            agentUploadEnabled = true;
         }
 
-        private void OnUploadAgentIDs()
+        private void OnUploadAgents()
         {
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
 
@@ -60,12 +68,7 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(marionAgent, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                        
-                        //AgentUploadEnabled = false;
-                        MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners");
 
-                        Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
-                        //   UploadMarionOwnersToTblName();
                     }
                 }
             }
@@ -75,7 +78,15 @@ namespace MarionUpload.ViewModels
                 Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
             }
 
+            AgentUploadEnabled = false;
+            MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners(agents)");
+            Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+
+            agentImportEnabled = false;
+            agentUploadEnabled = false;
+
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+            Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
         }
 
         private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionAgent marionAgent, long primaryOwnerKey)
@@ -107,7 +118,7 @@ namespace MarionUpload.ViewModels
             owner.MailCi = marionAgent.AgentCity.Trim();
             owner.MailSt = marionAgent.AgentState.Trim();
             owner.MailZ = marionAgent.AgentZip.ToString();
-            owner.MailZ4 = marionAgent.AgentZipPlusFour.ToString().Substring(0, 4);
+            owner.MailZ4 = marionAgent.AgentZip4.ToString().PadLeft(4);
 
             owner.UpdateDate = _updateDate;
             owner.UpdateBy = _updateBy;
@@ -147,7 +158,7 @@ namespace MarionUpload.ViewModels
             Int32.TryParse(GetString(line, 112, 116), out int intZip);
             data.AgentZip = intZip;
             Int32.TryParse(GetString(line, 118, 121), out int intZip4);
-            data.AgentZipPlusFour = intZip4;
+            data.AgentZip4 = intZip4;
             return data;
         }
 

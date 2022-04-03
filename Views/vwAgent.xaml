@@ -11,20 +11,12 @@
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
                 <Button Content="Upload AgentIDs" Command="{Binding CommandUploadAgentIDs}"                     
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
+                <TextBlock Text="{Binding MarionAgents.Count}" 
+                                Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
             </StackPanel>
-            <DataGrid Name="dgAgents" Margin="10" Width="Auto" Height="700" HorizontalAlignment="Left"
-                            ItemsSource="{Binding MarionAgents}" AutoGenerateColumns="False"  >
+            <DataGrid Name="dgAgents" Margin="10" Width="1400" Height="600" HorizontalAlignment="Left"
+                            ItemsSource="{Binding MarionAgents}" AutoGenerateColumns="True" >
                 <DataGrid.Columns>
-                    <!--<DataGridTextColumn Header="NameID" Binding="{Binding Path=NameID, Mode=OneWay}" />
-                    <DataGridTextColumn Header="NameC" Binding="{Binding Path=NameC, Mode=TwoWay}" />-->
-                    <DataGridTextColumn Header="AgentNumber" Binding="{Binding Path=AgentNumber, Mode=OneWay}" />
-                    <DataGridTextColumn Header="AgentName" Binding="{Binding Path=AgentName, Mode=TwoWay}" />
-                    <DataGridTextColumn Header="InCareOf" Binding="{Binding Path=InCareOf, Mode=TwoWay}" />
-                    <DataGridTextColumn Header="StreetAddress" Binding="{Binding Path=StreetAddress, Mode=TwoWay}" />
-                    <DataGridTextColumn Header="City" Binding="{Binding Path=City, Mode=TwoWay}" />
-                    <DataGridTextColumn Header="State" Binding="{Binding Path=State, Mode=TwoWay}" />
-                    <DataGridTextColumn Header="Zip" Binding="{Binding Path=Zip, Mode=TwoWay}" />
-                    <DataGridTextColumn Header="Zip4" Binding="{Binding Path=Zip4, Mode=TwoWay}" />
                 </DataGrid.Columns>
             </DataGrid>
 

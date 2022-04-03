@@ -45,8 +45,18 @@ namespace MarionUpload.ViewModels
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
 
-        public bool OwnerImportEnabled { get => _ownerImportEnabled; set { _ownerImportEnabled = value; RaisePropertyChanged(nameof(OwnerImportEnabled)); } }
+        public bool OwnerImportEnabled { get => ownerImportEnabled; set { ownerImportEnabled = value; RaisePropertyChanged(nameof(OwnerImportEnabled)); } }
         public bool OwnerUploadEnabled { get => ownerUploadEnabled; set { ownerUploadEnabled = value; RaisePropertyChanged(nameof(ownerUploadEnabled)); } }
+        private bool ownerImportEnabled = true;
+        private bool ownerUploadEnabled = false;
+
+        public List<mOwner> OwnersToInsert { get; set; }
+        public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
+        public IDictionary<int, long> MarionOwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
+        public static IDictionary<string, long> NameSortCadMap { get; private set; } = new Dictionary<string, long>();
+
+        private DateTime _updateDate;
+        private string _updateBy;     
 
         public vmOwner()
         {
@@ -54,6 +64,9 @@ namespace MarionUpload.ViewModels
             MarionOwners2017 = new ObservableCollection<mOwner>();
             CadOwner2017NameSortMap = new Dictionary<string, mOwner>();
             NameSorts = new NameSorts();
+           
+            OwnerImportEnabled = true;
+            OwnerUploadEnabled = false;
         }
 
         private void OnImportOwners()
@@ -61,9 +74,9 @@ namespace MarionUpload.ViewModels
             GetMarionOperatorNamesFromImport();
             SelectOwnerDataFromWagData2017();
             SelectOwnerDataFromMarionImportTable();
-
-            OwnerUploadEnabled = true;
+           
             OwnerImportEnabled = false;
+            OwnerUploadEnabled = true;
         }
 
         private void GetMarionOperatorNamesFromImport()
@@ -167,14 +180,16 @@ namespace MarionUpload.ViewModels
                 OwnerUploadEnabled = false;
                 MessageBox.Show($"Finished uploading {MarionOwners.Count()} owners");
 
-                Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
-                //   UploadMarionOwnersToTblName();
+                Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());             
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error Uploading Owner Data -> {ex}");
                 Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
             }
+
+            OwnerImportEnabled = false;
+            OwnerUploadEnabled = false;
 
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
         }
@@ -197,17 +212,7 @@ namespace MarionUpload.ViewModels
                 var distinctResults = results.Distinct(new OwnerNumberComparer()).ToList();
                 distinctResults.ForEach(owner => MarionOwners.Add(owner));
             }
-        }
-
-        public List<mOwner> OwnersToInsert { get; set; }
-        public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
-        public IDictionary<int, long> MarionOwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
-        public static IDictionary<string, long> NameSortCadMap { get; private set; } = new Dictionary<string, long>();
-
-        private DateTime _updateDate;
-        private string _updateBy;
-        private bool _ownerImportEnabled = true;
-        private bool ownerUploadEnabled = false;
+        }       
 
         private mOwner TranslateFrom_mMarionOwnerTo_mOwner(mMarionOwner importedMarionOwner)
         {
