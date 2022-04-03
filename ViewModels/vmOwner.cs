@@ -246,7 +246,7 @@ namespace MarionUpload.ViewModels
                 owner.NameSel_YN = true;
             }
 
-            if (importedMarionOwner.AgentNumber == "")
+            if (importedMarionOwner.AgentNumber == 0)
             {
                 owner.AgentID = 66864;
                 owner.Ntc2Agent_YN = false;
@@ -254,7 +254,8 @@ namespace MarionUpload.ViewModels
             }
             else
             {
-                owner.AgentID = SelectAgentNameIdFromMarionAgentImportTable(importedMarionOwner.AgentNumber);
+                //get agent from MarionAgentNumberToNameIdMap in vmAgent
+                owner.AgentID = vmAgent.MarionAgentNumberToNameIdMap[importedMarionOwner.AgentNumber];                   
                 owner.Ntc2Agent_YN = true;
                 owner.Stmnt2Agent_YN = true;
             }
@@ -308,23 +309,23 @@ namespace MarionUpload.ViewModels
             return owner;
         }
 
-        public int SelectAgentNameIdFromMarionAgentImportTable(string marionAgentId)
-        {
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-            {
-                var result = db.Query<mMarionAgent>($"Select NameId From AbMarionAgents where AgentId = {marionAgentId} ");
+        //public int SelectAgentNameIdFromMarionAgentImportTable(string marionAgentId)
+        //{
+        //    using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+        //    {
+        //        var result = db.Query<mMarionAgent>($"Select NameId From AbMarionAgents where AgentId = {marionAgentId} ");
 
-                if (result.Count() == 0) // could not find this agent in the Marion Agent Table
-                {
-                    Log.Error($"Could not find agent {marionAgentId} in the Marion Agent Table");
-                    // MessageBox.Show($"Could not find agent {marionAgentId} in the Marion Agent Table");
-                    return 66864;
-                }
+        //        if (result.Count() == 0) // could not find this agent in the Marion Agent Table
+        //        {
+        //            Log.Error($"Could not find agent {marionAgentId} in the Marion Agent Table");
+        //            // MessageBox.Show($"Could not find agent {marionAgentId} in the Marion Agent Table");
+        //            return 66864;
+        //        }
 
-                var AgentNameId = result.FirstOrDefault().NameId;
-                return AgentNameId;
-            }
-        }
+        //        var AgentNameId = result.FirstOrDefault().NameId;
+        //        return AgentNameId;
+        //    }
+        //}
     }
 
     public class OwnerNumberComparer : IEqualityComparer<mMarionOwner>

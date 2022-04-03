@@ -30,7 +30,7 @@ namespace MarionUpload.ViewModels
         }
         public ObservableCollection<mMarionAgent> MarionAgents { get; set; }
         private mAgent Agent { get; set; }
-
+        public static IDictionary<int, int> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, int>();
 
         public ICommand CommandImportAgents => new RelayCommand(OnImportAgents);
         public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgentIDs);
@@ -55,42 +55,20 @@ namespace MarionUpload.ViewModels
                     foreach (mMarionAgent marionAgent in MarionAgents)
                     {
                         var populatedOwner = TranslateFrom_mMarionAgentTo_mOwner(marionAgent);
-                        if (MarionAgents.Contains(marionAgent.AgentNumber) populatedOwner.Agent_YN = true;
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
-                        NameIdMap.Add(marionAgent.AgentNumber, primaryOwnerKey);
+                        MarionAgentNumberToNameIdMap.Add(marionAgent.AgentNumber, (int)primaryOwnerKey);
 
-                        if (!NameSortCadMap.ContainsKey(populatedOwner.NameSortCad.Trim().ToUpper()))
-                        {
-                            NameSortCadMap.Add(populatedOwner.NameSortCad.Trim().ToUpper(), primaryOwnerKey);
-                        }
-
-                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
+                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(marionAgent, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                        MarionOwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
-
-
-
-                        //THE FOLLOWING IS NOT NEEDED. WE WILL USE THE MarionOperatorNames.Contains() INSTEAD
-                        //// also update all the owner ids in the Marion Operator Table
-                        //var marionOperators = db.Query<mMarionOperator>("SELECT OperatorName, CompanyNameSub, CompanyName, CompanyID, OperatorFlag, Active From [wagapp2_2021_Marion].[dbo].[AbMarionOperators] where OperatorFlag = 1");
-                        //foreach (var marionOperator in marionOperators)
-                        //{
-                        //    if (NameSortCadMap.ContainsKey(marionOperator.CompanyName.Trim().ToUpper()))
-                        //    {
-                        //        marionOperator.CompanyID = (int)NameSortCadMap[marionOperator.CompanyName.Trim().ToUpper()];
-                        //    }
-
-                        //    db.Update<mMarionOperator>(marionOperator);
-                        //}
-
-
-
+                        
                         //AgentUploadEnabled = false;
                         MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners");
 
                         Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
                         //   UploadMarionOwnersToTblName();
                     }
+                }
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error Uploading Owner Data -> {ex}");
@@ -100,27 +78,36 @@ namespace MarionUpload.ViewModels
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
         }
 
+        private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionAgent marionAgent, long primaryOwnerKey)
+        {
+            var cadOwner = new mCadOwner();
+            cadOwner.CadID = "MAR";
+            cadOwner.CadOwnerID = marionAgent.AgentNumber.ToString();
+            cadOwner.delflag = false;
+            cadOwner.NameID = (int)primaryOwnerKey;
+            return cadOwner;
+        }
 
-        private object TranslateFrom_mMarionAgentTo_mOwner(mMarionAgent marionAgent)
+        private mOwner TranslateFrom_mMarionAgentTo_mOwner(mMarionAgent marionAgent)
         {
             NameSorts nsorts = new NameSorts();
             _updateDate = DateTime.Now;
             _updateBy = "MPW";
 
             var owner = new mOwner();
-
+            owner.Agnt_YN = true;
             owner.CadID = "MAR";
             owner.NameSortCad = marionAgent.AgentName.Trim();
             owner.Stat_YN = true;
             owner.NameSortFirst = marionAgent.AgentName.Trim();
             owner.NameC = marionAgent.AgentName.Trim();
-            owner.Name2 = marionAgent.AgentName.Trim();
+            owner.Name2 = marionAgent.AgentNumber.ToString();
             owner.NameSel_YN = true;
             owner.Mail1 = marionAgent.AgentStreet.Trim();
             owner.MailCi = marionAgent.AgentCity.Trim();
             owner.MailSt = marionAgent.AgentState.Trim();
-            owner.MailZ = marionAgent.AgentZip.Trim();
-            owner.MailZ4 = marionAgent.AgentZipPlusFour.Trim().Substring(0, 4);
+            owner.MailZ = marionAgent.AgentZip.ToString();
+            owner.MailZ4 = marionAgent.AgentZipPlusFour.ToString().Substring(0, 4);
 
             owner.UpdateDate = _updateDate;
             owner.UpdateBy = _updateBy;
@@ -149,14 +136,18 @@ namespace MarionUpload.ViewModels
         static mMarionAgent ParseLineFromMarionAgentsFlatFile(string line)
         {
             var data = new mMarionAgent();
-            data.AgentNumber = GetString(line, 1, 3);
+            Int32.TryParse(GetString(line, 1, 3), out int intAgentNumber);
+            data.AgentNumber = intAgentNumber;
             data.AgentName = GetString(line, 4, 33);
             data.AgentInCareOf = GetString(line, 34, 63);
             data.AgentStreet = GetString(line, 64, 93);
             data.AgentCity = GetString(line, 94, 109);
             data.AgentState = GetString(line, 110, 111);
-            data.AgentZip = GetString(line, 112, 116);
-            data.AgentZipPlusFour = GetString(line, 112, 116):
+            var alpha = GetString(line, 1, 3);
+            Int32.TryParse(GetString(line, 112, 116), out int intZip);
+            data.AgentZip = intZip;
+            Int32.TryParse(GetString(line, 118, 121), out int intZip4);
+            data.AgentZipPlusFour = intZip4;
             return data;
         }
 

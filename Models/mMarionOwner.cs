@@ -12,7 +12,7 @@ namespace MarionUpload.Models
         public string InCareOf { get; set; }      
         public string StreetAddress { get; set; } 
         public string CityStateZip { get; set; }
-        public string AgentNumber { get; set; }  
+        public int AgentNumber { get; set; }  
         public string NameSortCad { get; set; }
         public bool NameSel_YN { get; set; }       
     }
