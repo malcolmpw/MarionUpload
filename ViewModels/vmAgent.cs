@@ -1,163 +1,162 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
+using MarionUpload.Helpers;
+using MarionUpload.Messages;
+using MarionUpload.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
-using Dapper;
-using Dapper.Contrib;
-using GalaSoft.MvvmLight.Command;
-using MarionUpload.Helpers;
-using MarionUpload.Models;
 
 
 namespace MarionUpload.ViewModels
 {
-    public class vmAgent
+    public class vmAgent : ViewModelBase
     {
         static readonly string Path = @"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MA215500.TXT";
         //private const string AgentErrorPath = @"c:\temp\marion_agents_not_found.txt";
 
         public vmAgent()
         {
-            MarionAgents = new ObservableCollection<mAgent>();
+            MarionAgents = new ObservableCollection<mMarionAgent>();
 
         }
-        public ObservableCollection<mAgent> MarionAgents { get; set; }
+        public ObservableCollection<mMarionAgent> MarionAgents { get; set; }
         private mAgent Agent { get; set; }
 
 
         public ICommand CommandImportAgents => new RelayCommand(OnImportAgents);
         public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgentIDs);
 
+        private DateTime _updateDate;
+        private string _updateBy;
+
         public void OnImportAgents()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
         {
             ReadMarionAgentsFlatFileIntoMarionAgents();
             // GetMatchingTblNameData(); // NOT USED
         }
-        
+
         private void OnUploadAgentIDs()
-        {            
-            InsertMarionAgentNumbers(marionAgents);
+        {
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+
+            try
+            {
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+                {
+                    foreach (mMarionAgent marionAgent in MarionAgents)
+                    {
+                        var populatedOwner = TranslateFrom_mMarionAgentTo_mOwner(marionAgent);
+                        if (MarionAgents.Contains(marionAgent.AgentNumber) populatedOwner.Agent_YN = true;
+                        var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
+                        NameIdMap.Add(marionAgent.AgentNumber, primaryOwnerKey);
+
+                        if (!NameSortCadMap.ContainsKey(populatedOwner.NameSortCad.Trim().ToUpper()))
+                        {
+                            NameSortCadMap.Add(populatedOwner.NameSortCad.Trim().ToUpper(), primaryOwnerKey);
+                        }
+
+                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
+                        var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
+                        MarionOwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+
+
+
+                        //THE FOLLOWING IS NOT NEEDED. WE WILL USE THE MarionOperatorNames.Contains() INSTEAD
+                        //// also update all the owner ids in the Marion Operator Table
+                        //var marionOperators = db.Query<mMarionOperator>("SELECT OperatorName, CompanyNameSub, CompanyName, CompanyID, OperatorFlag, Active From [wagapp2_2021_Marion].[dbo].[AbMarionOperators] where OperatorFlag = 1");
+                        //foreach (var marionOperator in marionOperators)
+                        //{
+                        //    if (NameSortCadMap.ContainsKey(marionOperator.CompanyName.Trim().ToUpper()))
+                        //    {
+                        //        marionOperator.CompanyID = (int)NameSortCadMap[marionOperator.CompanyName.Trim().ToUpper()];
+                        //    }
+
+                        //    db.Update<mMarionOperator>(marionOperator);
+                        //}
+
+
+
+                        //AgentUploadEnabled = false;
+                        MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners");
+
+                        Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+                        //   UploadMarionOwnersToTblName();
+                    }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error Uploading Owner Data -> {ex}");
+                Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+            }
+
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+        }
+
+
+        private object TranslateFrom_mMarionAgentTo_mOwner(mMarionAgent marionAgent)
+        {
+            NameSorts nsorts = new NameSorts();
+            _updateDate = DateTime.Now;
+            _updateBy = "MPW";
+
+            var owner = new mOwner();
+
+            owner.CadID = "MAR";
+            owner.NameSortCad = marionAgent.AgentName.Trim();
+            owner.Stat_YN = true;
+            owner.NameSortFirst = marionAgent.AgentName.Trim();
+            owner.NameC = marionAgent.AgentName.Trim();
+            owner.Name2 = marionAgent.AgentName.Trim();
+            owner.NameSel_YN = true;
+            owner.Mail1 = marionAgent.AgentStreet.Trim();
+            owner.MailCi = marionAgent.AgentCity.Trim();
+            owner.MailSt = marionAgent.AgentState.Trim();
+            owner.MailZ = marionAgent.AgentZip.Trim();
+            owner.MailZ4 = marionAgent.AgentZipPlusFour.Trim().Substring(0, 4);
+
+            owner.UpdateDate = _updateDate;
+            owner.UpdateBy = _updateBy;
+
+            return owner;
         }
 
         public List<mMarionAgent> marionAgents;
 
-        public static void InsertMarionAgentNumbers(List<mMarionAgent> agents)
-        {
-            // insert marion agent numbers and nameIDs into tblCadOwner            
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-            {
-                string sqlQuery = "Insert Into tblCadOwners(NameID, CadID, CadOwnerID, delflag) Values(@NameID, @CadID, @CadOwnerID, @delflag)";
-                foreach (mMarionAgent m in agents)
-                {
-                    var agentInsert = new mCadOwner()
-                    {
-                        NameID = m.NameId,
-                        CadID = "MAR",
-                        CadOwnerID = m.AgentId,
-                        delflag = false
-                    };                        
-                    db.Execute(sqlQuery, agentInsert);
-                }
-            }
-        }
-
-        //static List<(string reason, string agentName, string agentZip, string zip4)> _listOfErrorAgents = new List<(string, string, string, string)>();
-
-        //private void GetMatchingTblNameData()
-        //{
-        //********************* this method was abandoned in favor of manually adding the needed agents to tblName and ***************************
-        //********************* using WagApp2 to find the NameID in tblName of agent matches and recording these NameIDs in dbo.AbMarionAgents ***
-
-        //using (IDbConnection db = new SqlConnection(ConnectionString))
-        //{
-        //    foreach (mAgent agent in MarionAgents)
-        //    {
-        //        GetNameidAndAgentname(db, agent, agent.AgentName, agent.Zip, agent.Zip4);
-        //    }
-
-        //    using (StreamWriter sw = new StreamWriter(AgentErrorPath, false))
-        //    {
-        //        foreach (var error in _listOfErrorAgents)
-        //        {
-        //            sw.WriteLine($"{error.reason} - agent name:{error.agentName} Zip:{error.agentZip} Zip4:{error.zip4}");
-        //        }
-        //    }
-        //}
-        //}
-
-
-        //private static mAgent GetNameidAndAgentname(IDbConnection db, mAgent _agent, string _agentName, string _agentZip, string zip4)
-        //{
-        //    var parameters = new { AgentName = _agentName.Trim(), AgentZip = _agentZip.Trim() };
-        //    var sql = "Select * from tblName where tblName.NameC like @AgentName and tblName.MailZ like @AgentZip";
-        //    try
-        //    {
-        //        var owner = db.Query<mOwner>(sql, parameters).SingleOrDefault();
-
-        //        if (owner == null)
-        //        {
-        //            _listOfErrorAgents.Add(("no owner found", _agentName, _agentZip, zip4));
-        //            return _agent;
-        //        }
-
-        //        _agent.NameID = owner.NameID;
-        //        _agent.NameC = owner.NameSort;
-        //        return _agent;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        var owners = db.Query<mOwner>(sql, parameters);
-        //        var filteredOwners = owners.Where(o => o.MailZ4 == zip4).ToList();
-
-        //        if (filteredOwners.Count() > 1)
-        //        {
-        //            _listOfErrorAgents.Add(("multiple owners found", _agentName, _agentZip, zip4));
-        //        }
-
-        //        if (filteredOwners.Count > 0)
-        //        {
-        //            _agent.NameID = filteredOwners[0].NameID;
-        //            _agent.NameC = filteredOwners[0].NameSort;
-        //        }
-        //        return _agent;
-        //    }
-        //}
-
         public void ReadMarionAgentsFlatFileIntoMarionAgents()
         {
-            //var service = new DataExportService();
-
             using (StreamReader sr = new StreamReader(Path))
             {
                 MarionAgents.Clear();
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
-                    mAgent agent = new mAgent();
+                    line = line.PadRight(131);
+                    mMarionAgent agent = new mMarionAgent();
                     agent = ParseLineFromMarionAgentsFlatFile(line);
                     MarionAgents.Add(agent);
                 }
             }
         }
 
-        static mAgent ParseLineFromMarionAgentsFlatFile(string line)
+        static mMarionAgent ParseLineFromMarionAgentsFlatFile(string line)
         {
-            var data = new mAgent();
+            var data = new mMarionAgent();
             data.AgentNumber = GetString(line, 1, 3);
             data.AgentName = GetString(line, 4, 33);
-            data.InCareOf = GetString(line, 34, 63);
-            data.StreetAddress = GetString(line, 64, 93);
-            data.City = GetString(line, 94, 109);
-            data.State = GetString(line, 110, 111);
-            data.Zip = GetString(line, 112, 116);
-            var last = GetString(line, 118, 121);
-            data.Zip4 = last ?? "";
+            data.AgentInCareOf = GetString(line, 34, 63);
+            data.AgentStreet = GetString(line, 64, 93);
+            data.AgentCity = GetString(line, 94, 109);
+            data.AgentState = GetString(line, 110, 111);
+            data.AgentZip = GetString(line, 112, 116);
+            data.AgentZipPlusFour = GetString(line, 112, 116):
             return data;
         }
 

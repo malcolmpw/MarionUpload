@@ -92,6 +92,7 @@
     <Compile Include="Comparers\OperatorComparer.cs" />
     <Compile Include="Helpers\ConnectionStringHelper.cs" />
     <Compile Include="Messages\AccountsFinishedMessage.cs" />
+    <Compile Include="Messages\AgentFinishedMessage.cs" />
     <Compile Include="Messages\OwnerFinishedMessage.cs" />
     <Compile Include="Messages\PropertiesFinishedMessage.cs" />
     <Compile Include="Messages\UnitsFinishedMessage.cs" />
