@@ -2,8 +2,8 @@
 {
     public class mAgent
     {        
-        public int NameID { get; set; }
-        public string NameC { get; set; }
+        //public int NameID { get; set; }
+        //public string NameC { get; set; }
         public string AgentNumber { get; set; }   //BEG   1 - END   3
         public string AgentName { get; set; }     //BEG   4 - END  33
         public string InCareOf { get; set; }      //BEG  34 - END  64

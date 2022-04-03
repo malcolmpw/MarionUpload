@@ -15,8 +15,8 @@
             <DataGrid Name="dgAgents" Margin="10" Width="Auto" Height="700" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionAgents}" AutoGenerateColumns="False"  >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="NameID" Binding="{Binding Path=NameID, Mode=OneWay}" />
-                    <DataGridTextColumn Header="NameC" Binding="{Binding Path=NameC, Mode=TwoWay}" />
+                    <!--<DataGridTextColumn Header="NameID" Binding="{Binding Path=NameID, Mode=OneWay}" />
+                    <DataGridTextColumn Header="NameC" Binding="{Binding Path=NameC, Mode=TwoWay}" />-->
                     <DataGridTextColumn Header="AgentNumber" Binding="{Binding Path=AgentNumber, Mode=OneWay}" />
                     <DataGridTextColumn Header="AgentName" Binding="{Binding Path=AgentName, Mode=TwoWay}" />
                     <DataGridTextColumn Header="InCareOf" Binding="{Binding Path=InCareOf, Mode=TwoWay}" />

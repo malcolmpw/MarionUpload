@@ -1,8 +1,7 @@
 ﻿namespace MarionUpload.Models
 {
     public class mMarionAgent
-    {        
-        
+    {                
         public string AgentId { get; set; }       
         public string AgentName { get; set; }    
         public string InCareOf { get; set; }     

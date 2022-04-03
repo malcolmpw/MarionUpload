@@ -14,6 +14,9 @@
                 </Button>
             </StackPanel>
             <TabControl Name="tabImportAndUploadTasks" Margin="10" IsEnabled="{Binding IsStarted}" SelectedIndex="{Binding CurrentStep}">
+                <TabItem Header="Agents" Visibility="Visible">
+                    <view:vwAgent/>
+                </TabItem>
                 <TabItem Header="Owners" IsEnabled="{Binding OwnersEnabled}">
                     <view:vwOwner/>
                 </TabItem>
@@ -31,9 +34,6 @@
                 </TabItem>
                 <TabItem Header="Finished">
                     <view:vwFinishedScreen />
-                </TabItem>
-                <TabItem Header="Agents" Visibility="Collapsed">
-                    <view:vwAgent/>
                 </TabItem>
                 <TabItem Header="tlkpUnit" Visibility="Collapsed">
                     <view:vwLookupUnits/>

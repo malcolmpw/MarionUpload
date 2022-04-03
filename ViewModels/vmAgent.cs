@@ -31,38 +31,21 @@ namespace MarionUpload.ViewModels
         private mAgent Agent { get; set; }
 
 
-        public ICommand CommandImportAgents => new RelayCommand(DelegateImportAgents);
-        public void DelegateImportAgents()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
+        public ICommand CommandImportAgents => new RelayCommand(OnImportAgents);
+        public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgentIDs);
+
+        public void OnImportAgents()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
         {
             ReadMarionAgentsFlatFileIntoMarionAgents();
             // GetMatchingTblNameData(); // NOT USED
-
         }
-
-        public ICommand CommandUploadAgentIDs => new RelayCommand(DelegateUploadAgentIDs);
-        private void DelegateUploadAgentIDs()
-        {
-            // By searching in WagApp2 NameSelect and PrimaryData,
-            // I added NameIDs from tblName to the AbMarionAgents table, and
-            // I inserted new agents into tblName when none were found.
-
-            // Now I will collect all the Marion AgentIDs and NameIDs
-            GetMarionAgentIDs();
-            // And insert the matching pairs into tblCadOwner
+        
+        private void OnUploadAgentIDs()
+        {            
             InsertMarionAgentNumbers(marionAgents);
         }
 
         public List<mMarionAgent> marionAgents;
-        private List<mMarionAgent> GetMarionAgentIDs()
-        {
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-            {
-                // get marion agents
-                var sql = "Select * from AbMarionAgents";
-                marionAgents = db.Query<mMarionAgent>(sql).ToList();
-            }
-            return marionAgents;
-        }
 
         public static void InsertMarionAgentNumbers(List<mMarionAgent> agents)
         {
