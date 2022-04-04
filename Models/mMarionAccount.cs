@@ -15,6 +15,6 @@ namespace MarionUpload.Models
         public float DecimalInterest { get; set; }
         public int AccountNumber { get; set; }
         public int AccountSequence { get; set; }
-        public decimal Juris2MarketValue { get; set; }
+        public decimal Juris1MarketValue { get; set; }
     }
 }

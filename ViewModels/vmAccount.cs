@@ -54,7 +54,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionAccount>("Select ImportID, OwnerNumber, LeaseNumber, InterestType, SPTBCode," +
-                                                        " Protest, DecimalInterest, AccountNumber, Juris2MarketValue, [AccountSequence]" +
+                                                        " Protest, DecimalInterest, AccountNumber, Juris1MarketValue, [AccountSequence]" +
                                                         " from AbMarionImport"); ;
 
                 var resultList = results.ToList();
@@ -190,7 +190,7 @@ namespace MarionUpload.ViewModels
             var acctPrYr = new mAccountPrYr();
             acctPrYr.AcctLegal = populatedAccount.AcctLegal;
             acctPrYr.PctType = populatedAccount.PctType;
-            acctPrYr.PctProp = populatedAccount.PctProp;
+            acctPrYr.PctProp = (float)Math.Round(populatedAccount.PctProp,9);
             acctPrYr.Protest_YN = populatedAccount.Protest_YN;
             acctPrYr.PTDcode = populatedAccount.PTDcode;
             acctPrYr.NameID = populatedAccount.NameID;
@@ -256,9 +256,9 @@ namespace MarionUpload.ViewModels
             var interestInfo = " ( " + interestDecimalsFormatted + " - " + account.PctType.ToString() + ")";
             if (_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV") account.AcctLegal += interestInfo;
 
-            account.ValAcctCur = _marionAccount.Juris2MarketValue;
-            account.valacctPrYr = _marionAccount.Juris2MarketValue;
-            account.AcctValPrYr = _marionAccount.Juris2MarketValue;
+            account.ValAcctCur = _marionAccount.Juris1MarketValue;
+            account.valacctPrYr = _marionAccount.Juris1MarketValue;
+            account.AcctValPrYr = _marionAccount.Juris1MarketValue;
 
             string divString = _marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ? "M" : "U";
             account.division = char.Parse(divString.Substring(0, 1));

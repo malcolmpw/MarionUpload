@@ -111,14 +111,13 @@ namespace MarionUpload.ViewModels
                         if (jurisdiction == 0) continue;
                         if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
                         {
-                            Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
+                            Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit ");
                             //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
                             continue;
                         }
                         var unitProperty = TranslateImportPropertyToUnitProperty(property, jurisdiction);
                         db.Insert<mUnitProperty>(unitProperty);
                     }
-
                 }
 
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);

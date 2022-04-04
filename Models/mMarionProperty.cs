@@ -28,6 +28,6 @@ namespace MarionUpload.Models
         public int Jurisdiction10 { get; set; }
         public int Jurisdiction11 { get; set; }
         public int Jurisdiction12 { get; set; }
-        public int Juris2MarketValue { get; set; }
+        public decimal Juris1MarketValue { get; set; }
     }
 }

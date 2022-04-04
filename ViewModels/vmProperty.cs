@@ -60,15 +60,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionProperty>(
-                    "Select distinct LeaseNumber, PropertyType, SPTBCode, " +
-                    "Description1, Description2," +
-                    "LeaseName,RRC,OperatorName," +
-                    "Jurisdiction1, Jurisdiction2, Jurisdiction3, " +
-                    "Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
-                    "Jurisdiction7, Jurisdiction8, Jurisdiction9, " +
-                    "Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
-                    "Juris2MarketValue " +
-                    "from AbMarionImport");
+                    "Select distinct Juris1MarketValue, LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12 from AbMarionImport order by Juris1MarketValue desc ");
                 //MessageBox.Show($"sptb code = --{results.FirstOrDefault().SPTBCode}--");
 
                 JurisdictionMap = db.Query<mJurisdiction>("Select Code,Name from abMariontlkpJurisdiction")
@@ -79,7 +71,7 @@ namespace MarionUpload.ViewModels
                 var resultList = results.Distinct(new PropertyComparer()).ToList();
 
                 resultList.ForEach(marionProperty => MarionProperties.Add(marionProperty));
-
+                var subList = MarionProperties.Where(t => t.Juris1MarketValue != 0.0M).Select(p => p.Juris1MarketValue) .ToList();
                 PropertyImportEnabled = false;
                 PropertyUploadEnabled = true;
             }
@@ -151,8 +143,8 @@ namespace MarionUpload.ViewModels
             oppSegment.EqptClassID = 136;//inventory
             oppSegment.DeprSchedID = 1;// from inventory
 
-            oppSegment.PrsnlValCur = marionProperty.Juris2MarketValue;
-            oppSegment.PrsnlValFlat = marionProperty.Juris2MarketValue;
+            oppSegment.PrsnlValCur = marionProperty.Juris1MarketValue;
+            oppSegment.PrsnlValFlat = marionProperty.Juris1MarketValue;
 
             oppSegment.delflag = false;
 
@@ -212,7 +204,7 @@ namespace MarionUpload.ViewModels
                 property.Location = (importedMarionProperty.Description2).Trim();
             }
 
-            //property.SegmentValue = importedMarionProperty.Juris2MarketValue;
+            //property.SegmentValue = importedMarionProperty.Juris1MarketValue;
 
             property.ControlCad = "MAR";
 
