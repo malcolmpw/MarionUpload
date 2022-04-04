@@ -127,6 +127,7 @@ namespace MarionUpload.ViewModels
                 {
                     // delete accounts
                     db.Execute("Delete from tblAccount where Cad = 'MAR'");
+                    db.Execute("Delete from tblAprslAdmin where CadID = 'MAR'");
                     db.Execute("Delete n from tblName n, tblCadOwners c where n.NameID = c.NameID and c.CadID = 'MAR'");
                     db.Execute("Delete from tblCadOwners where CadID = 'MAR'");
 

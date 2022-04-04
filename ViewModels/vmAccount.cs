@@ -73,16 +73,16 @@ namespace MarionUpload.ViewModels
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
 
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-                {                    
-                    AccountList= new List<mAccount>();
+                {
+                    AccountList = new List<mAccount>();
                     foreach (var _marionAccount in MarionAccounts)
                     {
                         var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                         var primaryKey = db.Insert<mAccount>(populatedAccount);
                         AccountList.Add(populatedAccount);
 
-                        var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);                        
-                       
+                        var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
+
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
                         var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
                     }
@@ -108,7 +108,7 @@ namespace MarionUpload.ViewModels
                         "from tblAccount where tblAccount.PropID = PropID and tblAccount.NameID = NameID " +
                         "and tblAccount.Cad='MAR'";
 
-                        var affectedRows = db.Execute(sqlStringForTlkpAccountPrYr1);
+                    var affectedRows = db.Execute(sqlStringForTlkpAccountPrYr1);
 
                     // update tlkpAccountPrYr with values in tblAccount
                     string sqlStringForTlkpAccountPrYr2 =
@@ -133,13 +133,18 @@ namespace MarionUpload.ViewModels
                         try
                         {
                             // test to see if populatedAprslAdmin already exists.
-                            // var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                            var adminQueryString = $"use wagapp2_2021_Marion Select * from tblAprslAdmin a where a.Year = '2022' and a.NameID = {acct.NameID} and a.CadID='MAR' ";
+                            var affectedRows3 = db.Query(adminQueryString).Count();
+                            if (affectedRows3 == 0)
+                            {
+                                var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                            }
                         }
                         catch (Exception ex)
                         {
                             throw new Exception($"Error in inserting into Admin Appraisal table {ex.Message}");
                         }
-                   }
+                    }
                 }
 
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);

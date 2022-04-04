@@ -29,7 +29,7 @@ namespace MarionUpload.Models
         public int EqptClassID { get; set; }
         public int DeprSchedID { get; set; }
         public decimal PrsnlValFlat { get; set; }
-        public decimal PrsnlValCur { get; set; }
+        public decimal PrsnlValCur { get; set; }       
              
         public bool delflag { get; set; }
     }
