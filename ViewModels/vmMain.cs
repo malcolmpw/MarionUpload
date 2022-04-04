@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using MarionUpload.Helpers;
 using MarionUpload.Messages;
+using MarionUpload.Models;
 
 namespace MarionUpload.ViewModels
 {
@@ -105,8 +111,46 @@ namespace MarionUpload.ViewModels
 
         private void OnStartWizard()
         {
+            // Clean up all Tables
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+            DeleteAllMarionCountyData();
             IsStarted = true;
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+
         }
 
+        private void DeleteAllMarionCountyData()
+        {
+            try
+            {
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+                {
+                    // delete accounts
+                    db.Execute("Delete from tblAccount where Cad = 'MAR'");
+                    db.Execute("Delete n from tblName n, tblCadOwners c where n.NameID = c.NameID and c.CadID = 'MAR'");
+                    db.Execute("Delete from tblCadOwners where CadID = 'MAR'");
+
+                    db.Execute("Delete s from tblPersonal s, tblProperty p, tblCadProperty c where s.PropId = p.PropId and  p.PropId = c.PropID and c.CadID = 'MAR'");
+                    db.Execute("Delete p from tblProperty p, tblCadProperty c where p.PropId = c.PropID and c.CadID = 'MAR'");
+                    db.Execute("Delete from tblCadProperty where CadID = 'MAR'");
+
+                    db.Execute("Delete t from tblLease l, tblTract t, tblCadLease c where t.LeaseID = l.LeaseID and l.LeaseID = c.LeaseID and c.CadID = 'MAR'");
+                    db.Execute("Delete l from tblLease l, tblCadLease c where l.LeaseID = c.LeaseID and c.CadID = 'MAR'");
+                    db.Execute("Delete from tblCadLease where CadID = 'MAR'");
+
+                    var cadunits = db.Query<mTlkpUnit>("select * from tlkpCadUnit where CadId = 'MAR'");
+                    foreach (var cadunit in cadunits)
+                    {
+                        db.Execute($"Delete from tblUnitProperty where UnitId = '{cadunit.UnitID}'");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error Uploading Owner Data -> {ex}");
+                Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
+            }
+        }
     }
 }

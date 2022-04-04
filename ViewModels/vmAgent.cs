@@ -29,8 +29,9 @@ namespace MarionUpload.ViewModels
         private bool agentUploadEnabled = false;
 
         public ObservableCollection<mMarionAgent> MarionAgents { get; set; }
+        
         private mAgent Agent { get; set; }
-        public static IDictionary<int, int> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, int>();
+        public static IDictionary<int, long> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
 
         public ICommand CommandImportAgents => new RelayCommand(OnImportAgents);
         public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgents);
@@ -48,6 +49,10 @@ namespace MarionUpload.ViewModels
         public void OnImportAgents()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
         {
             ReadMarionAgentsFlatFileIntoMarionAgents();
+            //MarionAgents.OrderBy(a => a.AgentNumber);
+            //var backupAgents = MarionAgents;
+            //MarionAgents = null;
+            //MarionAgents = backupAgents;
             agentImportEnabled = false;
             agentUploadEnabled = true;
         }
@@ -141,7 +146,7 @@ namespace MarionUpload.ViewModels
                     agent = ParseLineFromMarionAgentsFlatFile(line);
                     MarionAgents.Add(agent);
                 }
-            }
+            }           
         }
 
         static mMarionAgent ParseLineFromMarionAgentsFlatFile(string line)
