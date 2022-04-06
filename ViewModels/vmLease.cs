@@ -220,7 +220,10 @@ namespace MarionUpload.ViewModels
 
             // now I need the tblWell data to link via rrc=tblWell.RrcLease to get tblLease LeaseOprID
             var maironRrc = parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC);
-            var wellRrcOper = vmOwner.WellOperatorIdMap[maironRrc];
+
+            string wellRrcOper = "";
+            if (vmOwner.WellOperatorIdMap.ContainsKey(maironRrc))
+             wellRrcOper = vmOwner.WellOperatorIdMap[maironRrc];
 
             int operId = 0;
             var success = int.TryParse(wellRrcOper, out operId);
