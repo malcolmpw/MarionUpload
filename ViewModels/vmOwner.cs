@@ -54,6 +54,8 @@ namespace MarionUpload.ViewModels
         public static ObservableCollection<mMarionWellOperatorID> MarionWellOperatorIDs { get; set; }
         public Dictionary<string, string> MarionWellOperatorIdMap { get; set; }
 
+        public static ObservableCollection<mCrwOperator> CrwOperators { get; set; }
+
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
 
@@ -90,14 +92,26 @@ namespace MarionUpload.ViewModels
 
         private void OnImportOwners()
         {
-            GetMarionOperatorRRCsFromImport();
-            GetMarionOperatorIdsFromTblWell();
+            GetOperatorsFromAbCrwOperators();
+            //GetMarionOperatorRRCsFromImport();
+            //GetRrcOperatorIdsFromTblWell();
             GetMarionOperatorNamesFromImport();
             SelectOwnerDataFromWagData2017();
             SelectOwnerDataFromMarionImportTable();
 
             OwnerImportEnabled = false;
             OwnerUploadEnabled = true;
+        }
+
+        private void GetOperatorsFromAbCrwOperators()
+        {
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
+            {
+                CrwOperators = new ObservableCollection<mCrwOperator>();
+                string sqlString = "select distinct OprRrcID,NameSort from wagapp2_2021_Marion.dbo.AbMarionOperatorsFromCRW ";
+                var crwOperators = db.Query<mCrwOperator>(sqlString).ToList();
+                CrwOperators = new ObservableCollection<mCrwOperator>(crwOperators);
+            }
         }
 
         private void GetMarionOperatorRRCsFromImport()
@@ -115,7 +129,7 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        private void GetMarionOperatorIdsFromTblWell()
+        private void GetRrcOperatorIdsFromTblWell()
         {
 
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
@@ -215,8 +229,8 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                        if(!MarionOwnerNumberToNameIdMap.ContainsKey(_marionOwner.OwnerNumber))
-                        MarionOwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                        if (!MarionOwnerNumberToNameIdMap.ContainsKey(_marionOwner.OwnerNumber))
+                            MarionOwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
 
                     }
                 }
@@ -272,7 +286,7 @@ namespace MarionUpload.ViewModels
             //var matchingOwner = CadOwner2017NameSortMap[owner.NameSortCad];
             owner.Stat_YN = true;
 
-          
+
             ////MarionOperatorRRCs=select from m in MarionOperatorRRCs(XamlGeneratedNamespace=>)
 
             //List<mMarionOperatorRrc> idsWithOnlyFirstRrc = new List<mMarionOperatorRrc>();

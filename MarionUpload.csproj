@@ -109,6 +109,7 @@
     <Compile Include="Models\mMarionAgent.cs" />
     <Compile Include="Models\mMarionImport.cs" />
     <Compile Include="Models\mMarionLease.cs" />
+    <Compile Include="Models\mCrwOperator.cs" />
     <Compile Include="Models\mMarionOperatorRrc.cs" />
     <Compile Include="Models\mMarionOperator.cs" />
     <Compile Include="Models\mMarionOwner.cs" />
