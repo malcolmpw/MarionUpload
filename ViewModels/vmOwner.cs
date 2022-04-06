@@ -52,9 +52,7 @@ namespace MarionUpload.ViewModels
         public Dictionary<string, string> WellOperatorIdMap { get; set; }
 
         public static ObservableCollection<mMarionWellOperatorID> MarionWellOperatorIDs { get; set; }
-        public Dictionary<string, string> MarionWellOperatorIdMap { get; set; }
-
-        public static ObservableCollection<mCrwOperator> CrwOperators { get; set; }
+        public Dictionary<string, string> MarionWellOperatorIdMap { get; set; }       
 
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
@@ -92,7 +90,7 @@ namespace MarionUpload.ViewModels
 
         private void OnImportOwners()
         {
-            GetOperatorsFromAbCrwOperators();
+           
             //GetMarionOperatorRRCsFromImport();
             //GetRrcOperatorIdsFromTblWell();
             GetMarionOperatorNamesFromImport();
@@ -103,16 +101,7 @@ namespace MarionUpload.ViewModels
             OwnerUploadEnabled = true;
         }
 
-        private void GetOperatorsFromAbCrwOperators()
-        {
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
-            {
-                CrwOperators = new ObservableCollection<mCrwOperator>();
-                string sqlString = "select distinct OprRrcID,NameSort from wagapp2_2021_Marion.dbo.AbMarionOperatorsFromCRW ";
-                var crwOperators = db.Query<mCrwOperator>(sqlString).ToList();
-                CrwOperators = new ObservableCollection<mCrwOperator>(crwOperators);
-            }
-        }
+        
 
         private void GetMarionOperatorRRCsFromImport()
         {

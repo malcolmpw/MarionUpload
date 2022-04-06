@@ -1,4 +1,5 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -28,10 +29,12 @@ namespace MarionUpload.ViewModels
         private bool agentImportEnabled = true;
         private bool agentUploadEnabled = false;
 
-        public ObservableCollection<mMarionAgent> MarionAgents { get; set; }
-        
         private mAgent Agent { get; set; }
+        public ObservableCollection<mMarionAgent> MarionAgents { get; set; }        
         public static IDictionary<int, long> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
+
+        public ObservableCollection<mCrwOperator> CrwOperators { get; set; }
+        public static IDictionary<string, long> OperRrcIDToNameIdMap { get; private set; } = new Dictionary<string, long>();
 
         public ICommand CommandImportAgents => new RelayCommand(OnImportAgents);
         public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgents);
@@ -53,6 +56,7 @@ namespace MarionUpload.ViewModels
             //var backupAgents = MarionAgents;
             //MarionAgents = null;
             //MarionAgents = backupAgents;
+            GetOperatorsFromAbCrwOperators();
             agentImportEnabled = false;
             agentUploadEnabled = true;
         }
@@ -84,6 +88,29 @@ namespace MarionUpload.ViewModels
                 Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
             }
 
+            try
+            {
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+                {
+                    foreach (mCrwOperator crwOperator in CrwOperators)
+                    {
+                        var populatedOwner = TranslateFrom_mCrwOperatorTo_mOwner(crwOperator);
+                        var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
+                        if (!OperRrcIDToNameIdMap.ContainsKey(populatedOwner.OperRrcID))
+                            OperRrcIDToNameIdMap.Add(populatedOwner.OperRrcID, (int)primaryOwnerKey);
+
+                        var populatedCadOwner = TranslateFrom_mCrwOperatorTo_mCadOwner(crwOperator, primaryOwnerKey);
+                        var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error Uploading Owner Data -> {ex}");
+                Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+            }
+
             AgentUploadEnabled = false;
             MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners(agents)");
             Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
@@ -95,11 +122,51 @@ namespace MarionUpload.ViewModels
             Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
         }
 
+        private mOwner TranslateFrom_mCrwOperatorTo_mOwner(mCrwOperator crwOperator)
+        {
+            _updateDate = DateTime.Now;
+            _updateBy = "MPW";
+
+            var owner = new mOwner();
+            owner.Agnt_YN = true;
+            owner.CadID = "MAR";
+            owner.NameSortCad = crwOperator.NameSort.Trim();
+            owner.Stat_YN = true;
+            owner.Oper_YN = true;
+            owner.OperRrcID = crwOperator.OperRrcID.Trim();
+            //owner.NameSortFirst = crwOperator.AgentName.Trim();
+            owner.NameC = crwOperator.NameSort.Trim();
+            //owner.Name2 = crwOperator.AgentNumber.ToString();
+            owner.NameSel_YN = true;
+            //owner.Mail1 = crwOperator.AgentStreet.Trim();
+            //owner.MailCi = crwOperator.AgentCity.Trim();
+            //owner.MailSt = crwOperator.AgentState.Trim();
+            //owner.MailZ = crwOperator.AgentZip.ToString();
+            //owner.MailZ4 = crwOperator.AgentZip4.ToString().PadLeft(4);
+
+            owner.UpdateDate = _updateDate;
+            owner.UpdateBy = _updateBy;
+
+            return owner;
+        }
+
         private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionAgent marionAgent, long primaryOwnerKey)
         {
             var cadOwner = new mCadOwner();
             cadOwner.CadID = "MAR";
             cadOwner.CadOwnerID = marionAgent.AgentNumber.ToString();
+            cadOwner.delflag = false;
+            cadOwner.NameID = (int)primaryOwnerKey;
+            return cadOwner;
+        }
+
+        private mCadOwner TranslateFrom_mCrwOperatorTo_mCadOwner(mCrwOperator crwOperator, long primaryOwnerKey)
+        {
+            var cadOwner = new mCadOwner();
+            cadOwner.CadID = "MAR";
+            var nsLength = crwOperator.NameSort.Length;
+            var nsUseLength = nsLength <= 15 ? nsLength : 15;
+            cadOwner.CadOwnerID = crwOperator.NameSort.Substring(0, nsUseLength).ToString();
             cadOwner.delflag = false;
             cadOwner.NameID = (int)primaryOwnerKey;
             return cadOwner;
@@ -133,6 +200,18 @@ namespace MarionUpload.ViewModels
         }
 
         public List<mMarionAgent> marionAgents;
+
+        private void GetOperatorsFromAbCrwOperators()
+        {
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+            {
+                CrwOperators = new ObservableCollection<mCrwOperator>();
+                //string sqlString = "select CadID,NameID,OprRrcID,NameSort,CountOfLpdID,Oper_YN from wagapp2_2021_Marion.dbo.AbMarionOperatorsFromCRW ";
+                string sqlString = "select * from wagapp2_2021_Marion.dbo.AbMarionOperatorsFromCRW ";
+                var crwOperators = db.Query<mCrwOperator>(sqlString).ToList();
+                CrwOperators = new ObservableCollection<mCrwOperator>(crwOperators);
+            }
+        }
 
         public void ReadMarionAgentsFlatFileIntoMarionAgents()
         {
