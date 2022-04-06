@@ -49,7 +49,7 @@ namespace MarionUpload.ViewModels
         public Dictionary<string, string> MarionOperatorRrcMap { get; set; }
 
         public static ObservableCollection<mWellOperatorID> WellOperatorIDs { get; set; }
-        public Dictionary<string, string> WellOperatorIdMap { get; set; }
+        public static Dictionary<string, string> WellOperatorIdMap { get; set; }
 
         public static ObservableCollection<mMarionWellOperatorID> MarionWellOperatorIDs { get; set; }
         public Dictionary<string, string> MarionWellOperatorIdMap { get; set; }       

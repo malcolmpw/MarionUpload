@@ -37,8 +37,6 @@ namespace MarionUpload.ViewModels
         public static IDictionary<string, long> OperatorNameIdMap { get; private set; }
         public List<string> OperatorNamesFromMarionImport { get; private set; }
 
-
-
         public vmLease()
         {
             MarionMineralAccounts = new ObservableCollection<mMarionLease>();
@@ -58,9 +56,9 @@ namespace MarionUpload.ViewModels
             {
                 var operatorResults = db.Query<mMarionOperator>(
                     "SELECT * from AbMarionOperators Where Active=1 order by OperatorName ");
-                var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();                
+                var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();
                 operatorDistinctResults.ForEach(marionOperator => MarionOperators.Add(marionOperator));
-                
+
                 //foreach (mMarionOperator oper in MarionOperators)
                 //{
                 //    if (!OperatorNameIdMap.ContainsKey(oper.CompanyName))
@@ -99,8 +97,8 @@ namespace MarionUpload.ViewModels
                 GetOperatorNamesFromMarionImport();
                 foreach (var marionLease in marionLeases)
                 {
-                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease,MarionOperators);
-                    if (OperatorNamesFromMarionImport.Contains(marionLease.OperatorName)) populatedLease.LeaseOprID= 0;
+                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease, MarionOperators);
+                    if (OperatorNamesFromMarionImport.Contains(marionLease.OperatorName)) populatedLease.LeaseOprID = 0;
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
                     var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
@@ -129,7 +127,7 @@ namespace MarionUpload.ViewModels
 
                         var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == marionTract.LeaseNumber).FirstOrDefault().Acres; //tract acres
                         var leaseAcres = (from m in MarionMineralAccounts where m.RRC == marionTract.RRC select m.Acres).Sum();//sum of tract acres in lease
-                        populatedTract.LeasePct = Math.Round(leaseAcres != 0 ? tractAcres / leaseAcres : 0.0,3);
+                        populatedTract.LeasePct = Math.Round(leaseAcres != 0 ? tractAcres / leaseAcres : 0.0, 3);
                         db.Insert<mTract>(populatedTract);
                     }
                 }
@@ -217,12 +215,17 @@ namespace MarionUpload.ViewModels
         private mLease TranslateFrom_mMarionLeaseTo_mLease(mMarionLease marionLease, ObservableCollection<mMarionOperator> marionOperators)
         {
             var lease = new mLease();
-            lease.LeaseNameWag = GetRRCnumberFromImportRRCstring(marionLease);
-            //var id = MarionOperators.Where(x => x.CompanyName == marionLease.OperatorName).FirstOrDefault().CompanyID;
-            lease.LeaseOprID = 0;
-            //(int)OperatorNameIdMap[marionLease.OperatorName];
-            lease.LeaseOprID = 0;
+            lease.LeaseNameWag = marionLease.LeaseName.Trim();
+            var parsers = new RrcParser();
 
+            // now I need the tblWell data to link via rrc=tblWell.RrcLease to get tblLease LeaseOprID
+            var maironRrc = parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC);
+            var wellRrcOper = vmOwner.WellOperatorIdMap[maironRrc];
+
+            int operId = 0;
+            var success = int.TryParse(wellRrcOper, out operId);
+            lease.LeaseOprID = success ? operId : 0;
+           
             lease.Stat_YN = true;
             lease.StatBy = UpdateByDefault;
             lease.StatDate = DateTime.Now;
@@ -234,8 +237,8 @@ namespace MarionUpload.ViewModels
             return lease;
 
         }
-        
-        
+
+
 
         private static string GetRRCnumberFromImportRRCstring(mMarionLease marionLease)
         {
