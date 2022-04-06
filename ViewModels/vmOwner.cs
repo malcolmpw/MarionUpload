@@ -35,14 +35,24 @@ namespace MarionUpload.ViewModels
                                                    "order by n.NameSortCad ";
 
         public ObservableCollection<mMarionOwner> MarionOwners { get; set; }
-        public ObservableCollection<mOwner> MarionOwners2017 { get; set; }
-        public ObservableCollection<mOwner> InsertedOwners { get; set; }
-        public Dictionary<string, mOwner> CadOwner2017NameSortMap { get; set; }
         public ObservableCollection<string> MarionOwnerNames { get; set; }
+        public ObservableCollection<mOwner> InsertedOwners { get; set; }
         public NameSorts NameSorts { get; set; }
+
+        public ObservableCollection<mOwner> MarionOwners2017 { get; set; }
+        public Dictionary<string, mOwner> CadOwner2017NameSortMap { get; set; }
 
         public static ObservableCollection<string> MarionOperatorNames { get; set; }
         public HashSet<string> HashSetOfOperatorNames { get; set; }
+
+        public static ObservableCollection<mMarionOperatorRrc> MarionOperatorRRCs { get; set; }
+        public Dictionary<string, string> MarionOperatorRrcMap { get; set; }
+
+        public static ObservableCollection<mWellOperatorID> WellOperatorIDs { get; set; }
+        public Dictionary<string, string> WellOperatorIdMap { get; set; }
+
+        public static ObservableCollection<mMarionWellOperatorID> MarionWellOperatorIDs { get; set; }
+        public Dictionary<string, string> MarionWellOperatorIdMap { get; set; }
 
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
@@ -60,11 +70,18 @@ namespace MarionUpload.ViewModels
         private DateTime _updateDate;
         private string _updateBy;
 
+        RrcParser rrcParser = new RrcParser();
+
         public vmOwner()
         {
             MarionOwners = new ObservableCollection<mMarionOwner>();
             MarionOwners2017 = new ObservableCollection<mOwner>();
             CadOwner2017NameSortMap = new Dictionary<string, mOwner>();
+            MarionOperatorRrcMap = new Dictionary<string, string>();
+            WellOperatorIdMap = new Dictionary<string, string>();
+            MarionWellOperatorIdMap = new Dictionary<string, string>();
+            MarionWellOperatorIDs = new ObservableCollection<mMarionWellOperatorID>();
+
             NameSorts = new NameSorts();
             HashSetOfOperatorNames = new HashSet<string>();
             OwnerImportEnabled = true;
@@ -73,12 +90,45 @@ namespace MarionUpload.ViewModels
 
         private void OnImportOwners()
         {
+            GetMarionOperatorRRCsFromImport();
+            GetMarionOperatorIdsFromTblWell();
             GetMarionOperatorNamesFromImport();
             SelectOwnerDataFromWagData2017();
             SelectOwnerDataFromMarionImportTable();
 
             OwnerImportEnabled = false;
             OwnerUploadEnabled = true;
+        }
+
+        private void GetMarionOperatorRRCsFromImport()
+        {
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
+            {
+                string marionOperatorRrcSqlString = "select distinct RRC,OperatorName from wagapp2_2021_Marion.dbo.AbMarionImport where SPTBCode='G1 ' ";
+                var wellMarionOperatorRRCs = db.Query<mMarionOperatorRrc>(marionOperatorRrcSqlString).ToList();
+                MarionOperatorRRCs = new ObservableCollection<mMarionOperatorRrc>(wellMarionOperatorRRCs);
+                foreach (mMarionOperatorRrc marionOperatorRrc in MarionOperatorRRCs)
+                {
+                    if (!MarionWellOperatorIdMap.ContainsKey(marionOperatorRrc.OperatorName))
+                        MarionOperatorRrcMap.Add(marionOperatorRrc.RRC, marionOperatorRrc.OperatorName);
+                }
+            }
+        }
+
+        private void GetMarionOperatorIdsFromTblWell()
+        {
+
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
+            {
+                string wellOperatorSqlString = "select distinct RrcLease,RrcOpr from tblWell where CadID = 'MAR' ";
+                var wellOperatorIDs = db.Query<mWellOperatorID>(wellOperatorSqlString).ToList();
+                WellOperatorIDs = new ObservableCollection<mWellOperatorID>(wellOperatorIDs);
+                foreach (mWellOperatorID wellOperatorId in WellOperatorIDs)
+                {
+                    if (!WellOperatorIdMap.ContainsKey(wellOperatorId.RrcLease))
+                        WellOperatorIdMap.Add(wellOperatorId.RrcLease, wellOperatorId.RrcOpr);
+                }
+            }
         }
 
         private void GetMarionOperatorNamesFromImport()
@@ -90,7 +140,7 @@ namespace MarionUpload.ViewModels
                 MarionOperatorNames = new ObservableCollection<string>(marionOperatorNames);
                 foreach (string operatorName in marionOperatorNames)
                 {
-                    HashSetOfOperatorNames.Add(operatorName);
+                    HashSetOfOperatorNames.Add(operatorName.Trim());
                 }
             }
         }
@@ -137,7 +187,8 @@ namespace MarionUpload.ViewModels
                 string CadOwner2017NameSortModified = dr2017.NameSortCad.Trim().ToUpper();
                 if (!CadOwner2017NameSortMap.ContainsKey(CadOwner2017NameSortModified))
                 {
-                    CadOwner2017NameSortMap.Add(CadOwner2017NameSortModified, dr2017);
+                    if (!CadOwner2017NameSortMap.ContainsKey(CadOwner2017NameSortModified))
+                        CadOwner2017NameSortMap.Add(CadOwner2017NameSortModified, dr2017);
                 }
             }
         }
@@ -154,7 +205,8 @@ namespace MarionUpload.ViewModels
                     {
                         var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(_marionOwner);
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
-                        NameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                        if (!NameIdMap.ContainsKey(_marionOwner.OwnerNumber))
+                            NameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
 
                         //if (!NameSortCadMap.ContainsKey(populatedOwner.NameSortCad.Trim().ToUpper()))
                         //{
@@ -163,6 +215,7 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
+                        if(!MarionOwnerNumberToNameIdMap.ContainsKey(_marionOwner.OwnerNumber))
                         MarionOwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
 
                     }
@@ -219,14 +272,48 @@ namespace MarionUpload.ViewModels
             //var matchingOwner = CadOwner2017NameSortMap[owner.NameSortCad];
             owner.Stat_YN = true;
 
-            if (HashSetOfOperatorNames.Contains(importedMarionOwner.OwnerName))
-            {
-                owner.Oper_YN = true;
-            }
-            else
-            {
-                owner.Oper_YN = false;
-            }
+          
+            ////MarionOperatorRRCs=select from m in MarionOperatorRRCs(XamlGeneratedNamespace=>)
+
+            //List<mMarionOperatorRrc> idsWithOnlyFirstRrc = new List<mMarionOperatorRrc>();
+
+            //var newId = new mMarionOperatorRrc();
+            //foreach (mMarionOperatorRrc oprc in MarionOperatorRRCs)
+            //{
+            //    newId = new mMarionOperatorRrc();
+            //    newId.OperatorName = oprc.OperatorName;
+            //    newId.RRC = MarionOperatorRRCs.Where(x => x.OperatorName == newId.OperatorName).Select(x => x.RRC).FirstOrDefault();
+            //}
+            //idsWithOnlyFirstRrc.Add(newId);
+            //MarionOperatorRRCs = new ObservableCollection<mMarionOperatorRrc>(idsWithOnlyFirstRrc);
+
+            //RrcParser rrcParser = new RrcParser();
+            //foreach (mMarionWellOperatorID id in MarionWellOperatorIDs)
+            //{
+            //    var thisId = (from m in MarionOperatorRRCs
+            //                  join w in WellOperatorIDs
+            //                  on int.Parse(rrcParser.GetRRCnumberFromImportRRCstring(m.RRC))
+            //                  equals int.Parse(rrcParser.GetRRCnumberFromImportRRCstring(w.RrcLease))
+            //                  select new mMarionOperatorRrc
+            //                  {
+            //                      OperatorName = m.OperatorName,
+            //                      RRC = MarionOperatorRRCs.Where(x => x.OperatorName == m.OperatorName).Select(x => x.RRC).FirstOrDefault()
+
+            //                  }).FirstOrDefault();
+
+            //    if (!MarionWellOperatorIdMap.ContainsKey(id.OperatorName.Trim()))
+            //        MarionWellOperatorIdMap.Add(thisId.OperatorName.Trim(), thisId.RRC);
+            //}
+
+            //if (HashSetOfOperatorNames.Contains(importedMarionOwner.OwnerName.Trim()))
+            //{
+            //    owner.Oper_YN = true;
+            //    owner.OperRrcID = MarionWellOperatorIdMap[importedMarionOwner.OwnerName.Trim()];
+            //}
+            //else
+            //{
+            //    owner.Oper_YN = false;
+            //}
 
             mOwner matchingOwner;
             bool hasValue = CadOwner2017NameSortMap.TryGetValue(owner.NameSortCad, out matchingOwner);
@@ -261,17 +348,17 @@ namespace MarionUpload.ViewModels
             else
             {
                 if (vmAgent.MarionAgentNumberToNameIdMap.ContainsKey(importedMarionOwner.AgentNumber))
-                    {
+                {
 
                     owner.AgentID = (int)vmAgent.MarionAgentNumberToNameIdMap[importedMarionOwner.AgentNumber];
                     owner.Ntc2Agent_YN = true;
-                    owner.Stmnt2Agent_YN = true; 
+                    owner.Stmnt2Agent_YN = true;
                 }
                 else
                 {
                     owner.AgentID = 66864;
                     owner.Ntc2Agent_YN = false;
-                    owner.Stmnt2Agent_YN = false;                    
+                    owner.Stmnt2Agent_YN = false;
                 }
             }
 

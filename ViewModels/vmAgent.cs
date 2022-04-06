@@ -69,6 +69,7 @@ namespace MarionUpload.ViewModels
                     {
                         var populatedOwner = TranslateFrom_mMarionAgentTo_mOwner(marionAgent);
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
+                       if(!MarionAgentNumberToNameIdMap.ContainsKey(marionAgent.AgentNumber))
                         MarionAgentNumberToNameIdMap.Add(marionAgent.AgentNumber, (int)primaryOwnerKey);
 
                         var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(marionAgent, primaryOwnerKey);

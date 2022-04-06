@@ -91,12 +91,15 @@ namespace MarionUpload.ViewModels
                 {
                     var populatedProperty = TranslateFrom_mMarionPropertyTo_mProperty(_marionProperty);
                     var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
+                    if(!PropertyIdMap.ContainsKey(_marionProperty.LeaseNumber))
                     PropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
+                    if(!PropertyLegalMap.ContainsKey((int)primaryPropertyKey))
                     PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
                     System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
 
                     var populatedCadProperty = TranslateFrom_mMarionPropertyTo_mCadProperty(_marionProperty, primaryPropertyKey);
                     var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
+                    if(!CadPropertyIdMap.ContainsKey(_marionProperty.LeaseNumber))
                     CadPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
 
                     //Add a first segment to each property where SPTBCode <> 'G1' and SPTBCode <> 'XV'

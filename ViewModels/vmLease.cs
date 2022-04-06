@@ -36,6 +36,9 @@ namespace MarionUpload.ViewModels
 
         public static IDictionary<string, long> OperatorNameIdMap { get; private set; }
         public List<string> OperatorNamesFromMarionImport { get; private set; }
+
+
+
         public vmLease()
         {
             MarionMineralAccounts = new ObservableCollection<mMarionLease>();
@@ -231,6 +234,8 @@ namespace MarionUpload.ViewModels
             return lease;
 
         }
+        
+        
 
         private static string GetRRCnumberFromImportRRCstring(mMarionLease marionLease)
         {
