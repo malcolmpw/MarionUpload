@@ -66,7 +66,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
 
-                var results = db.Query<mMarionProperty>(
+                var results = db.Query<mMarionMineralProperty>(
                 "Select distinct LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName, RRC, OperatorName," +
                 "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
                 "Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
@@ -82,7 +82,7 @@ namespace MarionUpload.ViewModels
         }
 
         public Dictionary<string, mCadUnit> CadUnitIDMap { get; private set; }
-        public ObservableCollection<mMarionProperty> MarionProperties { get; private set; } = new ObservableCollection<mMarionProperty>();
+        public ObservableCollection<mMarionMineralProperty> MarionProperties { get; private set; } = new ObservableCollection<mMarionMineralProperty>();
 
         private void OnUploadUnitProperty()
         {
@@ -128,7 +128,7 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        private mUnitProperty TranslateImportPropertyToUnitProperty(mMarionProperty property, int jurisdiction)
+        private mUnitProperty TranslateImportPropertyToUnitProperty(mMarionMineralProperty property, int jurisdiction)
         {
             mUnitProperty unitProperty = new mUnitProperty();
             unitProperty.PropID = (int)vmProperty.PropertyIdMap[property.LeaseNumber];

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarionUpload.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MarionUpload.Models
 {
-    public class mMarionProperty
+    public class mMarionMineralProperty : IMarionWithRRC
     {
         public string PropertyType { get; set; }
         public string SPTBCode { get; set; }

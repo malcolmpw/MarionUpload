@@ -90,6 +90,7 @@
     </ApplicationDefinition>
     <Compile Include="Comparers\LeaseComparer.cs" />
     <Compile Include="Comparers\OperatorComparer.cs" />
+    <Compile Include="Comparers\PersonalPropertyComparer.cs" />
     <Compile Include="Helpers\ConnectionStringHelper.cs" />
     <Compile Include="Helpers\RrcParser.cs" />
     <Compile Include="Messages\AccountsFinishedMessage.cs" />
@@ -113,7 +114,8 @@
     <Compile Include="Models\mMarionOperatorRrc.cs" />
     <Compile Include="Models\mMarionOperator.cs" />
     <Compile Include="Models\mMarionOwner.cs" />
-    <Compile Include="Models\mMarionProperty.cs" />
+    <Compile Include="Models\mMarionPersonalProperty.cs" />
+    <Compile Include="Models\mMarionMineralProperty.cs" />
     <Compile Include="Models\mOwner2015.cs" />
     <Compile Include="Models\Dictionary.cs" />
     <Compile Include="Models\mJurisdiction.cs" />
@@ -124,6 +126,7 @@
     <Compile Include="Models\mSegment.cs" />
     <Compile Include="Models\mMarionWellOperatorID.cs" />
     <Compile Include="Models\mWellOperatorID.cs" />
+    <Compile Include="Interfaces\IMarionWithRRC.cs" />
     <Compile Include="ViewModels\vmAccount.cs" />
     <Compile Include="ViewModels\vmAgentAndOperator.cs" />
     <Compile Include="ViewModels\vmCadUnit.cs" />

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace MarionUpload.Comparers
 {
-    public class PropertyComparer : IEqualityComparer<mMarionProperty>
+    public class PropertyComparer : IEqualityComparer<mMarionMineralProperty>
     {
-        public bool Equals(mMarionProperty x, mMarionProperty y)
+        public bool Equals(mMarionMineralProperty x, mMarionMineralProperty y)
         {
             return x.LeaseNumber == y.LeaseNumber;
         }
 
-        public int GetHashCode(mMarionProperty obj)
+        public int GetHashCode(mMarionMineralProperty obj)
         {
             return obj.LeaseNumber.GetHashCode();
         }
