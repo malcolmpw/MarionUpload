@@ -76,15 +76,19 @@ namespace MarionUpload.ViewModels
 
                 distinctMineralResults.ForEach(mineralProperty => MarionMineralProperties.Add(mineralProperty));
 
+                
+                
                 var personalResults = db.Query<mMarionPersonalProperty>(
                 "Select distinct OwnerNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName, RRC, OperatorName," +
                 "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
                 "Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
                 "from AbMarionImport where SPTBCode <> 'G1 ' and SPTBCode <> 'XV ' ");
 
-                var distinctPersonalResults = mineralResults.Distinct(new MineralPropertyComparer()).ToList();
+                var distinctPersonalResults = personalResults.Distinct(new PersonalPropertyComparer()).ToList();
 
-                distinctPersonalResults.ForEach(personalProperty => MarionMineralProperties.Add(personalProperty));
+                distinctPersonalResults.ForEach(personalProperty => MarionPersonalProperties.Add(personalProperty));
+
+
 
                 UnitImportEnabled = false;
                 UnitUploadEnabled = true;
@@ -102,8 +106,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
 
-                var unitLookup = db.Query<mCadUnit>("Select [CadID], [UnitID], [CadUnitIDText], [CadAppraised], active " +
-                                                    "From tlkpCadUnit where CadID = 'MAR' and CadAppraised = 1");
+                var unitLookup = db.Query<mCadUnit>("Select [CadID], [UnitID], [CadUnitIDText], [CadAppraised], active From tlkpCadUnit where CadID = 'MAR' and CadAppraised = 1");
 
                 CadUnitIDMap = unitLookup.ToDictionary(key => key.CadUnitIDText.Trim(), val => val);
 
