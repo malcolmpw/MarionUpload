@@ -22,9 +22,9 @@ namespace MarionUpload.Helpers
             }
 
             // get rid of padded left zeroes
-            int intOut;
-            var success = int.TryParse(rrcNumber, out intOut);
-            rrcNumber = success? intOut.ToString():"0";                
+            //int intOut;
+            //var success = int.TryParse(rrcNumber, out intOut);
+            //rrcNumber = success? intOut.ToString():"0";                
 
             return rrcNumber;
         }

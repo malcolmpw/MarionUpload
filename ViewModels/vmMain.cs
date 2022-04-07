@@ -144,6 +144,8 @@ namespace MarionUpload.ViewModels
                     {
                         db.Execute($"Delete from tblUnitProperty where UnitId = '{cadunit.UnitID}'");
                     }
+
+                    db.Execute($"delete tblName from tblName n join AbMarionOperatorsFromCRW c on n.OperRrcID=c.OperRrcID");
                 }
 
             }

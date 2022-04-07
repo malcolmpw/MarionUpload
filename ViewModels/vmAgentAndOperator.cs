@@ -33,7 +33,7 @@ namespace MarionUpload.ViewModels
         public ObservableCollection<mMarionAgent> MarionAgents { get; set; }        
         public static IDictionary<int, long> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
 
-        public ObservableCollection<mCrwOperator> CrwOperators { get; set; }
+        public static ObservableCollection<mCrwOperator> CrwOperators { get; set; }
         public static IDictionary<string, long> CrwOperRrcIDToNameIdMap { get; private set; } = new Dictionary<string, long>();
         public static IDictionary<string, string> CrwRrcToOperIdMap { get; private set; } = new Dictionary<string, string>();              
 
@@ -87,16 +87,18 @@ namespace MarionUpload.ViewModels
                     {
                         var populatedOwner = TranslateFrom_mCrwOperatorTo_mOwner(crwOperator);
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
+
                         if (!CrwOperRrcIDToNameIdMap.ContainsKey(populatedOwner.OperRrcID))
                             CrwOperRrcIDToNameIdMap.Add(populatedOwner.OperRrcID, (int)primaryOwnerKey);
 
-                        if (!CrwRrcToOperIdMap.ContainsKey(populatedOwner.OperRrcID))
-                            CrwRrcToOperIdMap.Add(crwOperator.OperRrcID, populatedOwner.OperRrcID);
+                        //if (!CrwRrcToOperIdMap.ContainsKey(populatedOwner.OperRrcID))
+                        //    CrwRrcToOperIdMap.Add(crwOperator.OperRrcID, populatedOwner.OperRrcID);
 
                         var populatedCadOwner = TranslateFrom_mCrwOperatorTo_mCadOwner(crwOperator, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
 
                     }
+                
                 }
             }
             catch (Exception ex)
@@ -141,6 +143,7 @@ namespace MarionUpload.ViewModels
             owner.Agnt_YN = true;
             owner.CadID = "MAR";
             owner.NameSortCad = crwOperator.NameSort.Trim();
+            
             owner.Stat_YN = true;
             owner.Oper_YN = true;
             owner.OperRrcID = crwOperator.OperRrcID.Trim();
