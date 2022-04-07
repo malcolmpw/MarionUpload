@@ -246,11 +246,21 @@ namespace MarionUpload.ViewModels
             account.PctType = ConvertInterestType(_marionAccount);
 
             account.Protest_YN = _marionAccount.Protest == "P";
-            account.PTDcode = (_marionAccount.SPTBCode).Trim();
+            account.PTDcode = _marionAccount.SPTBCode.Trim();
 
-            account.PropID = vmProperty.PropertyIdMap[_marionAccount.LeaseNumber];
+            if (account.PTDcode == "G1" || account.PTDcode == "XV")
+            {
+                if (vmProperty.MineralPropertyIdMap.ContainsKey(_marionAccount.LeaseNumber))
+                    account.PropID = vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
+            }
+            else
+            {
+                if (vmProperty.PersonalPropertyIdMap.ContainsKey(_marionAccount.OwnerNumber))
+                    account.PropID = vmProperty.PersonalPropertyIdMap[_marionAccount.OwnerNumber];
+            }
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
 
+            if(vmProperty.PropertyLegalMap.ContainsKey((int)account.PropID))
             account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
             var interestDecimalsFormatted = String.Format("0:0.000000000", _marionAccount.DecimalInterest.ToString());
             var interestInfo = " ( " + interestDecimalsFormatted + " - " + account.PctType.ToString() + ")";

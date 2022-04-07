@@ -120,7 +120,7 @@
     <Compile Include="Models\Dictionary.cs" />
     <Compile Include="Models\mJurisdiction.cs" />
     <Compile Include="Models\mPtdProp.cs" />
-    <Compile Include="Comparers\PropertyComparer.cs" />
+    <Compile Include="Comparers\MineralPropertyComparer.cs" />
     <Compile Include="Messages\LeaseFinishedMessage.cs" />
     <Compile Include="Models\mTract.cs" />
     <Compile Include="Models\mSegment.cs" />

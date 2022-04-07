@@ -130,7 +130,7 @@ namespace MarionUpload.ViewModels
 
                         var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionTract, tractId);
                         populatedTract.LeaseID = (long)primaryLeaseKey;
-                        populatedTract.PropID = vmProperty.PropertyIdMap[marionTract.LeaseNumber];
+                        populatedTract.PropID = vmProperty.MineralPropertyIdMap[marionTract.LeaseNumber];
 
                         var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == marionTract.LeaseNumber).FirstOrDefault().Acres; //tract acres
                         var leaseAcres = (from m in MarionMineralAccounts where m.RRC == marionTract.RRC select m.Acres).Sum();//sum of tract acres in lease
@@ -182,7 +182,7 @@ namespace MarionUpload.ViewModels
 
                 var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionMineralRow, tractId);
                 populatedTract.LeaseID = (long)thisLeaseId;
-                populatedTract.PropID = vmProperty.PropertyIdMap[thisMarionLease.LeaseNumber];
+                populatedTract.PropID = vmProperty.MineralPropertyIdMap[thisMarionLease.LeaseNumber];
 
                 var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == thisMarionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
                 var leaseAcres = (from m in MarionMineralAccounts where m.RRC == thisMarionLease.RRC select m.Acres).Sum();//sum of tract acres in lease

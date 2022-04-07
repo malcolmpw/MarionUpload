@@ -64,7 +64,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionMineralProperty>(
-                    "Select LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, Juris1MarketValue from AbMarionImport order by Juris1MarketValue desc where SPTBCode LIKE '%G1%'");
+                    "Select LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, Juris1MarketValue from AbMarionImport where SPTBCode = 'G1 ' order by Juris1MarketValue desc ");
                 //MessageBox.Show($"sptb code = --{results.FirstOrDefault().SPTBCode}--");
 
                 JurisdictionMap = db.Query<mJurisdiction>("Select Code,Name from abMariontlkpJurisdiction")
@@ -72,7 +72,7 @@ namespace MarionUpload.ViewModels
                 PtdPropMap = db.Query<mPtdProp>("Select PropClassSub, PropClassDesc from tlkpPtdPropClassSub")
                     .ToDictionary(key => key.PropClassSub, val => val.PropClassDesc);
 
-                var resultList = results.Distinct(new PropertyComparer()).ToList();
+                var resultList = results.Distinct(new MineralPropertyComparer()).ToList();
 
                 resultList.ForEach(marionProperty => MarionMineralProperties.Add(marionProperty));
                 PropertyImportEnabled = false;
@@ -88,11 +88,11 @@ namespace MarionUpload.ViewModels
             // distinct Description1,Description2,PropertyType,SPTBcode and got 652 rows.
             // I need all these fields so I am using the last query despite some (8) strange duplicates
 
-            MarionMineralProperties.Clear();
+            MarionPersonalProperties.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionPersonalProperty>(
-                    "Select LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, Juris1MarketValue from AbMarionImport order by Juris1MarketValue desc where SPTBCode NOT LIKE '%G1%'");
+                "Select OwnerNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, Juris1MarketValue from AbMarionImport where SPTBCode <> 'G1 ' order by Juris1MarketValue desc ");
                 //MessageBox.Show($"sptb code = --{results.FirstOrDefault().SPTBCode}--");
 
                 JurisdictionMap = db.Query<mJurisdiction>("Select Code,Name from abMariontlkpJurisdiction")
@@ -108,7 +108,8 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        public static IDictionary<int, long> PropertyIdMap { get; private set; } = new Dictionary<int, long>();
+        public static IDictionary<int, long> MineralPropertyIdMap { get; private set; } = new Dictionary<int, long>();
+        public static IDictionary<int, long> PersonalPropertyIdMap { get; private set; } = new Dictionary<int, long>();
         public static IDictionary<int, string> PropertyLegalMap { get; private set; } = new Dictionary<int, string>();
         public IDictionary<int, long> CadPropertyIdMap { get; private set; } = new Dictionary<int, long>();
 
@@ -122,8 +123,8 @@ namespace MarionUpload.ViewModels
                 {
                     var populatedProperty = TranslateFrom_mMarionMineralPropertyTo_mProperty(_marionProperty);
                     var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
-                    if(!PropertyIdMap.ContainsKey(_marionProperty.LeaseNumber))
-                    PropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
+                    if(!MineralPropertyIdMap.ContainsKey(_marionProperty.LeaseNumber))
+                        MineralPropertyIdMap.Add(_marionProperty.LeaseNumber, primaryPropertyKey);
                     if(!PropertyLegalMap.ContainsKey((int)primaryPropertyKey))
                     PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
                     System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
@@ -138,8 +139,8 @@ namespace MarionUpload.ViewModels
                 {
                     var populatedProperty = TranslateFrom_mMarionPersonalPropertyTo_mProperty(marionProperty);
                     var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
-                    if (!PropertyIdMap.ContainsKey(marionProperty.LeaseNumber))
-                        PropertyIdMap.Add(marionProperty.LeaseNumber, primaryPropertyKey);
+                    if (!PersonalPropertyIdMap.ContainsKey(marionProperty.OwnerNumber))
+                        PersonalPropertyIdMap.Add(marionProperty.OwnerNumber, primaryPropertyKey);
                     if (!PropertyLegalMap.ContainsKey((int)primaryPropertyKey))
                         PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
                     System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MarionUpload.Comparers
 {
-    public class PropertyComparer : IEqualityComparer<mMarionMineralProperty>
+    public class MineralPropertyComparer : IEqualityComparer<mMarionMineralProperty>
     {
         public bool Equals(mMarionMineralProperty x, mMarionMineralProperty y)
         {
