@@ -17,5 +17,7 @@ namespace MarionUpload.Models
         public string StatReason { get; set; }
         public DateTime StatDate { get; set; }
         public string StatBy { get; set; }
+        [Computed]
+        public string RrcLease { get; set; }
     }
 }

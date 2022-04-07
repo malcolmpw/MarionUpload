@@ -21,6 +21,11 @@ namespace MarionUpload.Helpers
                 rrcNumber = (match.Groups[0].Value).Trim();
             }
 
+            // get rid of padded left zeroes
+            int intOut;
+            var success = int.TryParse(rrcNumber, out intOut);
+            rrcNumber = success? intOut.ToString():"0";                
+
             return rrcNumber;
         }
     }

@@ -89,8 +89,7 @@ namespace MarionUpload.ViewModels
         }
 
         private void OnImportOwners()
-        {
-           
+        {           
             //GetMarionOperatorRRCsFromImport();
             //GetRrcOperatorIdsFromTblWell();
             GetMarionOperatorNamesFromImport();
@@ -112,7 +111,7 @@ namespace MarionUpload.ViewModels
                 MarionOperatorRRCs = new ObservableCollection<mMarionOperatorRrc>(wellMarionOperatorRRCs);
                 foreach (mMarionOperatorRrc marionOperatorRrc in MarionOperatorRRCs)
                 {
-                    if (!MarionWellOperatorIdMap.ContainsKey(marionOperatorRrc.OperatorName))
+                    if (!MarionOperatorRrcMap.ContainsKey(marionOperatorRrc.OperatorName))
                         MarionOperatorRrcMap.Add(marionOperatorRrc.RRC, marionOperatorRrc.OperatorName);
                 }
             }
@@ -128,8 +127,10 @@ namespace MarionUpload.ViewModels
                 WellOperatorIDs = new ObservableCollection<mWellOperatorID>(wellOperatorIDs);
                 foreach (mWellOperatorID wellOperatorId in WellOperatorIDs)
                 {
-                    if (!WellOperatorIdMap.ContainsKey(wellOperatorId.RrcLease))
-                        WellOperatorIdMap.Add(wellOperatorId.RrcLease, wellOperatorId.RrcOpr);
+                    var intRrcLease = int.Parse(wellOperatorId.RrcLease);
+                    var newRrcLease = intRrcLease.ToString();
+                    if (!WellOperatorIdMap.ContainsKey(newRrcLease))
+                        WellOperatorIdMap.Add(newRrcLease, wellOperatorId.RrcOpr);
                 }
             }
         }
@@ -350,10 +351,10 @@ namespace MarionUpload.ViewModels
             }
             else
             {
-                if (vmAgent.MarionAgentNumberToNameIdMap.ContainsKey(importedMarionOwner.AgentNumber))
+                if (vmAgentAndOperator.MarionAgentNumberToNameIdMap.ContainsKey(importedMarionOwner.AgentNumber))
                 {
 
-                    owner.AgentID = (int)vmAgent.MarionAgentNumberToNameIdMap[importedMarionOwner.AgentNumber];
+                    owner.AgentID = (int)vmAgentAndOperator.MarionAgentNumberToNameIdMap[importedMarionOwner.AgentNumber];
                     owner.Ntc2Agent_YN = true;
                     owner.Stmnt2Agent_YN = true;
                 }

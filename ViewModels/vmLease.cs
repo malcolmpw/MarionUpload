@@ -98,7 +98,14 @@ namespace MarionUpload.ViewModels
                 foreach (var marionLease in marionLeases)
                 {
                     var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease, MarionOperators);
-                    if (OperatorNamesFromMarionImport.Contains(marionLease.OperatorName)) populatedLease.LeaseOprID = 0;
+                    //if (OperatorNamesFromMarionImport.Contains(marionLease.OperatorName)) populatedLease.LeaseOprID = 0;
+
+                    var rrcOperId = db.ExecuteScalar($"SELECT TOP 1 RrcOpr FROM tblWell where RrcLease = '{populatedLease.RrcLease}'") as string;
+                    if (!string.IsNullOrWhiteSpace(rrcOperId))
+                    {
+                        populatedLease.LeaseOprID = int.Parse(rrcOperId.Trim());
+                    }
+
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 
                     var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
@@ -188,7 +195,7 @@ namespace MarionUpload.ViewModels
         {
             var cadLease = new mCadLease();
             cadLease.CadId = "MAR";
-            cadLease.CadLeaseId = GetRRCnumberFromImportRRCstring(marionLease);
+            cadLease.CadLeaseId = marionLease.RRC;
 
             return cadLease;
         }
@@ -219,16 +226,26 @@ namespace MarionUpload.ViewModels
             var parsers = new RrcParser();
 
             // now I need the tblWell data to link via rrc=tblWell.RrcLease to get tblLease LeaseOprID
-            var maironRrc = parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC);
+            var marionRrc = parsers.GetRRCnumberFromImportRRCstring(parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC));
+            var newMarionRrc = int.Parse(marionRrc).ToString();
+            lease.RrcLease = newMarionRrc;
 
-            string wellRrcOper = "";
-            if (vmOwner.WellOperatorIdMap.ContainsKey(maironRrc))
-             wellRrcOper = vmOwner.WellOperatorIdMap[maironRrc];
+            
 
-            int operId = 0;
-            var success = int.TryParse(wellRrcOper, out operId);
-            lease.LeaseOprID = success ? operId : 0;
-           
+            //string wellRrcOper = "";
+            //if (vmAgentAndOperator.CrwRrcToOperIdMap.ContainsKey(newMarionRrc))
+            // wellRrcOper = vmAgentAndOperator.CrwRrcToOperIdMap[newMarionRrc];
+            
+            //int operId = 0;
+            //var success = int.TryParse(wellRrcOper, out operId);
+            // lease.LeaseOprID = success ? operId : 0;
+
+            //lease.CadPropID = marionLease.RRC; NO NO this should stay null because CadPropID is only unique to tract
+            
+            // PropId comes from tblProp
+            // tblTract.PropId comes from tblProperty.PropID
+            
+
             lease.Stat_YN = true;
             lease.StatBy = UpdateByDefault;
             lease.StatDate = DateTime.Now;

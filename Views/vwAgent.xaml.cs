@@ -24,7 +24,7 @@ namespace MarionUpload.Views
         public vwAgent()
         {
             InitializeComponent();
-            DataContext = new vmAgent();
+            DataContext = new vmAgentAndOperator();
         }
     }
 }

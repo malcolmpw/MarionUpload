@@ -19,7 +19,7 @@ using System.Windows.Input;
 
 namespace MarionUpload.ViewModels
 {
-    public class vmAgent : ViewModelBase
+    public class vmAgentAndOperator : ViewModelBase
     {
         static readonly string Path = @"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MA215500.TXT";
         //private const string AgentErrorPath = @"c:\temp\marion_agents_not_found.txt";
@@ -34,60 +34,51 @@ namespace MarionUpload.ViewModels
         public static IDictionary<int, long> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
 
         public ObservableCollection<mCrwOperator> CrwOperators { get; set; }
-        public static IDictionary<string, long> OperRrcIDToNameIdMap { get; private set; } = new Dictionary<string, long>();
+        public static IDictionary<string, long> CrwOperRrcIDToNameIdMap { get; private set; } = new Dictionary<string, long>();
+        public static IDictionary<string, string> CrwRrcToOperIdMap { get; private set; } = new Dictionary<string, string>();              
 
-        public ICommand CommandImportAgents => new RelayCommand(OnImportAgents);
-        public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgents);
+        public ICommand CommandImportAgents => new RelayCommand(OnImportAgentsAndOperators);
+        public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgentsAndOperators);
 
         private DateTime _updateDate;
         private string _updateBy;
 
-        public vmAgent()
+        public vmAgentAndOperator()
         {
             MarionAgents = new ObservableCollection<mMarionAgent>();
             agentImportEnabled = true;
             agentUploadEnabled = false;
         }
 
-        public void OnImportAgents()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
+        public void OnImportAgentsAndOperators()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
         {
             ReadMarionAgentsFlatFileIntoMarionAgents();
-            //MarionAgents.OrderBy(a => a.AgentNumber);
-            //var backupAgents = MarionAgents;
-            //MarionAgents = null;
-            //MarionAgents = backupAgents;
+           
             GetOperatorsFromAbCrwOperators();
+
             agentImportEnabled = false;
             agentUploadEnabled = true;
         }
 
-        private void OnUploadAgents()
+        private void OnUploadAgentsAndOperators()
         {
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
+            UploadAgentsToOwners();
+            UploadOperatorsToOwners();
 
-            try
-            {
-                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-                {
-                    foreach (mMarionAgent marionAgent in MarionAgents)
-                    {
-                        var populatedOwner = TranslateFrom_mMarionAgentTo_mOwner(marionAgent);
-                        var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
-                       if(!MarionAgentNumberToNameIdMap.ContainsKey(marionAgent.AgentNumber))
-                        MarionAgentNumberToNameIdMap.Add(marionAgent.AgentNumber, (int)primaryOwnerKey);
+            AgentUploadEnabled = false;
+            MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners(agents)");
+            Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
 
-                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(marionAgent, primaryOwnerKey);
-                        var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
+            agentImportEnabled = false;
+            agentUploadEnabled = false;
 
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error Uploading Owner Data -> {ex}");
-                Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
-            }
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+            Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+        }
 
+        private void UploadOperatorsToOwners()
+        {
             try
             {
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
@@ -96,8 +87,11 @@ namespace MarionUpload.ViewModels
                     {
                         var populatedOwner = TranslateFrom_mCrwOperatorTo_mOwner(crwOperator);
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
-                        if (!OperRrcIDToNameIdMap.ContainsKey(populatedOwner.OperRrcID))
-                            OperRrcIDToNameIdMap.Add(populatedOwner.OperRrcID, (int)primaryOwnerKey);
+                        if (!CrwOperRrcIDToNameIdMap.ContainsKey(populatedOwner.OperRrcID))
+                            CrwOperRrcIDToNameIdMap.Add(populatedOwner.OperRrcID, (int)primaryOwnerKey);
+
+                        if (!CrwRrcToOperIdMap.ContainsKey(populatedOwner.OperRrcID))
+                            CrwRrcToOperIdMap.Add(crwOperator.OperRrcID, populatedOwner.OperRrcID);
 
                         var populatedCadOwner = TranslateFrom_mCrwOperatorTo_mCadOwner(crwOperator, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
@@ -110,16 +104,32 @@ namespace MarionUpload.ViewModels
                 MessageBox.Show($"Error Uploading Owner Data -> {ex}");
                 Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
             }
+        }
 
-            AgentUploadEnabled = false;
-            MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners(agents)");
-            Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+        private void UploadAgentsToOwners()
+        {
+            try
+            {
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+                {
+                    foreach (mMarionAgent marionAgent in MarionAgents)
+                    {
+                        var populatedOwner = TranslateFrom_mMarionAgentTo_mOwner(marionAgent);
+                        var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
+                        if (!MarionAgentNumberToNameIdMap.ContainsKey(marionAgent.AgentNumber))
+                            MarionAgentNumberToNameIdMap.Add(marionAgent.AgentNumber, (int)primaryOwnerKey);
 
-            agentImportEnabled = false;
-            agentUploadEnabled = false;
+                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(marionAgent, primaryOwnerKey);
+                        var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
 
-            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
-            Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error Uploading Owner Data -> {ex}");
+                Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
+            }
         }
 
         private mOwner TranslateFrom_mCrwOperatorTo_mOwner(mCrwOperator crwOperator)
@@ -134,15 +144,9 @@ namespace MarionUpload.ViewModels
             owner.Stat_YN = true;
             owner.Oper_YN = true;
             owner.OperRrcID = crwOperator.OperRrcID.Trim();
-            //owner.NameSortFirst = crwOperator.AgentName.Trim();
-            owner.NameC = crwOperator.NameSort.Trim();
-            //owner.Name2 = crwOperator.AgentNumber.ToString();
+            owner.NameSortFirst = crwOperator.NameSort.Trim();
+            owner.NameC = crwOperator.NameSort.Trim();            
             owner.NameSel_YN = true;
-            //owner.Mail1 = crwOperator.AgentStreet.Trim();
-            //owner.MailCi = crwOperator.AgentCity.Trim();
-            //owner.MailSt = crwOperator.AgentState.Trim();
-            //owner.MailZ = crwOperator.AgentZip.ToString();
-            //owner.MailZ4 = crwOperator.AgentZip4.ToString().PadLeft(4);
 
             owner.UpdateDate = _updateDate;
             owner.UpdateBy = _updateBy;
