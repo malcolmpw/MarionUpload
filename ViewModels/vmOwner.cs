@@ -35,6 +35,7 @@ namespace MarionUpload.ViewModels
                                                    "order by n.NameSortCad ";
 
         public ObservableCollection<mMarionOwner> MarionOwners { get; set; }
+        
         public ObservableCollection<string> MarionOwnerNames { get; set; }
         public ObservableCollection<mOwner> InsertedOwners { get; set; }
         public NameSorts NameSorts { get; set; }
@@ -52,7 +53,7 @@ namespace MarionUpload.ViewModels
         public static Dictionary<string, string> WellOperatorIdMap { get; set; }
 
         public static ObservableCollection<mMarionWellOperatorID> MarionWellOperatorIDs { get; set; }
-        public Dictionary<string, string> MarionWellOperatorIdMap { get; set; }       
+        public Dictionary<string, string> MarionWellOperatorIdMap { get; set; }
 
         public ICommand CommandImportOwners => new RelayCommand(OnImportOwners);
         public ICommand CommandUploadOwners => new RelayCommand(OnUploadOwners);
@@ -65,6 +66,10 @@ namespace MarionUpload.ViewModels
         public List<mOwner> OwnersToInsert { get; set; }
         public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
         public IDictionary<int, long> MarionOwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
+        public ObservableCollection<int> ProgressBarUpLoadOwnersMinimumValue { get; private set; }
+        public ObservableCollection<int> ProgressBarUpLoadOwnersMaximumValue { get; private set; }
+        public ObservableCollection<int> ProgressBarUpLoadOwnersCurrentValue { get; private set; }
+
         //public static IDictionary<string, long> NameSortCadMap { get; private set; } = new Dictionary<string, long>();
 
         private DateTime _updateDate;
@@ -89,7 +94,7 @@ namespace MarionUpload.ViewModels
         }
 
         private void OnImportOwners()
-        {           
+        {
             //GetMarionOperatorRRCsFromImport();
             //GetRrcOperatorIdsFromTblWell();
             GetMarionOperatorNamesFromImport();
@@ -100,7 +105,7 @@ namespace MarionUpload.ViewModels
             OwnerUploadEnabled = true;
         }
 
-        
+
 
         private void GetMarionOperatorRRCsFromImport()
         {
@@ -200,13 +205,19 @@ namespace MarionUpload.ViewModels
         private void OnUploadOwners()
         {
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
-
+            //Configure the ProgressBar
+            
+            //ProgressBarUpLoadOwnersMinimumValue = 0;
+                    
+            
             try
             {
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
                 {
                     foreach (mMarionOwner _marionOwner in MarionOwners)
                     {
+                        //ProgressBarUpLoadOwnersMaximumValue = MarionOwners.Count;
+                        //ProgressBarUpLoadOwnersCurrentValue = MarionOwners.CurrentPosition;
                         var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(_marionOwner);
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
                         if (!NameIdMap.ContainsKey(_marionOwner.OwnerNumber))
@@ -257,7 +268,7 @@ namespace MarionUpload.ViewModels
         {
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                var results = db.Query<mMarionOwner>("Select ImportID, OwnerNumber, OwnerName, InCareOf, StreetAddress, CityStateZip, AgentNumber From AbMarionImport");
+                var results = db.Query<mMarionOwner>("Select OwnerNumber, OwnerName, InCareOf, StreetAddress, CityStateZip, AgentNumber From AbMarionImport");
                 var distinctResults = results.Distinct(new OwnerNumberComparer()).ToList();
                 distinctResults.ForEach(owner => MarionOwners.Add(owner));
             }
@@ -275,49 +286,6 @@ namespace MarionUpload.ViewModels
             owner.NameSortCad = importedMarionOwner.OwnerName.Trim();
             //var matchingOwner = CadOwner2017NameSortMap[owner.NameSortCad];
             owner.Stat_YN = true;
-
-
-            ////MarionOperatorRRCs=select from m in MarionOperatorRRCs(XamlGeneratedNamespace=>)
-
-            //List<mMarionOperatorRrc> idsWithOnlyFirstRrc = new List<mMarionOperatorRrc>();
-
-            //var newId = new mMarionOperatorRrc();
-            //foreach (mMarionOperatorRrc oprc in MarionOperatorRRCs)
-            //{
-            //    newId = new mMarionOperatorRrc();
-            //    newId.OperatorName = oprc.OperatorName;
-            //    newId.RRC = MarionOperatorRRCs.Where(x => x.OperatorName == newId.OperatorName).Select(x => x.RRC).FirstOrDefault();
-            //}
-            //idsWithOnlyFirstRrc.Add(newId);
-            //MarionOperatorRRCs = new ObservableCollection<mMarionOperatorRrc>(idsWithOnlyFirstRrc);
-
-            //RrcParser rrcParser = new RrcParser();
-            //foreach (mMarionWellOperatorID id in MarionWellOperatorIDs)
-            //{
-            //    var thisId = (from m in MarionOperatorRRCs
-            //                  join w in WellOperatorIDs
-            //                  on int.Parse(rrcParser.GetRRCnumberFromImportRRCstring(m.RRC))
-            //                  equals int.Parse(rrcParser.GetRRCnumberFromImportRRCstring(w.RrcLease))
-            //                  select new mMarionOperatorRrc
-            //                  {
-            //                      OperatorName = m.OperatorName,
-            //                      RRC = MarionOperatorRRCs.Where(x => x.OperatorName == m.OperatorName).Select(x => x.RRC).FirstOrDefault()
-
-            //                  }).FirstOrDefault();
-
-            //    if (!MarionWellOperatorIdMap.ContainsKey(id.OperatorName.Trim()))
-            //        MarionWellOperatorIdMap.Add(thisId.OperatorName.Trim(), thisId.RRC);
-            //}
-
-            //if (HashSetOfOperatorNames.Contains(importedMarionOwner.OwnerName.Trim()))
-            //{
-            //    owner.Oper_YN = true;
-            //    owner.OperRrcID = MarionWellOperatorIdMap[importedMarionOwner.OwnerName.Trim()];
-            //}
-            //else
-            //{
-            //    owner.Oper_YN = false;
-            //}
 
             mOwner matchingOwner;
             bool hasValue = CadOwner2017NameSortMap.TryGetValue(owner.NameSortCad, out matchingOwner);
@@ -413,25 +381,7 @@ namespace MarionUpload.ViewModels
             owner = NameSorts.RebuildNameSort(owner);
 
             return owner;
-        }
-
-        //public int SelectAgentNameIdFromMarionAgentImportTable(string marionAgentId)
-        //{
-        //    using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-        //    {
-        //        var result = db.Query<mMarionAgent>($"Select NameId From AbMarionAgents where AgentId = {marionAgentId} ");
-
-        //        if (result.Count() == 0) // could not find this agent in the Marion Agent Table
-        //        {
-        //            Log.Error($"Could not find agent {marionAgentId} in the Marion Agent Table");
-        //            // MessageBox.Show($"Could not find agent {marionAgentId} in the Marion Agent Table");
-        //            return 66864;
-        //        }
-
-        //        var AgentNameId = result.FirstOrDefault().NameId;
-        //        return AgentNameId;
-        //    }
-        //}
+        }      
     }
 
     public class OwnerNumberComparer : IEqualityComparer<mMarionOwner>

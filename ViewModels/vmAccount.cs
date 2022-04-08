@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Globalization;
 
 namespace MarionUpload.ViewModels
 {
@@ -235,6 +236,10 @@ namespace MarionUpload.ViewModels
         {
             var account = new mAccount();
 
+            //account.NameID= get this from a mapping of Marion OwnerNumber to Wag tblName.NameId
+            //account.PropID= get this from a mapping of Marion LeaseNumber to Wag tblProperty.PropId for Mineral Properties
+            //account.PropID= get this from a mapping of Marion OwnerNumber and LeaseNumber to Wag tblProperty.PropId for Non-Mineral Properties
+
             account.Stat_YN = true;
             account.UpdateBy = UpdateByDefault;
             account.UpdateDate = DateTime.Now;
@@ -262,7 +267,7 @@ namespace MarionUpload.ViewModels
 
             if(vmProperty.PropertyLegalMap.ContainsKey((int)account.PropID))
             account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
-            var interestDecimalsFormatted = _marionAccount.DecimalInterest.ToString("F9,, CultureInfo.InvariantCulture");
+            var interestDecimalsFormatted = _marionAccount.DecimalInterest.ToString("F9", CultureInfo.InvariantCulture);
             //var interestInfo = " ( " + interestDecimalsFormatted + " - " + account.PctType.ToString() + ")";
             var interestInfo = " ( " + interestDecimalsFormatted + ")";
             if (_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV") account.AcctLegal += interestInfo;
