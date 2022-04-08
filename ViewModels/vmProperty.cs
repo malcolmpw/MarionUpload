@@ -196,7 +196,7 @@ namespace MarionUpload.ViewModels
             oppSegment.DeprSchedID = 1;// from inventory
 
             oppSegment.PrsnlValCur = marionProperty.Juris1MarketValue;
-            oppSegment.PrsnlValFlat = marionProperty.Juris1MarketValue;
+            oppSegment.PrsnlValFlat = marionProperty.Juris1MarketValue;            
 
             oppSegment.delflag = false;
 

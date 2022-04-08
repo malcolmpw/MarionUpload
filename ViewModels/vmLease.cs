@@ -128,11 +128,19 @@ namespace MarionUpload.ViewModels
                     var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease, MarionOperators);
 
                     var rrcOperId = db.ExecuteScalar($"SELECT TOP 1 RrcOpr FROM tblWell where RrcLease = '{populatedLease.RrcLease}'") as string;
+
+                    var WellOperatorRrcId = "";
                     if (!string.IsNullOrWhiteSpace(rrcOperId))
                     {
-                        populatedLease.LeaseOprID = int.Parse(rrcOperId.Trim());
+                        WellOperatorRrcId = rrcOperId;
                     }
+                    long rrcLeaseInt = 0;
+                    if (vmAgentAndOperator.CrwOperRrcIDToNameIdMap.ContainsKey(WellOperatorRrcId))
+                        rrcLeaseInt = vmAgentAndOperator.CrwOperRrcIDToNameIdMap[WellOperatorRrcId];
+                    populatedLease.LeaseOprID = (int)rrcLeaseInt;
 
+                    var leaseNameRrc = db.ExecuteScalar($"SELECT TOP 1 LpdLeaseName FROM tblWell where RrcLease = '{populatedLease.RrcLease}'") as string;
+                    populatedLease.LeaseNameWag = leaseNameRrc;
 
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 

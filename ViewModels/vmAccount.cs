@@ -262,8 +262,9 @@ namespace MarionUpload.ViewModels
 
             if(vmProperty.PropertyLegalMap.ContainsKey((int)account.PropID))
             account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
-            var interestDecimalsFormatted = String.Format("0:0.000000000", _marionAccount.DecimalInterest.ToString());
-            var interestInfo = " ( " + interestDecimalsFormatted + " - " + account.PctType.ToString() + ")";
+            var interestDecimalsFormatted = _marionAccount.DecimalInterest.ToString("F9,, CultureInfo.InvariantCulture");
+            //var interestInfo = " ( " + interestDecimalsFormatted + " - " + account.PctType.ToString() + ")";
+            var interestInfo = " ( " + interestDecimalsFormatted + ")";
             if (_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV") account.AcctLegal += interestInfo;
 
             account.ValAcctCur = _marionAccount.Juris1MarketValue;
