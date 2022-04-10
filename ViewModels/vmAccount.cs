@@ -96,9 +96,10 @@ namespace MarionUpload.ViewModels
             MarionAccounts.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                var results = db.Query<mMarionAccount>("Select ImportID, OwnerNumber, LeaseNumber, InterestType, SPTBCode," +
-                                                        " Protest, DecimalInterest, AccountNumber, Juris1MarketValue, [AccountSequence]" +
-                                                        " from AbMarionImport"); ;
+                var results = db.Query<mMarionAccount>(
+                    "Select ImportID, OwnerNumber, LeaseNumber, InterestType, SPTBCode," +
+                    " Protest, DecimalInterest, AccountNumber, Juris1MarketValue, [AccountSequence]" +
+                    " from AbMarionImport"); ;
 
                 var resultList = results.ToList();
 
@@ -286,6 +287,21 @@ namespace MarionUpload.ViewModels
             //account.NameID= get this from a mapping of Marion OwnerNumber to Wag tblName.NameId
             //account.PropID= get this from a mapping of Marion LeaseNumber to Wag tblProperty.PropId for Mineral Properties
             //account.PropID= get this from a mapping of Marion OwnerNumber and LeaseNumber to Wag tblProperty.PropId for Non-Mineral Properties
+
+            account.NameID = vmOwner.MarionOwnerNumberToNameIdMap[_marionAccount.OwnerNumber];
+
+            if (_marionAccount.SPTBCode == "G1 " || _marionAccount.SPTBCode == "XV ")
+            {
+                if(vmProperty.MineralPropertyIdMap.ContainsKey(_marionAccount.LeaseNumber))
+                account.PropID = vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
+            }
+            else
+            {
+                Tuple<int, int> acctTuple = new Tuple<int, int>(_marionAccount.OwnerNumber, _marionAccount.LeaseNumber);
+                
+                if(vmProperty.PersonalPropertyIdMap.ContainsKey(acctTuple))
+                account.PropID = vmProperty.PersonalPropertyIdMap[acctTuple];
+            }
 
             account.Stat_YN = true;
             account.UpdateBy = UpdateByDefault;

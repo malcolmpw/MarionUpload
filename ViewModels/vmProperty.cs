@@ -58,33 +58,33 @@ namespace MarionUpload.ViewModels
         //    }
         //}
 
-        public int ProgressBarUpLoadMarionPersonalPropertiesMinimumValue
-        {
-            get => ProgressBarUpLoadMarionPersonalPropertiesMinimumValue;
-            private set
-            {
-                ProgressBarUpLoadMarionPersonalPropertiesMinimumValue = value;
-                RaisePropertyChanged(nameof(ProgressBarUpLoadMarionPersonalPropertiesMinimumValue));
-            }
-        }
-        public int ProgressBarUpLoadMarionPersonalPropertiesMaximumValue
-        {
-            get => ProgressBarUpLoadMarionPersonalPropertiesMaximumValue;
-            private set
-            {
-                ProgressBarUpLoadMarionPersonalPropertiesMaximumValue = value;
-                RaisePropertyChanged(nameof(ProgressBarUpLoadMarionPersonalPropertiesMaximumValue));
-            }
-        }
-        public int ProgressBarUpLoadMarionPersonalPropertiesCurrentValue
-        {
-            get => ProgressBarUpLoadMarionPersonalPropertiesCurrentValue;
-            private set
-            {
-                ProgressBarUpLoadMarionPersonalPropertiesCurrentValue = value;
-                RaisePropertyChanged(nameof(ProgressBarUpLoadMarionPersonalPropertiesCurrentValue));
-            }
-        }
+        //public int ProgressBarUpLoadMarionPersonalPropertiesMinimumValue
+        //{
+        //    get => ProgressBarUpLoadMarionPersonalPropertiesMinimumValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadMarionPersonalPropertiesMinimumValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadMarionPersonalPropertiesMinimumValue));
+        //    }
+        //}
+        //public int ProgressBarUpLoadMarionPersonalPropertiesMaximumValue
+        //{
+        //    get => ProgressBarUpLoadMarionPersonalPropertiesMaximumValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadMarionPersonalPropertiesMaximumValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadMarionPersonalPropertiesMaximumValue));
+        //    }
+        //}
+        //public int ProgressBarUpLoadMarionPersonalPropertiesCurrentValue
+        //{
+        //    get => ProgressBarUpLoadMarionPersonalPropertiesCurrentValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadMarionPersonalPropertiesCurrentValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadMarionPersonalPropertiesCurrentValue));
+        //    }
+        //}
 
         public ICommand CommandImportProperties => new RelayCommand(OnImportProperties);
         public ICommand CommandUploadProperties => new RelayCommand(OnUploadProperties);
@@ -153,12 +153,11 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionPersonalProperty>(
-                "Select OwnerNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, " +
+                "Select OwnerNumber, LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, " +
                 "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
                 "Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, " +
                 "Juris1MarketValue from AbMarionImport where SPTBCode <> 'G1 ' AND SPTBCode <> 'XV ' ");
-                //MessageBox.Show($"sptb code = --{results.FirstOrDefault().SPTBCode}--");
-
+                //MessageBox.Show($"sptb code = --{results.FirstOrDefault().SPTBCode}--");              
                 var resultList = results.Distinct(new PersonalPropertyComparer()).ToList();
                 resultList.ForEach(marionProperty => MarionPersonalProperties.Add(marionProperty));
 
@@ -199,23 +198,28 @@ namespace MarionUpload.ViewModels
         {
             foreach (mMarionPersonalProperty marionPersonalProperty in MarionPersonalProperties)
             {
-                var populatedProperty = TranslateFrom_mMarionPersonalPropertyTo_mProperty(marionPersonalProperty);
-                var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
-                Tuple<int, int> keyTuple = new Tuple<int, int>(marionPersonalProperty.OwnerNumber, marionPersonalProperty.LeaseNumber);
-                if (!PersonalPropertyIdMap.ContainsKey(keyTuple))
-                    PersonalPropertyIdMap.Add(keyTuple, primaryPropertyKey);
-                if (!PropertyLegalMap.ContainsKey((int)primaryPropertyKey))
-                    PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
-                System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
+                if (marionPersonalProperty.SPTBCode != "G1 " && marionPersonalProperty.SPTBCode != "XV ")
+                {
+                    var populatedProperty = TranslateFrom_mMarionPersonalPropertyTo_mProperty(marionPersonalProperty);
+                    var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
+                    Tuple<int, int> keyTuple = new Tuple<int, int>(marionPersonalProperty.OwnerNumber, marionPersonalProperty.LeaseNumber);
+                    if (!PersonalPropertyIdMap.ContainsKey(keyTuple))
+                    {
+                        PersonalPropertyIdMap.Add(keyTuple, primaryPropertyKey);
+                    }
+                    if (!PropertyLegalMap.ContainsKey((int)primaryPropertyKey))
+                        PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
+                    System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
 
-                var populatedCadProperty = TranslateFrom_mMarionPersonalPropertyTo_mCadProperty(marionPersonalProperty, primaryPropertyKey);
-                var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
-                if (!CadPropertyIdMap.ContainsKey(marionPersonalProperty.LeaseNumber))
-                    CadPropertyIdMap.Add(marionPersonalProperty.LeaseNumber, primaryPropertyKey);
+                    var populatedCadProperty = TranslateFrom_mMarionPersonalPropertyTo_mCadProperty(marionPersonalProperty, primaryPropertyKey);
+                    var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
+                    if (!CadPropertyIdMap.ContainsKey(marionPersonalProperty.LeaseNumber))
+                        CadPropertyIdMap.Add(marionPersonalProperty.LeaseNumber, primaryPropertyKey);
 
-                //Add a first segment to each property where SPTBCode <> 'G1' and SPTBCode <> 'XV'
-                var populatedSegment = TranslateFrom_mPersonalPropertyTo_mSegment(populatedProperty, marionPersonalProperty);
-                var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
+                    //Add a first segment to each property where SPTBCode <> 'G1' and SPTBCode <> 'XV'
+                    var populatedSegment = TranslateFrom_mPersonalPropertyTo_mSegment(populatedProperty, marionPersonalProperty);
+                    var primarySegmentKey = db.Insert<mSegment>(populatedSegment);
+                }
             }
         }
 
@@ -223,19 +227,22 @@ namespace MarionUpload.ViewModels
         {
             foreach (mMarionMineralProperty marionMineralProperty in MarionMineralProperties)
             {
-                //++ProgressBarUpLoadMarionMineralPropertiesCurrentValue;                   
-                var populatedProperty = TranslateFrom_mMarionMineralPropertyTo_mProperty(marionMineralProperty);
-                var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
-                if (!MineralPropertyIdMap.ContainsKey(marionMineralProperty.LeaseNumber))
-                    MineralPropertyIdMap.Add(marionMineralProperty.LeaseNumber, primaryPropertyKey);
-                if (!PropertyLegalMap.ContainsKey((int)primaryPropertyKey))
-                    PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
-                System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
+                //++ProgressBarUpLoadMarionMineralPropertiesCurrentValue;
+                if (marionMineralProperty.SPTBCode == "G1 " || marionMineralProperty.SPTBCode == "XV ")
+                {
+                    var populatedProperty = TranslateFrom_mMarionMineralPropertyTo_mProperty(marionMineralProperty);
+                    var primaryPropertyKey = db.Insert<mProperty>(populatedProperty);
+                    if (!MineralPropertyIdMap.ContainsKey(marionMineralProperty.LeaseNumber))
+                        MineralPropertyIdMap.Add(marionMineralProperty.LeaseNumber, primaryPropertyKey);
+                    if (!PropertyLegalMap.ContainsKey((int)primaryPropertyKey))
+                        PropertyLegalMap.Add((int)primaryPropertyKey, populatedProperty.Legal);
+                    System.Diagnostics.Debug.WriteLine($"Primary Key: {primaryPropertyKey}");
 
-                var populatedCadProperty = TranslateFrom_mMarionMineralPropertyTo_mCadProperty(marionMineralProperty, primaryPropertyKey);
-                var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
-                if (!CadPropertyIdMap.ContainsKey(marionMineralProperty.LeaseNumber))
-                    CadPropertyIdMap.Add(marionMineralProperty.LeaseNumber, primaryPropertyKey);
+                    var populatedCadProperty = TranslateFrom_mMarionMineralPropertyTo_mCadProperty(marionMineralProperty, primaryPropertyKey);
+                    var primaryCadPropertyKey = db.Insert<mCadProperty>(populatedCadProperty);
+                    if (!CadPropertyIdMap.ContainsKey(marionMineralProperty.LeaseNumber))
+                        CadPropertyIdMap.Add(marionMineralProperty.LeaseNumber, primaryPropertyKey);
+                }
             }
         }
 
@@ -352,9 +359,9 @@ namespace MarionUpload.ViewModels
             //property.PropType = "P";
             //property.Legal = FetchPTDDescription(sptbCode) + "," +
             //                 FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
-            property.Legal = (importedMarionProperty.Description1).Trim() + "-" +
-                                (importedMarionProperty.Description2).Trim();
-            property.Location = (importedMarionProperty.Description2).Trim();
+            property.Legal = importedMarionProperty.Description1.Trim() + "-" +
+                                importedMarionProperty.Description2.Trim();
+            property.Location = importedMarionProperty.Description2.Trim();
 
             property.ControlCad = "MAR";
 

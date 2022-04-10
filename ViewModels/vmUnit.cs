@@ -80,7 +80,7 @@ namespace MarionUpload.ViewModels
                 
                 
                 var personalResults = db.Query<mMarionPersonalProperty>(
-                "Select distinct OwnerNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName, RRC, OperatorName," +
+                "Select distinct OwnerNumber, LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName, RRC, OperatorName," +
                 "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
                 "Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12 " +
                 "from AbMarionImport where SPTBCode <> 'G1 ' and SPTBCode <> 'XV ' ");
@@ -111,72 +111,9 @@ namespace MarionUpload.ViewModels
 
                 CadUnitIDMap = unitLookup.ToDictionary(key => key.CadUnitIDText.Trim(), val => val);
 
-                foreach (var mineralProperty in MarionMineralProperties)
-                {
-                    var jurisdictions = new List<int>
-                    {
-                        mineralProperty.Jurisdiction1, mineralProperty.Jurisdiction2, mineralProperty.Jurisdiction3,
-                        mineralProperty.Jurisdiction4, mineralProperty.Jurisdiction5, mineralProperty.Jurisdiction6,
-                        mineralProperty.Jurisdiction7, mineralProperty.Jurisdiction8, mineralProperty.Jurisdiction9,
-                        mineralProperty.Jurisdiction10, mineralProperty.Jurisdiction11, mineralProperty.Jurisdiction12
-                    };
+                UploadMineralPropertyUnits(db);
 
-                    foreach (var jurisdiction in jurisdictions)
-                    {
-                        if (jurisdiction == 0) continue;
-                        if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
-                        {
-                            Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit ");
-                            //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
-                            continue;
-                        }
-                        var unitProperty = TranslateMineralImportPropertyToUnitProperty(mineralProperty, jurisdiction);
-                        //var unitId = db.ExecuteScalar($"SELECT TOP 1 UnitID,PropID FROM tblUnitProperty where  = '{populatedLease.RrcLease}'") as string;
-                        //db.ExecuteScalar = from tblUnitProperty u join tlkpCadUnit c on u.UnitId = c.UnitID
-                        db.Insert<mUnitProperty>(unitProperty);// error inserting into tblUnitProperty
-                    }
-                }
-
-                foreach (var personalProperty in MarionPersonalProperties)
-                {
-                    var jurisdictions = new List<int>
-                    {
-                        personalProperty.Jurisdiction1, personalProperty.Jurisdiction2, personalProperty.Jurisdiction3,
-                        personalProperty.Jurisdiction4, personalProperty.Jurisdiction5, personalProperty.Jurisdiction6,
-                        personalProperty.Jurisdiction7, personalProperty.Jurisdiction8, personalProperty.Jurisdiction9,
-                        personalProperty.Jurisdiction10, personalProperty.Jurisdiction11, personalProperty.Jurisdiction12
-                    };
-
-                    foreach (var jurisdiction in jurisdictions)
-                    {
-                        if (jurisdiction == 0) continue;
-                        if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
-                        {
-                            Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit ");
-                            //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
-                            continue;
-                        }
-                        var unitPropertyFromImport = TranslatePersonalImportPropertyToUnitProperty(personalProperty, jurisdiction);
-                        var unitIdFromDb = db.ExecuteScalar($"SELECT TOP 1 UnitID FROM tblUnitProperty where UnitID = '{unitPropertyFromImport.UnitID}' and PropID = '{unitPropertyFromImport.PropID}' ") as string;
-                        var propIdFromDb = db.ExecuteScalar($"SELECT TOP 1 PropID FROM tblUnitProperty where UnitID = '{unitPropertyFromImport.UnitID}' and PropID = '{unitPropertyFromImport.PropID}' ") as string;
-                        var unitCompare_YN = unitPropertyFromImport.UnitID.CompareTo( unitIdFromDb);
-                        var propCompare_YN = unitPropertyFromImport.PropID.CompareTo(propIdFromDb);
-                        if (unitIdFromDb==null && propIdFromDb==null)
-                        {
-                            db.Insert<mUnitProperty>(unitPropertyFromImport);                            
-                        }
-                        else
-                            if(unitCompare_YN == 0 && propCompare_YN == 0)
-                        {
-                            MessageBox.Show($"UnitProperty to insert already exists UnitID = {unitPropertyFromImport.UnitID} and PropID = {unitPropertyFromImport.PropID}.");
-
-                        }
-                        else
-                        {
-                            db.Insert<mUnitProperty>(unitPropertyFromImport);
-                        }
-                    }
-                }
+                UploadPersonalPropertyUnits(db);
 
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
@@ -186,22 +123,117 @@ namespace MarionUpload.ViewModels
             }
         }
 
+        private void UploadPersonalPropertyUnits(IDbConnection db)
+        {
+            foreach (var personalProperty in MarionPersonalProperties)
+            {
+                var jurisdictions = new List<int>
+                    {
+                        personalProperty.Jurisdiction1, personalProperty.Jurisdiction2, personalProperty.Jurisdiction3,
+                        personalProperty.Jurisdiction4, personalProperty.Jurisdiction5, personalProperty.Jurisdiction6,
+                        personalProperty.Jurisdiction7, personalProperty.Jurisdiction8, personalProperty.Jurisdiction9,
+                        personalProperty.Jurisdiction10, personalProperty.Jurisdiction11, personalProperty.Jurisdiction12
+                    };
+
+                foreach (var jurisdiction in jurisdictions)
+                {
+                    if (jurisdiction == 0) continue;
+                    if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
+                    {
+                        Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit ");
+                        //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
+                        continue;
+                    }
+                    var unitPropertyFromImport = TranslatePersonalImportPropertyToUnitProperty(personalProperty, jurisdiction);
+                    var unitIdFromDb = db.ExecuteScalar($"SELECT TOP 1 UnitID FROM tblUnitProperty where UnitID = '{unitPropertyFromImport.UnitID}' and PropID = '{unitPropertyFromImport.PropID}' ") as string;
+                    var propIdFromDb = db.ExecuteScalar($"SELECT TOP 1 PropID FROM tblUnitProperty where UnitID = '{unitPropertyFromImport.UnitID}' and PropID = '{unitPropertyFromImport.PropID}' ") as string;
+                    var unitCompare_YN = unitPropertyFromImport.UnitID.CompareTo(unitIdFromDb);
+                    var propCompare_YN = unitPropertyFromImport.PropID.CompareTo(propIdFromDb);
+
+                    if (personalProperty.SPTBCode == "G1 " || personalProperty.SPTBCode == "XV ")
+                    {
+                        if (personalProperty.SPTBCode != "G1 " && personalProperty.SPTBCode != "XV ")
+                        {
+                            if (unitIdFromDb == null && propIdFromDb == null)
+                            {
+                                db.Insert<mUnitProperty>(unitPropertyFromImport);
+                            }
+                            else
+                                if (unitCompare_YN == 0 && propCompare_YN == 0)
+                            {
+                                MessageBox.Show($"UnitProperty to insert already exists UnitID = {unitPropertyFromImport.UnitID} and PropID = {unitPropertyFromImport.PropID}.");
+
+                            }
+                            else
+                            {
+                                db.Insert<mUnitProperty>(unitPropertyFromImport);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UploadMineralPropertyUnits(IDbConnection db)
+        {
+            foreach (var mineralProperty in MarionMineralProperties)
+            {
+                var jurisdictions = new List<int>
+                    {
+                        mineralProperty.Jurisdiction1, mineralProperty.Jurisdiction2, mineralProperty.Jurisdiction3,
+                        mineralProperty.Jurisdiction4, mineralProperty.Jurisdiction5, mineralProperty.Jurisdiction6,
+                        mineralProperty.Jurisdiction7, mineralProperty.Jurisdiction8, mineralProperty.Jurisdiction9,
+                        mineralProperty.Jurisdiction10, mineralProperty.Jurisdiction11, mineralProperty.Jurisdiction12
+                    };
+
+                foreach (var jurisdiction in jurisdictions)
+                {
+                    if (jurisdiction == 0) continue;
+                    if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
+                    {
+                        Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit ");
+                        //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
+                        continue;
+                    }
+                    var unitProperty = TranslateMineralImportPropertyToUnitProperty(mineralProperty, jurisdiction);
+                    //var unitId = db.ExecuteScalar($"SELECT TOP 1 UnitID,PropID FROM tblUnitProperty where  = '{populatedLease.RrcLease}'") as string;
+                    //db.ExecuteScalar = from tblUnitProperty u join tlkpCadUnit c on u.UnitId = c.UnitID
+                    db.Insert<mUnitProperty>(unitProperty);// error inserting into tblUnitProperty
+                }
+            }
+        }
+
         private mUnitProperty TranslateMineralImportPropertyToUnitProperty(mMarionMineralProperty property, int jurisdiction)
         {
-            mUnitProperty unitProperty = new mUnitProperty();
-            unitProperty.PropID = (int)vmProperty.MineralPropertyIdMap[property.LeaseNumber];
-            unitProperty.UnitID = CadUnitIDMap[jurisdiction.ToString()].UnitID;
-            unitProperty.UnitPct = 1;
+            var unitProperty = new mUnitProperty();
+            if (property.SPTBCode == "G1 " || property.SPTBCode == "XV ") 
+            {
+                unitProperty = new mUnitProperty();
+                unitProperty.PropID = (int)vmProperty.MineralPropertyIdMap[property.LeaseNumber];
+                unitProperty.UnitID = CadUnitIDMap[jurisdiction.ToString()].UnitID;
+                unitProperty.UnitPct = 1;                
+            }
+            else
+            {
+                unitProperty = null;
+            }
             return unitProperty;
         }
 
         private mUnitProperty TranslatePersonalImportPropertyToUnitProperty(mMarionPersonalProperty property, int jurisdiction)
         {
             mUnitProperty unitProperty = new mUnitProperty();
-            Tuple<int, int> keyTuple = new Tuple<int, int>(property.OwnerNumber, property.LeaseNumber);
-            unitProperty.PropID = (int)vmProperty.PersonalPropertyIdMap[keyTuple];
-            unitProperty.UnitID = CadUnitIDMap[jurisdiction.ToString()].UnitID;
-            unitProperty.UnitPct = 1;
+            if (property.SPTBCode != "G1 " && property.SPTBCode != "XV ")
+            {
+                Tuple<int, int> keyTuple = new Tuple<int, int>(property.OwnerNumber, property.LeaseNumber);
+                unitProperty.PropID = (int)vmProperty.PersonalPropertyIdMap[keyTuple];
+                unitProperty.UnitID = CadUnitIDMap[jurisdiction.ToString()].UnitID;
+                unitProperty.UnitPct = 1;
+            }
+            else
+            {
+                unitProperty = null;
+            }
             return unitProperty;
         }
     }

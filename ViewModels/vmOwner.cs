@@ -65,7 +65,7 @@ namespace MarionUpload.ViewModels
 
         public List<mOwner> OwnersToInsert { get; set; }
         public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
-        public IDictionary<int, long> MarionOwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
+        public static IDictionary<int, long> MarionOwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
 
         //public int ProgressBarUpLoadOwnersMinimumValue
         //{
