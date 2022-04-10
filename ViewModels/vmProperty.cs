@@ -104,14 +104,14 @@ namespace MarionUpload.ViewModels
 
         private void OnImportProperties()
         {
-            SelectJurisdictionNamesfromabMarionTlkpJurisdiction();
+            SelectJurisdictionNamesfromAbMarionTlkpJurisdiction();
             SelectPropClassDataFromTlkpPtdPropClassSub();
 
             SelectMineralPropertyDataFromMarionImportTable();
             SelectPersonalPropertyDataFromMarionImportTable();
         }
 
-        private void SelectJurisdictionNamesfromabMarionTlkpJurisdiction()
+        private void SelectJurisdictionNamesfromAbMarionTlkpJurisdiction()
         {
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
@@ -135,7 +135,10 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionMineralProperty>(
-                    "Select LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, Juris1MarketValue from AbMarionImport where SPTBCode = 'G1 ' or SPTBCode = 'XV ' ");
+                    "Select LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, " +
+                    "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
+                    "Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, " +
+                    "Juris1MarketValue from AbMarionImport where SPTBCode = 'G1 ' or SPTBCode = 'XV ' ");
                 var resultList = results.Distinct(new MineralPropertyComparer()).ToList();
                 resultList.ForEach(marionProperty => MarionMineralProperties.Add(marionProperty));
 
@@ -150,7 +153,10 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 var results = db.Query<mMarionPersonalProperty>(
-                "Select OwnerNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, Juris1MarketValue from AbMarionImport where SPTBCode <> 'G1 'AND SPTBCode <> 'XV ' ");
+                "Select OwnerNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName,RRC,OperatorName, " +
+                "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
+                "Jurisdiction7, Jurisdiction8, Jurisdiction9, Jurisdiction10, Jurisdiction11, Jurisdiction12, " +
+                "Juris1MarketValue from AbMarionImport where SPTBCode <> 'G1 ' AND SPTBCode <> 'XV ' ");
                 //MessageBox.Show($"sptb code = --{results.FirstOrDefault().SPTBCode}--");
 
                 var resultList = results.Distinct(new PersonalPropertyComparer()).ToList();
