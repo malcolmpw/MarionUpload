@@ -21,6 +21,7 @@ namespace MarionUpload.Models
         public string CreateWhy { get; set; }
         public DateTime CreateDate { get; set; }
         public bool Stat_YN { get; set; }
-        //public decimal SegmentValue { get; set; }
+        [Computed]
+        public decimal SegmentValue { get; set; }
     }
 }

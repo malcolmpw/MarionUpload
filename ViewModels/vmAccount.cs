@@ -24,11 +24,53 @@ namespace MarionUpload.ViewModels
         private bool accountImportEnabled = true;
         private bool accountUploadEnabled = false;
 
+        //public int ProgressBarUpLoadMarionAccountsMinimumValue
+        //{
+        //    get => ProgressBarUpLoadMarionAccountsMinimumValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadMarionAccountsMinimumValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadMarionAccountsMinimumValue));
+        //    }
+        //}
+        //public int ProgressBarUpLoadMarionAccountsMaximumValue
+        //{
+        //    get => ProgressBarUpLoadMarionAccountsMaximumValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadMarionAccountsMaximumValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadMarionAccountsMaximumValue));
+        //    }
+        //}
+        //public int ProgressBarUpLoadMarionAccountsCurrentValue
+        //{
+        //    get => ProgressBarUpLoadMarionAccountsMaximumValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadMarionAccountsMaximumValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadMarionAccountsMaximumValue));
+        //    }
+        //}
+
         public ICommand CommandImportAccounts => new RelayCommand(OnImportAccounts);
         public ICommand CommandUploadAccounts => new RelayCommand(OnUploadAccounts);
 
-        public bool AccountImportEnabled { get => accountImportEnabled; set { accountImportEnabled = value; RaisePropertyChanged(nameof(AccountImportEnabled)); } }
-        public bool AccountUploadEnabled { get => accountUploadEnabled; set { accountUploadEnabled = value; RaisePropertyChanged(nameof(AccountUploadEnabled)); } }
+        public bool AccountImportEnabled
+        {
+            get => accountImportEnabled; set
+            {
+                accountImportEnabled = value;
+                RaisePropertyChanged(nameof(AccountImportEnabled));
+            }
+        }
+        public bool AccountUploadEnabled
+        {
+            get => accountUploadEnabled; set
+            {
+                accountUploadEnabled = value;
+                RaisePropertyChanged(nameof(AccountUploadEnabled));
+            }
+        }
 
         public List<mAccount> AccountList { get; set; }
 
@@ -71,6 +113,10 @@ namespace MarionUpload.ViewModels
         {
             try
             {
+                //ProgressBarUpLoadMarionAccountsMinimumValue = 0;
+                //ProgressBarUpLoadMarionAccountsMaximumValue = MarionAccounts.Count();
+                //ProgressBarUpLoadMarionAccountsCurrentValue = 0;
+
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
 
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
@@ -78,6 +124,7 @@ namespace MarionUpload.ViewModels
                     AccountList = new List<mAccount>();
                     foreach (var _marionAccount in MarionAccounts)
                     {
+                        //++ProgressBarUpLoadMarionAccountsCurrentValue;
                         var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                         var primaryKey = db.Insert<mAccount>(populatedAccount);
                         AccountList.Add(populatedAccount);
@@ -191,7 +238,7 @@ namespace MarionUpload.ViewModels
             var acctPrYr = new mAccountPrYr();
             acctPrYr.AcctLegal = populatedAccount.AcctLegal;
             acctPrYr.PctType = populatedAccount.PctType;
-            acctPrYr.PctProp = (float)Math.Round(populatedAccount.PctProp,9);
+            acctPrYr.PctProp = (float)Math.Round(populatedAccount.PctProp, 9);
             acctPrYr.Protest_YN = populatedAccount.Protest_YN;
             acctPrYr.PTDcode = populatedAccount.PTDcode;
             acctPrYr.NameID = populatedAccount.NameID;
@@ -260,13 +307,14 @@ namespace MarionUpload.ViewModels
             }
             else
             {
-                if (vmProperty.PersonalPropertyIdMap.ContainsKey(_marionAccount.OwnerNumber))
-                    account.PropID = vmProperty.PersonalPropertyIdMap[_marionAccount.OwnerNumber];
+                Tuple<int, int> keyTuple = new Tuple<int, int>(_marionAccount.OwnerNumber, _marionAccount.LeaseNumber);
+                if (vmProperty.PersonalPropertyIdMap.ContainsKey(keyTuple))
+                    account.PropID = vmProperty.PersonalPropertyIdMap[keyTuple];
             }
             account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
 
-            if(vmProperty.PropertyLegalMap.ContainsKey((int)account.PropID))
-            account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
+            if (vmProperty.PropertyLegalMap.ContainsKey((int)account.PropID))
+                account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];
             var interestDecimalsFormatted = _marionAccount.DecimalInterest.ToString("F9", CultureInfo.InvariantCulture);
             //var interestInfo = " ( " + interestDecimalsFormatted + " - " + account.PctType.ToString() + ")";
             var interestInfo = " ( " + interestDecimalsFormatted + ")";

@@ -14,8 +14,11 @@
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
                 <TextBlock Text="{Binding MarionOwners.Count}" 
                                 Margin="10" Width="200" Height="30" HorizontalAlignment="Left"/>
-                <!--<ProgressBar x:Name="pbOwners" Maximum="{Binding MarionOwners.Count}" Height="30" Width="200" 
-                             IsIndeterminate="False" />-->
+                <!--<ProgressBar x:Name="pbOwners" 
+                             Maximum="{Binding ProgressBarUpLoadOwnersMaximumValue}" 
+                             Minimum="{Binding ProgressBarUpLoadOwnersMinimumValue}" 
+                             Value="{Binding ProgressBarUpLoadOwnersCurrentValue}" 
+                             Height="30" Width="200" IsIndeterminate="False" />-->
             </StackPanel>
             <DataGrid Name="dgOwners" Margin="10" Width="1400" Height="600" HorizontalAlignment="Left"
                             ItemsSource="{Binding MarionOwners}"/>

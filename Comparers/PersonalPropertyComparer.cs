@@ -9,9 +9,9 @@ namespace MarionUpload.Comparers
         public bool Equals(mMarionPersonalProperty x, mMarionPersonalProperty y)
         {
             // return x.LeaseNumber == y.LeaseNumber;
-            var tuple1 = new Tuple<int, int>(x.OwnerNumber, x.LeaseNumber);
-            var tuple2 = new Tuple<int, int>(y.OwnerNumber, y.LeaseNumber);
-            return tuple1 == tuple2;
+            var tupleX = new Tuple<int, int>(x.OwnerNumber, x.LeaseNumber);
+            var tupleY = new Tuple<int, int>(y.OwnerNumber, y.LeaseNumber);
+            return tupleX == tupleY;
         }
 
         public int GetHashCode(mMarionPersonalProperty obj)

@@ -171,6 +171,8 @@ namespace MarionUpload.ViewModels
                         var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == marionTract.LeaseNumber).FirstOrDefault().Acres; //tract acres
                         var leaseAcres = (from m in MarionMineralAccounts where m.RRC == marionTract.RRC select m.Acres).Sum();//sum of tract acres in lease
                         populatedTract.LeasePct = Math.Round(leaseAcres != 0 ? tractAcres / leaseAcres : 0.0, 3);
+                        //Note!! LeasePct needs to be inserted into tblAccount.Legal ??????? how? parse legal and re-build?
+
                         db.Insert<mTract>(populatedTract);
                     }
                 }

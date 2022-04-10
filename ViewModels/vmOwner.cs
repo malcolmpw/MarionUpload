@@ -66,10 +66,34 @@ namespace MarionUpload.ViewModels
         public List<mOwner> OwnersToInsert { get; set; }
         public static IDictionary<int, long> NameIdMap { get; private set; } = new Dictionary<int, long>();
         public IDictionary<int, long> MarionOwnerNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
-        public ObservableCollection<int> ProgressBarUpLoadOwnersMinimumValue { get; private set; }
-        public ObservableCollection<int> ProgressBarUpLoadOwnersMaximumValue { get; private set; }
-        public ObservableCollection<int> ProgressBarUpLoadOwnersCurrentValue { get; private set; }
 
+        //public int ProgressBarUpLoadOwnersMinimumValue
+        //{
+        //    get => ProgressBarUpLoadOwnersMinimumValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadOwnersMinimumValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadOwnersMinimumValue));
+        //    }
+        //}
+        //public int ProgressBarUpLoadOwnersMaximumValue
+        //{
+        //    get => ProgressBarUpLoadOwnersMaximumValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadOwnersMaximumValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadOwnersMaximumValue));
+        //    }
+        //}
+        //public int ProgressBarUpLoadOwnersCurrentValue
+        //{
+        //    get => ProgressBarUpLoadOwnersCurrentValue;
+        //    private set
+        //    {
+        //        ProgressBarUpLoadOwnersCurrentValue = value;
+        //        RaisePropertyChanged(nameof(ProgressBarUpLoadOwnersCurrentValue));
+        //    }
+        //}
         //public static IDictionary<string, long> NameSortCadMap { get; private set; } = new Dictionary<string, long>();
 
         private DateTime _updateDate;
@@ -206,18 +230,18 @@ namespace MarionUpload.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
             //Configure the ProgressBar
-            
+
             //ProgressBarUpLoadOwnersMinimumValue = 0;
-                    
-            
-            try
-            {
+            //ProgressBarUpLoadOwnersMaximumValue = MarionOwners.Count();
+            //ProgressBarUpLoadOwnersCurrentValue = 0;
+
+            try            {
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-                {
+                {                    
                     foreach (mMarionOwner _marionOwner in MarionOwners)
                     {
-                        //ProgressBarUpLoadOwnersMaximumValue = MarionOwners.Count;
-                        //ProgressBarUpLoadOwnersCurrentValue = MarionOwners.CurrentPosition;
+                        //++ProgressBarUpLoadOwnersCurrentValue;
+
                         var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(_marionOwner);
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
                         if (!NameIdMap.ContainsKey(_marionOwner.OwnerNumber))

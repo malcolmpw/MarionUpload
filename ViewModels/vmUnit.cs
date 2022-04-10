@@ -8,6 +8,7 @@ using MarionUpload.Comparers;
 using MarionUpload.Helpers;
 using MarionUpload.Messages;
 using MarionUpload.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -130,7 +131,9 @@ namespace MarionUpload.ViewModels
                             continue;
                         }
                         var unitProperty = TranslateMineralImportPropertyToUnitProperty(mineralProperty, jurisdiction);
-                        db.Insert<mUnitProperty>(unitProperty);
+                        //var unitId = db.ExecuteScalar($"SELECT TOP 1 UnitID,PropID FROM tblUnitProperty where  = '{populatedLease.RrcLease}'") as string;
+                        //db.ExecuteScalar = from tblUnitProperty u join tlkpCadUnit c on u.UnitId = c.UnitID
+                        db.Insert<mUnitProperty>(unitProperty);// error inserting into tblUnitProperty
                     }
                 }
 
@@ -153,8 +156,25 @@ namespace MarionUpload.ViewModels
                             //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
                             continue;
                         }
-                        var unitProperty = TranslatePersonalImportPropertyToUnitProperty(personalProperty, jurisdiction);
-                        db.Insert<mUnitProperty>(unitProperty);
+                        var unitPropertyFromImport = TranslatePersonalImportPropertyToUnitProperty(personalProperty, jurisdiction);
+                        var unitIdFromDb = db.ExecuteScalar($"SELECT TOP 1 UnitID FROM tblUnitProperty where UnitID = '{unitPropertyFromImport.UnitID}' and PropID = '{unitPropertyFromImport.PropID}' ") as string;
+                        var propIdFromDb = db.ExecuteScalar($"SELECT TOP 1 PropID FROM tblUnitProperty where UnitID = '{unitPropertyFromImport.UnitID}' and PropID = '{unitPropertyFromImport.PropID}' ") as string;
+                        var unitCompare_YN = unitPropertyFromImport.UnitID.CompareTo( unitIdFromDb);
+                        var propCompare_YN = unitPropertyFromImport.PropID.CompareTo(propIdFromDb);
+                        if (unitIdFromDb==null && propIdFromDb==null)
+                        {
+                            db.Insert<mUnitProperty>(unitPropertyFromImport);                            
+                        }
+                        else
+                            if(unitCompare_YN == 0 && propCompare_YN == 0)
+                        {
+                            MessageBox.Show($"UnitProperty to insert already exists UnitID = {unitPropertyFromImport.UnitID} and PropID = {unitPropertyFromImport.PropID}.");
+
+                        }
+                        else
+                        {
+                            db.Insert<mUnitProperty>(unitPropertyFromImport);
+                        }
                     }
                 }
 
@@ -178,7 +198,8 @@ namespace MarionUpload.ViewModels
         private mUnitProperty TranslatePersonalImportPropertyToUnitProperty(mMarionPersonalProperty property, int jurisdiction)
         {
             mUnitProperty unitProperty = new mUnitProperty();
-            unitProperty.PropID = (int)vmProperty.PersonalPropertyIdMap[property.OwnerNumber];
+            Tuple<int, int> keyTuple = new Tuple<int, int>(property.OwnerNumber, property.LeaseNumber);
+            unitProperty.PropID = (int)vmProperty.PersonalPropertyIdMap[keyTuple];
             unitProperty.UnitID = CadUnitIDMap[jurisdiction.ToString()].UnitID;
             unitProperty.UnitPct = 1;
             return unitProperty;
