@@ -96,7 +96,7 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadOwner = TranslateFrom_mCrwOperatorTo_mCadOwner(crwOperator, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-
+                       
                     }
                 
                 }
@@ -143,7 +143,10 @@ namespace MarionUpload.ViewModels
             owner.Agnt_YN = true;
             owner.CadID = "MAR";
             owner.NameSortCad = crwOperator.NameSort.Trim();
-            
+            owner.NameC= crwOperator.NameSort.Trim();
+            owner.NameSort= crwOperator.NameSort.Trim();
+            owner.NameSortFirst= crwOperator.NameSort.Trim();
+
             owner.Stat_YN = true;
             owner.Oper_YN = true;
             owner.OperRrcID = crwOperator.OperRrcID.Trim();

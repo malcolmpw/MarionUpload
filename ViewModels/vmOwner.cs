@@ -235,27 +235,39 @@ namespace MarionUpload.ViewModels
             //ProgressBarUpLoadOwnersMaximumValue = MarionOwners.Count();
             //ProgressBarUpLoadOwnersCurrentValue = 0;
 
-            try            {
+            UploadMarionOwners();                       
+
+            OwnerImportEnabled = false;
+            OwnerUploadEnabled = false;
+
+            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
+        }
+
+       
+        private void UploadMarionOwners()
+        {
+            try
+            {
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
-                {                    
-                    foreach (mMarionOwner _marionOwner in MarionOwners)
+                {
+                    foreach (mMarionOwner marionOperators in MarionOwners)
                     {
                         //++ProgressBarUpLoadOwnersCurrentValue;
 
-                        var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(_marionOwner);
+                        var populatedOwner = TranslateFrom_mMarionOwnerTo_mOwner(marionOperators);
                         var primaryOwnerKey = db.Insert<mOwner>(populatedOwner);
-                        if (!NameIdMap.ContainsKey(_marionOwner.OwnerNumber))
-                            NameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                        if (!NameIdMap.ContainsKey(marionOperators.OwnerNumber))
+                            NameIdMap.Add(marionOperators.OwnerNumber, primaryOwnerKey);
 
                         //if (!NameSortCadMap.ContainsKey(populatedOwner.NameSortCad.Trim().ToUpper()))
                         //{
                         //    NameSortCadMap.Add(populatedOwner.NameSortCad.Trim().ToUpper(), primaryOwnerKey);
                         //}
 
-                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(_marionOwner, primaryOwnerKey);
+                        var populatedCadOwner = TranslateFrom_mMarionOwnerTo_mCadOwner(marionOperators, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                        if (!MarionOwnerNumberToNameIdMap.ContainsKey(_marionOwner.OwnerNumber))
-                            MarionOwnerNumberToNameIdMap.Add(_marionOwner.OwnerNumber, primaryOwnerKey);
+                        if (!MarionOwnerNumberToNameIdMap.ContainsKey(marionOperators.OwnerNumber))
+                            MarionOwnerNumberToNameIdMap.Add(marionOperators.OwnerNumber, primaryOwnerKey);
 
                     }
                 }
@@ -271,11 +283,6 @@ namespace MarionUpload.ViewModels
                 MessageBox.Show($"Error Uploading Owner Data -> {ex}");
                 Messenger.Default.Send<OwnerFinishedMessage>(new OwnerFinishedMessage());
             }
-
-            OwnerImportEnabled = false;
-            OwnerUploadEnabled = false;
-
-            Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
         }
 
         private mCadOwner TranslateFrom_mMarionOwnerTo_mCadOwner(mMarionOwner marionOwner, long primaryKey)
