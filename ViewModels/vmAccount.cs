@@ -290,6 +290,8 @@ namespace MarionUpload.ViewModels
 
             account.NameID = vmOwner.MarionOwnerNumberToNameIdMap[_marionAccount.OwnerNumber];
 
+            account.SeqNmbr = _marionAccount.AccountNumber.ToString() + "|" + _marionAccount.AccountSequence.ToString();
+
             if (_marionAccount.SPTBCode == "G1 " || _marionAccount.SPTBCode == "XV ")
             {
                 if(vmProperty.MineralPropertyIdMap.ContainsKey(_marionAccount.LeaseNumber))

@@ -9,6 +9,7 @@ namespace MarionUpload.Models
         [Key]
         public int AcctID { get; set; }
         public string AcctLegal { get; set; }
+        public string SeqNmbr { get; set; }
         public char PctType { get; set; }
         public float PctProp { get; set; }
         public bool Protest_YN { get; set; }
