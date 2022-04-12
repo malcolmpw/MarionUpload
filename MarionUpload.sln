@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL scripts", "SQL scripts"
 		Marion Operators.sql = Marion Operators.sql
 		NameSel_YN.sql = NameSel_YN.sql
 		PctType counts.sql = PctType counts.sql
+		Search for Juris 31,32,83.sql = Search for Juris 31,32,83.sql
 		SqlQuery_1.sql = SqlQuery_1.sql
 		TestForNameT.sql = TestForNameT.sql
 		Update Owners Operator Flag.sql = Update Owners Operator Flag.sql

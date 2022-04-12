@@ -129,8 +129,7 @@ namespace MarionUpload.ViewModels
                     var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease, MarionOperators);
 
                     var formattedRRC = populatedLease.RrcLease;                    
-                    var rrcOperId = db.ExecuteScalar($"SELECT TOP 1 RrcOpr FROM tblWell where RrcLease = '{formattedRRC}'") as string;
-                    var wellLpdID = db.ExecuteScalar($"SELECT TOP 1 LpdID FROM tblWell where RrcLease = '{formattedRRC}'") as string;
+                    var rrcOperId = db.ExecuteScalar($"SELECT TOP 1 RrcOpr FROM tblWell where RrcLease = '{formattedRRC}'") as string;                    
                     if (string.IsNullOrEmpty(rrcOperId))
                     {
                         formattedRRC = populatedLease.RrcLease.PadLeft(5, '0');  // oil well
@@ -158,8 +157,8 @@ namespace MarionUpload.ViewModels
                         populatedLease.LeaseOprID = (int)vmAgentAndOperator.CrwOperRrcIDToNameIdMap[crwRrcOperId];
                     }
 
-                    var leaseNameRrc = db.ExecuteScalar($"SELECT TOP 1 LpdLeaseName FROM tblWell where RrcLease = '{formattedRRC}'") as string;
-                    populatedLease.LeaseNameWag = leaseNameRrc;
+                    var lpdLeaseName = db.ExecuteScalar($"SELECT TOP 1 LpdLeaseName FROM tblWell where RrcLease = '{formattedRRC}'") as string;                    
+                    populatedLease.LeaseNameOpr = lpdLeaseName;
 
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
 

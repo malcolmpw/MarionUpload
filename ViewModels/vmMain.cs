@@ -137,16 +137,10 @@ namespace MarionUpload.ViewModels
 
                     db.Execute("Delete t from tblLease l, tblTract t, tblCadLease c where t.LeaseID = l.LeaseID and l.LeaseID = c.LeaseID and c.CadID = 'MAR'");
                     db.Execute("Delete l from tblLease l, tblCadLease c where l.LeaseID = c.LeaseID and c.CadID = 'MAR'");
-                    db.Execute("Delete from tblCadLease where CadID = 'MAR'");
-
-                    //var cadunits = db.Query<mTlkpUnit>("select * from tlkpCadUnit where CadId = 'MAR'");
-                    //foreach (var cadunit in cadunits)
-                    //{
-                    //    db.Execute($"Delete from tblUnitProperty where UnitId = '{cadunit.UnitID}'");
-                    //}
-
+                    db.Execute("Delete from tblCadLease where CadID = 'MAR'");                    
+                    
                     db.Execute($"delete tblUnitProperty from tblUnitProperty u join tlkpCadUnit c on u.UnitId=c.UnitID where c.CadId='MAR'");
-
+                    
                     db.Execute($"delete tblName from tblName n join AbMarionOperatorsFromCRW c on n.OperRrcID=c.OperRrcID");
                 }
 

@@ -11,6 +11,7 @@ namespace MarionUpload.Models
         public string CadPropID { get; set; }
         public int LeaseOprID { get; set; }
         public string LeaseNameWag { get; set; }
+        public string LeaseNameOpr { get; set; }
         public DateTime UpdateDate { get; set; }
         public string UpdateBy { get; set; }
         public bool Stat_YN { get; set; }
