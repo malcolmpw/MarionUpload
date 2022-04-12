@@ -77,8 +77,6 @@ namespace MarionUpload.ViewModels
 
                 distinctMineralResults.ForEach(mineralProperty => MarionMineralProperties.Add(mineralProperty));
 
-                
-                
                 var personalResults = db.Query<mMarionPersonalProperty>(
                 "Select distinct OwnerNumber, LeaseNumber, PropertyType, SPTBCode, Description1, Description2, LeaseName, RRC, OperatorName," +
                 "Jurisdiction1, Jurisdiction2, Jurisdiction3, Jurisdiction4, Jurisdiction5, Jurisdiction6, " +
@@ -88,9 +86,7 @@ namespace MarionUpload.ViewModels
                 var distinctPersonalResults = personalResults.Distinct(new PersonalPropertyComparer()).ToList();
 
                 distinctPersonalResults.ForEach(personalProperty => MarionPersonalProperties.Add(personalProperty));
-
-
-
+    
                 UnitImportEnabled = false;
                 UnitUploadEnabled = true;
             }
@@ -127,6 +123,7 @@ namespace MarionUpload.ViewModels
         {
             foreach (var personalProperty in MarionPersonalProperties)
             {
+
                 var jurisdictions = new List<int>
                     {
                         personalProperty.Jurisdiction1, personalProperty.Jurisdiction2, personalProperty.Jurisdiction3,
@@ -150,24 +147,20 @@ namespace MarionUpload.ViewModels
                     var unitCompare_YN = unitPropertyFromImport.UnitID.CompareTo(unitIdFromDb);
                     var propCompare_YN = unitPropertyFromImport.PropID.CompareTo(propIdFromDb);
 
-                    if (personalProperty.SPTBCode == "G1 " || personalProperty.SPTBCode == "XV ")
+                    if (personalProperty.SPTBCode != "G1 " && personalProperty.SPTBCode != "XV ")
                     {
-                        if (personalProperty.SPTBCode != "G1 " && personalProperty.SPTBCode != "XV ")
+                        if (unitIdFromDb == null && propIdFromDb == null)
                         {
-                            if (unitIdFromDb == null && propIdFromDb == null)
-                            {
-                                db.Insert<mUnitProperty>(unitPropertyFromImport);
-                            }
-                            else
-                                if (unitCompare_YN == 0 && propCompare_YN == 0)
-                            {
-                                MessageBox.Show($"UnitProperty to insert already exists UnitID = {unitPropertyFromImport.UnitID} and PropID = {unitPropertyFromImport.PropID}.");
-
-                            }
-                            else
-                            {
-                                db.Insert<mUnitProperty>(unitPropertyFromImport);
-                            }
+                            db.Insert<mUnitProperty>(unitPropertyFromImport);
+                        }
+                        else
+                            if (unitCompare_YN == 0 && propCompare_YN == 0)
+                        {
+                            MessageBox.Show($"UnitProperty to insert already exists UnitID = {unitPropertyFromImport.UnitID} and PropID = {unitPropertyFromImport.PropID}.");
+                        }
+                        else
+                        {
+                            db.Insert<mUnitProperty>(unitPropertyFromImport);
                         }
                     }
                 }
@@ -189,8 +182,10 @@ namespace MarionUpload.ViewModels
                 foreach (var jurisdiction in jurisdictions)
                 {
                     if (jurisdiction == 0) continue;
+                    
                     if (!CadUnitIDMap.ContainsKey(jurisdiction.ToString()))
                     {
+                        //MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit ");
                         Log.Error($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit ");
                         //   MessageBox.Show($"Jurisdiction #{jurisdiction} does not exist in tlkpCadUnit");
                         continue;
@@ -206,12 +201,13 @@ namespace MarionUpload.ViewModels
         private mUnitProperty TranslateMineralImportPropertyToUnitProperty(mMarionMineralProperty property, int jurisdiction)
         {
             var unitProperty = new mUnitProperty();
-            if (property.SPTBCode == "G1 " || property.SPTBCode == "XV ") 
+            if (property.SPTBCode == "G1 " || property.SPTBCode == "XV ")
             {
                 unitProperty = new mUnitProperty();
                 unitProperty.PropID = (int)vmProperty.MineralPropertyIdMap[property.LeaseNumber];
-                unitProperty.UnitID = CadUnitIDMap[jurisdiction.ToString()].UnitID;
-                unitProperty.UnitPct = 1;                
+                //unitProperty.UnitID = jurisdiction.ToString();
+                unitProperty.UnitID = CadUnitIDMap[jurisdiction.ToString()].UnitID;                                
+                unitProperty.UnitPct = 1;
             }
             else
             {
