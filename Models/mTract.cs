@@ -22,17 +22,17 @@ namespace MarionUpload.Models
         public string StatBy { get; set; }
         public bool delflag { get; set; }
 
-        public decimal well78Cur { get; set; }
-        public decimal well18Cur { get; set; }
+        //public decimal well78Cur { get; set; }
+        //public decimal well18Cur { get; set; }
 
-        public string OprLeaseName { get; set; }
-        public string OprLeaseID { get; set; }
-        public string OprDOID { get; set; }
-        public DateTime OprDODate { get; set; }
-        public DateTime OprDODateRecvd { get; set; }
-        public DateTime OprDODatePosted { get; set; }
-        public string OprDOPostBy { get; set; }
-        public bool OprNotWI_YN { get; set; }
+        //public string OprLeaseName { get; set; }
+        //public string OprLeaseID { get; set; }
+        //public string OprDOID { get; set; }
+        //public DateTime OprDODate { get; set; }
+        //public DateTime OprDODateRecvd { get; set; }
+        //public DateTime OprDODatePosted { get; set; }
+        //public string OprDOPostBy { get; set; }
+        //public bool OprNotWI_YN { get; set; }
 
     }
 }

@@ -30,15 +30,15 @@ namespace MarionUpload.ViewModels
         public ObservableCollection<mMarionLease> MarionMineralAccounts { get; set; }
         public static ObservableCollection<mMarionOperator> MarionOperators { get; set; }
         public ObservableCollection<mWellOperatorID> WellOperatorRrcData { get; private set; }
-        public ObservableCollection<mWellOperatorData> WellOperatorData { get; private set; }
+        //public ObservableCollection<mWellOperatorData> WellOperatorData { get; private set; }
         
         public ICommand CommandImportLeases => new RelayCommand(OnImportLeases);
         public ICommand CommandUploadLeases => new RelayCommand(OnUploadLeases);
 
         public static IDictionary<string, long> OperatorNameIdMap { get; private set; }
         public static IDictionary<string, string> OperatorRrcDataMap { get; private set; } = new Dictionary<string, string>();
-        public static IDictionary<string, mWellOperatorData> OperatorDataMap { get; private set; } =
-            new Dictionary<string, mWellOperatorData>();
+       // public static IDictionary<string, mWellOperatorData> OperatorDataMap { get; private set; } =
+           // new Dictionary<string, mWellOperatorData>();
         public List<string> OperatorNamesFromMarionImport { get; private set; }
         public List<string> OperatorNamesFromCrwImport { get; private set; }
 
@@ -86,21 +86,21 @@ namespace MarionUpload.ViewModels
                 var wells = db.Query(sqlString).ToList(); ;
                 foreach (var well in wells)
                 {
-                    var operData = new mWellOperatorData();
+                    var operData = new mWellOperatorID();
 
                     operData.RrcOpr = well.RrcOpr;
                     operData.RrcLease = well.RrcOpr;
-                    operData.LpdLeaseName = well.LpdLeaseName;
-                    operData.LpdStatusDate = well.LpdStatusDate;
-                    operData.OprDODateRecvd = well.OprDODateRecvd;
-                    operData.OprDODatePosted = well.OprDODatePosted;
-                    operData.LpdStatus = well.LpdStatus;
+                    //operData.LpdLeaseName = well.LpdLeaseName;
+                    //operData.LpdStatusDate = well.LpdStatusDate;
+                    //operData.OprDODateRecvd = well.OprDODateRecvd;
+                    //operData.OprDODatePosted = well.OprDODatePosted;
+                    //operData.LpdStatus = well.LpdStatus;
 
                     operData.RrcLease = int.Parse(well.RrcLease).ToString();
                     operData.RrcOpr = well.RrcOpr;
-                    WellOperatorData.Add(operData);
-                    if (!OperatorDataMap.ContainsKey(operData.RrcLease))
-                        OperatorDataMap.Add(operData.RrcLease, operData);
+                    WellOperatorRrcData.Add(operData);
+                    if (!OperatorRrcDataMap.ContainsKey(operData.RrcLease))
+                        OperatorRrcDataMap.Add(operData.RrcLease, operData.RrcOpr);
                 }
             }
         }
@@ -263,38 +263,38 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        //private void InsertTracts(IDbConnection db, mMarionLease thisMarionLease, mLease thisLease, long thisLeaseId)
-        //{
-        //    //   var marionTracts = MarionMineralAccounts.Where(l => l.SPTBCode.Trim() == "G1").Select(m => new { m.RRC, m.LeaseNumber }).Distinct().ToList();
-        //    var marionMineralRows = MarionMineralAccounts.Where(a => a.SPTBCode.Trim() == "G1").GroupBy(m => new { m.RRC, m.LeaseNumber })
-        //        .Select(group => group.FirstOrDefault())
-        //        .ToList();
+        private void InsertTracts(IDbConnection db, mMarionLease thisMarionLease, mLease thisLease, long thisLeaseId)
+        {
+            //   var marionTracts = MarionMineralAccounts.Where(l => l.SPTBCode.Trim() == "G1").Select(m => new { m.RRC, m.LeaseNumber }).Distinct().ToList();
+            var marionMineralRows = MarionMineralAccounts.Where(a => a.SPTBCode.Trim() == "G1").GroupBy(m => new { m.RRC, m.LeaseNumber })
+                .Select(group => group.FirstOrDefault())
+                .ToList();
 
-        //    var tractId = 0;
-        //    var currentRRC = "";
-        //    foreach (var marionMineralRow in marionMineralRows)
-        //    {
-        //        if (marionMineralRow.RRC != currentRRC)
-        //        {
-        //            currentRRC = marionMineralRow.RRC;
-        //            tractId = 1;
-        //        }
-        //        else
-        //        {
-        //            tractId++;
-        //            if (tractId > 2) MessageBox.Show($"The current multi-tract lease(RRC) = {marionMineralRow.RRC} and tractid = {marionMineralRow.LeaseNumber} / {tractId}. ");
-        //        }
+            var tractId = 0;
+            var currentRRC = "";
+            foreach (var marionMineralRow in marionMineralRows)
+            {
+                if (marionMineralRow.RRC != currentRRC)
+                {
+                    currentRRC = marionMineralRow.RRC;
+                    tractId = 1;
+                }
+                else
+                {
+                    tractId++;
+                    if (tractId > 2) MessageBox.Show($"The current multi-tract lease(RRC) = {marionMineralRow.RRC} and tractid = {marionMineralRow.LeaseNumber} / {tractId}. ");
+                }
 
-        //        var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionMineralRow, tractId);
-        //        populatedTract.LeaseID = (long)thisLeaseId;
-        //        populatedTract.PropID = vmProperty.MineralPropertyIdMap[thisMarionLease.LeaseNumber];
+                var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionMineralRow, tractId);
+                populatedTract.LeaseID = (long)thisLeaseId;
+                populatedTract.PropID = vmProperty.MineralPropertyIdMap[thisMarionLease.LeaseNumber];
 
-        //        var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == thisMarionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
-        //        var leaseAcres = (from m in MarionMineralAccounts where m.RRC == thisMarionLease.RRC select m.Acres).Sum();//sum of tract acres in lease
-        //        populatedTract.LeasePct = leaseAcres != 0 ? tractAcres / leaseAcres : 0.0;
-        //        db.Insert<mTract>(populatedTract);
-        //    }
-        //}
+                var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == thisMarionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
+                var leaseAcres = (from m in MarionMineralAccounts where m.RRC == thisMarionLease.RRC select m.Acres).Sum();//sum of tract acres in lease
+                populatedTract.LeasePct = leaseAcres != 0 ? tractAcres / leaseAcres : 0.0;
+                db.Insert<mTract>(populatedTract);
+            }
+        }
 
         private mCadLease TranslateFrom_mMarionLeaseTo_mCadLease(mMarionLease marionLease)
         {
@@ -321,25 +321,20 @@ namespace MarionUpload.ViewModels
             tract.UpdateBy = UpdateByDefault;
             tract.UpdateDate = DateTime.Now;
             
-            var marionRrc = marionLease.RRC;
-            var parser = new RrcParser();
-            marionRrc = parser.GetRRCnumberFromImportRRCstring(marionRrc);
+            //var marionRrc = marionLease.RRC;
+            //var parser = new RrcParser();
+            //marionRrc = parser.GetRRCnumberFromImportRRCstring(marionRrc);
 
-            var operatorData = new mWellOperatorData();
-            if (OperatorDataMap.ContainsKey(marionRrc))
-            {
-                operatorData = OperatorDataMap[marionRrc];
-                //tract.OprDODate=operatorData.
-                tract.OprDODatePosted = DateTime.Now; // operatorData.OprDODatePosted;
-                tract.OprDODateRecvd = DateTime.Now;// operatorData.OprDODateRecvd;
-                tract.OprDODate = DateTime.Now;
-                tract.OprDOID = marionRrc;
-                tract.OprDOPostBy = "MPW";
-                tract.OprLeaseID = operatorData.RrcLease;
-                tract.OprLeaseName = operatorData.LpdLeaseName;
-          
-            }
-            
+            //var operatorData = new mWellOperatorData();
+            //if (OperatorDataMap.ContainsKey(marionRrc))
+            //{
+            //    operatorData = OperatorDataMap[marionRrc];
+            //    //tract.OprDODate=operatorData.
+            //    tract.OprDODatePosted = operatorData.OprDODatePosted;
+            //    tract.OprDODateRecvd = operatorData.OprDODateRecvd;
+              
+            //}
+
             return tract;
         }
 
