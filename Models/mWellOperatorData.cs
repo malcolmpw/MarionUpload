@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MarionUpload.Models
 {
-    class mWellOperatorData
+    public class mWellOperatorData
     {
         public string RrcOpr { get; set; }
         public string RrcLease { get; set; }

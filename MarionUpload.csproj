@@ -127,6 +127,7 @@
     <Compile Include="Models\mMarionWellOperatorID.cs" />
     <Compile Include="Models\mWellOperatorData.cs" />
     <Compile Include="Interfaces\IMarionWithRRC.cs" />
+    <Compile Include="Models\mWellOperatorID.cs" />
     <Compile Include="ViewModels\vmAccount.cs" />
     <Compile Include="ViewModels\vmAgentAndOperator.cs" />
     <Compile Include="ViewModels\vmCadUnit.cs" />
