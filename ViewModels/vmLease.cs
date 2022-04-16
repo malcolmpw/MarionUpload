@@ -30,15 +30,15 @@ namespace MarionUpload.ViewModels
         public ObservableCollection<mMarionLease> MarionMineralAccounts { get; set; }
         public static ObservableCollection<mMarionOperator> MarionOperators { get; set; }
         public ObservableCollection<mWellOperatorID> WellOperatorRrcData { get; private set; }
-        //public ObservableCollection<mWellOperatorData> WellOperatorData { get; private set; }
+        public ObservableCollection<mWellOperatorData> WellOperatorData { get; private set; }
         
         public ICommand CommandImportLeases => new RelayCommand(OnImportLeases);
         public ICommand CommandUploadLeases => new RelayCommand(OnUploadLeases);
 
         public static IDictionary<string, long> OperatorNameIdMap { get; private set; }
         public static IDictionary<string, string> OperatorRrcDataMap { get; private set; } = new Dictionary<string, string>();
-       // public static IDictionary<string, mWellOperatorData> OperatorDataMap { get; private set; } =
-           // new Dictionary<string, mWellOperatorData>();
+        public static IDictionary<string, mWellOperatorData> OperatorDataMap { get; private set; } =
+            new Dictionary<string, mWellOperatorData>();
         public List<string> OperatorNamesFromMarionImport { get; private set; }
         public List<string> OperatorNamesFromCrwImport { get; private set; }
 
@@ -63,7 +63,6 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 string sqlString = $"Select distinct w.RrcLease,w.RrcOpr from tblWell w where CadID='MAR'";
-                //WellOperatorRrcData
                 var wells = db.Query(sqlString).ToList(); ;
                 foreach (var well in wells)
                 {
@@ -81,12 +80,15 @@ namespace MarionUpload.ViewModels
         {
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                string sqlString = $"Select distinct w.RrcLease,w.RrcOpr from tblWell w where CadID='MAR'";
-                //WellOperatorRrcData
+                string sqlString = $"Select distinct w.RrcLease,w.RrcOpr,w.LpdLeaseName, " +
+                    $"cast(w.LpdStatusDate as datetime), " +
+                    $"cast(w.OprDODateRecvd as datetime), " +
+                    $"cast (w.OprDODatePosted as datetime) " +
+                    "from tblWell w where CadID = 'MAR'";
                 var wells = db.Query(sqlString).ToList(); ;
                 foreach (var well in wells)
                 {
-                    var operData = new mWellOperatorID();
+                    var operData = new mWellOperatorData();
 
                     operData.RrcOpr = well.RrcOpr;
                     operData.RrcLease = well.RrcOpr;
@@ -98,9 +100,9 @@ namespace MarionUpload.ViewModels
 
                     operData.RrcLease = int.Parse(well.RrcLease).ToString();
                     operData.RrcOpr = well.RrcOpr;
-                    WellOperatorRrcData.Add(operData);
-                    if (!OperatorRrcDataMap.ContainsKey(operData.RrcLease))
-                        OperatorRrcDataMap.Add(operData.RrcLease, operData.RrcOpr);
+                    WellOperatorData.Add(operData);
+                    if (!OperatorDataMap.ContainsKey(operData.RrcLease))
+                        OperatorDataMap.Add(operData.RrcLease, operData);
                 }
             }
         }
@@ -201,10 +203,11 @@ namespace MarionUpload.ViewModels
                     }
 
 
-
                     var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
                     populatedCadLease.LeaseId = (long)primaryLeaseKey;
                     db.Insert<mCadLease>(populatedCadLease);
+
+
 
                     var marionTracts = MarionMineralAccounts.Where(a => a.RRC == marionLease.RRC).ToList();
                     var tractId = 0; var currentLeaseNumber = 0;
@@ -321,19 +324,16 @@ namespace MarionUpload.ViewModels
             tract.UpdateBy = UpdateByDefault;
             tract.UpdateDate = DateTime.Now;
             
-            //var marionRrc = marionLease.RRC;
-            //var parser = new RrcParser();
-            //marionRrc = parser.GetRRCnumberFromImportRRCstring(marionRrc);
+            var marionRrc = marionLease.RRC;
+            var parser = new RrcParser();
+            marionRrc = parser.GetRRCnumberFromImportRRCstring(marionRrc);
 
             //var operatorData = new mWellOperatorData();
-            //if (OperatorDataMap.ContainsKey(marionRrc))
-            //{
-            //    operatorData = OperatorDataMap[marionRrc];
-            //    //tract.OprDODate=operatorData.
-            //    tract.OprDODatePosted = operatorData.OprDODatePosted;
-            //    tract.OprDODateRecvd = operatorData.OprDODateRecvd;
-              
-            //}
+            //if (OperatorDataMap.ContainsKey(marionRrc)) operatorData = OperatorDataMap[marionRrc];
+                //tract.OprDODate=operatorData.
+                //tract.OprDODatePosted = operatorData.OprDODatePosted;
+                //tract.OprDODateRecvd = operatorData.OprDODateRecvd;
+          
 
             return tract;
         }
