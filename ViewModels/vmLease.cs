@@ -266,39 +266,6 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        private void InsertTracts(IDbConnection db, mMarionLease thisMarionLease, mLease thisLease, long thisLeaseId)
-        {
-            //   var marionTracts = MarionMineralAccounts.Where(l => l.SPTBCode.Trim() == "G1").Select(m => new { m.RRC, m.LeaseNumber }).Distinct().ToList();
-            var marionMineralRows = MarionMineralAccounts.Where(a => a.SPTBCode.Trim() == "G1").GroupBy(m => new { m.RRC, m.LeaseNumber })
-                .Select(group => group.FirstOrDefault())
-                .ToList();
-
-            var tractId = 0;
-            var currentRRC = "";
-            foreach (var marionMineralRow in marionMineralRows)
-            {
-                if (marionMineralRow.RRC != currentRRC)
-                {
-                    currentRRC = marionMineralRow.RRC;
-                    tractId = 1;
-                }
-                else
-                {
-                    tractId++;
-                    if (tractId > 2) MessageBox.Show($"The current multi-tract lease(RRC) = {marionMineralRow.RRC} and tractid = {marionMineralRow.LeaseNumber} / {tractId}. ");
-                }
-
-                var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(marionMineralRow, tractId);
-                populatedTract.LeaseID = (long)thisLeaseId;
-                populatedTract.PropID = vmProperty.MineralPropertyIdMap[thisMarionLease.LeaseNumber];
-
-                var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == thisMarionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
-                var leaseAcres = (from m in MarionMineralAccounts where m.RRC == thisMarionLease.RRC select m.Acres).Sum();//sum of tract acres in lease
-                populatedTract.LeasePct = leaseAcres != 0 ? tractAcres / leaseAcres : 0.0;
-                db.Insert<mTract>(populatedTract);
-            }
-        }
-
         private mCadLease TranslateFrom_mMarionLeaseTo_mCadLease(mMarionLease marionLease)
         {
             var cadLease = new mCadLease();
@@ -328,8 +295,8 @@ namespace MarionUpload.ViewModels
             var parser = new RrcParser();
             marionRrc = parser.GetRRCnumberFromImportRRCstring(marionRrc);
 
-            //var operatorData = new mWellOperatorData();
-            //if (OperatorDataMap.ContainsKey(marionRrc)) operatorData = OperatorDataMap[marionRrc];
+            var operatorData = new mWellOperatorData();
+            if (OperatorDataMap.ContainsKey(marionRrc)) operatorData = OperatorDataMap[marionRrc];
                 //tract.OprDODate=operatorData.
                 //tract.OprDODatePosted = operatorData.OprDODatePosted;
                 //tract.OprDODateRecvd = operatorData.OprDODateRecvd;
