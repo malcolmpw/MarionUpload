@@ -28,9 +28,9 @@ namespace MarionUpload.ViewModels
         private bool _ownersEnabled = true;
         private bool _propertiesEnabled;
         private bool _accountsEnabled;
-        private bool _unitsEnabled;        
+        private bool _unitsEnabled;
         private bool _leasesEnabled;
-        
+
         private const int AGENT_TAB_INDEX = 0;
         private const int OWNER_TAB_INDEX = 1;
         private const int PROPERTY_TAB_INDEX = 2;
@@ -41,10 +41,53 @@ namespace MarionUpload.ViewModels
 
         public bool IsStarted { get => _isStarted; set { _isStarted = value; Raise(nameof(IsStarted)); } }
         public int CurrentStep { get => _currentStep; set { _currentStep = value; Raise(nameof(CurrentStep)); } }
-        public ICommand CommandStartWizard => new RelayCommand(OnStartWizard);
+        public ICommand CommandStartImportWizard => new RelayCommand(OnStartImportWizard);
+        public ICommand CommandStartExportWizard => new RelayCommand(OnStartExportWizard);
+
+        private void OnStartExportWizard()
+        {
+            throw new NotImplementedException();
+            //create an empty collection of type AbMarionImport table that will later be saved as the export file
+            //import tblAccount where Cad='MAR'
+            //foreach (tblAccount accountRow in tblAccount)
+
+            //      translate the appropriate columns to AbMarionImport columns.
+            //      add (insert) the translated columns to accountRow.
+            //
+            //      using accountRow.NameID find the corresponding row in tblName.
+            //          translate the appropriate columns in tblName to AbMarionImport columns.
+            //          add (update) the translated columns to accountRow. Repeat this for tblCadOwners
+            //          
+            //      using accountRow.PropID find the corresponding row in tblProperty
+            //          translate the appropriate columns in tblProperty to AbMarionImport columns.
+            //          add (update) the translated columns to accountRow. Repeat this for tblCadProperty.
+            //
+            //      using accountRow.PropID and UnitID to  find the corresponding row in tblUnitProperty
+            //          translate the appropriate columns in tblUnitProperty to AbMarionImport columns.
+            //          add (update) the translated columns to accountRow.
+            //
+            //      using accountRow.PropID and TractID find the corresponding row in tblTract
+            //          translate the appropriate columns in tblTract to AbMarionImport columns.
+            //          add (update) the translated columns to accountRow.           
+            //
+            //      using accountRow.PropID find the corresponding rows in tblTract and cycle through the tracts (usually only one)
+            //          translate the appropriate columns in tblTract to AbMarionImport columns.
+            //          add (update) the translated columns to accountRow.
+            //
+            //      using LeaseID to find the corresponding row in tblLease
+            //          translate the appropriate columns in tblLease to AbMarionImport columns.
+            //          add (update) the translated columns to accountRow. Repeat this for tblCadLease.           
+            //
+
+
+
+
+
+
+        }
 
         public bool AgentsEnabled { get => _agentsEnabled; set { _agentsEnabled = value; Raise(nameof(AgentsEnabled)); } }
-        public bool OwnersEnabled { get => _ownersEnabled; set  { _ownersEnabled = value; Raise(nameof(OwnersEnabled)); } }
+        public bool OwnersEnabled { get => _ownersEnabled; set { _ownersEnabled = value; Raise(nameof(OwnersEnabled)); } }
         public bool PropertiesEnabled { get => _propertiesEnabled; set { _propertiesEnabled = value; Raise(nameof(PropertiesEnabled)); } }
         public bool AccountsEnabled { get => _accountsEnabled; set { _accountsEnabled = value; Raise(nameof(AccountsEnabled)); } }
         public bool UnitsEnabled { get => _unitsEnabled; set { _unitsEnabled = value; Raise(nameof(UnitsEnabled)); } }
@@ -109,7 +152,7 @@ namespace MarionUpload.ViewModels
             }
         }
 
-        private void OnStartWizard()
+        private void OnStartImportWizard()
         {
             // Clean up all Tables
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
@@ -137,10 +180,10 @@ namespace MarionUpload.ViewModels
 
                     db.Execute("Delete t from tblLease l, tblTract t, tblCadLease c where t.LeaseID = l.LeaseID and l.LeaseID = c.LeaseID and c.CadID = 'MAR'");
                     db.Execute("Delete l from tblLease l, tblCadLease c where l.LeaseID = c.LeaseID and c.CadID = 'MAR'");
-                    db.Execute("Delete from tblCadLease where CadID = 'MAR'");                    
-                    
+                    db.Execute("Delete from tblCadLease where CadID = 'MAR'");
+
                     db.Execute($"delete tblUnitProperty from tblUnitProperty u join tlkpCadUnit c on u.UnitId=c.UnitID where c.CadId='MAR'");
-                    
+
                     db.Execute($"delete tblName from tblName n join AbMarionOperatorsFromCRW c on n.OperRrcID=c.OperRrcID");
                 }
 
