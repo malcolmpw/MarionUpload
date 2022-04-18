@@ -50,9 +50,11 @@ namespace MarionUpload.ViewModels
             //create an empty collection of type AbMarionImport table that will later be saved as the export file
             //import tblAccount where Cad='MAR'
             //foreach (tblAccount accountRow in tblAccount)
-
-            //      translate the appropriate columns to AbMarionImport columns.
-            //      add (insert) the translated columns to accountRow.
+            //
+            //      translate the appropriate columns to AbMarionImport columns. Include 
+            //      add (insert) the translated columns to accountRow. Repeat this for tblCadAccount
+            //          don't forget to reverse:
+            //          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
             //
             //      using accountRow.NameID find the corresponding row in tblName.
             //          translate the appropriate columns in tblName to AbMarionImport columns.
