@@ -3,7 +3,7 @@
 namespace MarionUpLoad.Models
 {
     [Table("tblCadProperty")]
-    class mCadProperty
+    public class mCadProperty
     {
         [ExplicitKey]
         public int PropID { get; set; }

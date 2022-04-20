@@ -3,7 +3,7 @@
 namespace MarionUpload.Models
 {
     [Table("tblCadOwners")]
-    class mCadOwner
+    public class mCadOwner
     {
         [ExplicitKey]
         public int NameID { get; set; }

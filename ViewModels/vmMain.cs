@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using Dapper;
-using Dapper.Contrib.Extensions;
+﻿using Dapper;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using MarionUpload.Helpers;
 using MarionUpload.Messages;
 using MarionUpload.Models;
+using MarionUpLoad.Models;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Input;
 
 namespace MarionUpload.ViewModels
 {
@@ -41,51 +39,129 @@ namespace MarionUpload.ViewModels
 
         public bool IsStarted { get => _isStarted; set { _isStarted = value; Raise(nameof(IsStarted)); } }
         public int CurrentStep { get => _currentStep; set { _currentStep = value; Raise(nameof(CurrentStep)); } }
+
         public ICommand CommandStartImportWizard => new RelayCommand(OnStartImportWizard);
         public ICommand CommandStartExportWizard => new RelayCommand(OnStartExportWizard);
 
+        public ObservableCollection<mMarionImport> MarionExportRows { get; set; }
+        public ObservableCollection<mAccount> tblAccountRows { get; set; }
+        public ObservableCollection<mCadAccount> tblCadAccountRows { get; set; }
+        public ObservableCollection<mOwner> tblNameRows { get; set; }
+        public ObservableCollection<mCadOwner> tblCadOwnerRows { get; set; }
+        public ObservableCollection<mProperty> tblPropertyRows { get; set; }
+        public ObservableCollection<mCadProperty> tblCadPropertyRows { get; set; }
+        public ObservableCollection<mTract> tblTractRows { get; set; }
+        public ObservableCollection<mLease> tblLeaseRows { get; set; }
+        public ObservableCollection<mCadLease> tblCadLeaseRows { get; set; }
+
         private void OnStartExportWizard()
         {
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+            {
+                //create an empty collection of type AbMarionImport table that will later be saved as the export file
+                MarionExportRows = new ObservableCollection<mMarionImport>();
+
+                tblAccountRows = new ObservableCollection<mAccount>();
+                tblCadAccountRows = new ObservableCollection<mCadAccount>();
+
+                tblNameRows = new ObservableCollection<mOwner>();
+                tblCadOwnerRows = new ObservableCollection<mCadOwner>();
+
+                tblPropertyRows = new ObservableCollection<mProperty>();
+                tblCadPropertyRows = new ObservableCollection<mCadProperty>();
+
+                tblTractRows = new ObservableCollection<mTract>();
+                tblLeaseRows = new ObservableCollection<mLease>();
+                tblCadLeaseRows = new ObservableCollection<mCadLease>();
+
+                //import tblAccount where Cad='MAR'
+                var acctSqlString = $"select * from tblAccount a where a.Cad='MAR' ";
+                var accountRows = db.Query<mAccount>(acctSqlString);
+                var translatedAccountRow = new mMarionImport();                
+                foreach (mAccount accountRow in accountRows)
+                {
+                    //      translate the appropriate columns to AbMarionImport type columns. Include 
+                    translatedAccountRow = TranslateAccountRowToMarionImportRow(accountRow);
+                    //      add (insert) the translated columns to accountRow. Repeat this for tblCadAccount
+                    //MarionExportRows.Add(translatedAccountRow);
+                }
+
+                //import tblName where Cad='MAR'
+                var nameSqlString = $"select * from tblName n join tblCadOwners c on n.NameID = c.NameID where c.CadID='MAR'";
+                var nameRows = db.Query<mOwner>(nameSqlString);
+
+                foreach (mAccount accountRow in accountRows)
+                {
+                    //      using accountRow.NameID find the corresponding row in tblName.
+                    var nameRow = (from n in tblNameRows where accountRow.NameID == n.NameID select n).FirstOrDefault();
+                    //          translate the appropriate columns in tblName to AbMarionImport columns.
+                    var translatedNameRow = TranslateNameRowToMarionImportRow(nameRow);
+                    //          add (update) the translated columns to accountRow. Repeat this for tblCadOwners
+                }
+
+                var propertySqlString = $"select * from tblProperty p join tblCadProperty c on p.PropID = c.PropID where c.CadID='MAR'";
+                var propertyRows = db.Query<mProperty>(nameSqlString);
+
+                foreach (mAccount accountRow in accountRows)
+                {
+                    var propertyRow = (from n in tblNameRows where accountRow.NameID == n.NameID select n).FirstOrDefault();
+                    //var translatedNameRow = TranslateNameRowToMarionImportRow(nameRow);
+                }
+                //      using accountRow.PropID find the corresponding row in tblProperty
+                //          translate the appropriate columns in tblProperty to AbMarionImport columns.
+                //          add (update) the translated columns to accountRow. Repeat this for tblCadProperty.
+
+                var unitPropertySqlString = $"select * from tblUnitProperty u join tlkpCadUnit c on u.UnitID = c.UnitID where c.CadID='MAR'";
+                var unitPropertyRows = db.Query<mUnitProperty>(unitPropertySqlString);
+                //      using accountRow.PropID and UnitID to  find the corresponding row in tblUnitProperty
+                //          translate the appropriate columns in tblUnitProperty to AbMarionImport columns.
+                //          add (update) the translated columns to accountRow.
+                
+                var tractSqlString = $"select * from tblTract t where t.CadID='MAR' ";
+                var tractRows = db.Query<mTract>(tractSqlString);
+                //      using accountRow.PropID and TractPropID to find the corresponding row in tblTract
+                //          translate the appropriate columns in tblTract to AbMarionImport columns.
+                //          add (update) the translated columns to accountRow.           
+                //
+                //      using accountRow.PropID find the corresponding rows in tblTract and cycle through the tracts (usually only one)
+                //          translate the appropriate columns in tblTract to AbMarionImport columns.
+                //          add (update) the translated columns to accountRow.
+                
+                var leaseSqlString = $"select * from tblLease l join tblCadLease c on l.LeaseID = c.LeaseID where c.CadID='MAR'";
+                var leaseRows = db.Query(leaseSqlString);
+                //      using LeaseID to find the corresponding row in tblLease
+                //          translate the appropriate columns in tblLease to AbMarionImport columns.
+                //          add (update) the translated columns to accountRow. Repeat this for tblCadLease.           
+                //
+
+            }
+            //MarionExportRows = null;
+
+            //tblAccountRows = null;
+            //tblCadAccountRows = null;
+
+            //tblNameRows = null;
+            //tblCadOwnerRows = null;
+
+            //tblPropertyRows = null;
+            //tblCadPropertyRows = null;
+
+            //tblTractRows = null;
+            //tblLeaseRows = null;
+            //tblCadLeaseRows = null;
+        }
+
+        private mOwner TranslateNameRowToMarionImportRow(mOwner owner)
+        {
             throw new NotImplementedException();
-            //create an empty collection of type AbMarionImport table that will later be saved as the export file
-            //import tblAccount where Cad='MAR'
-            //foreach (tblAccount accountRow in tblAccount)
-            //
-            //      translate the appropriate columns to AbMarionImport columns. Include 
-            //      add (insert) the translated columns to accountRow. Repeat this for tblCadAccount
+
+        }
+
+        private mMarionImport TranslateAccountRowToMarionImportRow(mAccount accountRow)
+        {
+            throw new NotImplementedException();
             //          don't forget to reverse:
             //          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
-            //
-            //      using accountRow.NameID find the corresponding row in tblName.
-            //          translate the appropriate columns in tblName to AbMarionImport columns.
-            //          add (update) the translated columns to accountRow. Repeat this for tblCadOwners
-            //          
-            //      using accountRow.PropID find the corresponding row in tblProperty
-            //          translate the appropriate columns in tblProperty to AbMarionImport columns.
-            //          add (update) the translated columns to accountRow. Repeat this for tblCadProperty.
-            //
-            //      using accountRow.PropID and UnitID to  find the corresponding row in tblUnitProperty
-            //          translate the appropriate columns in tblUnitProperty to AbMarionImport columns.
-            //          add (update) the translated columns to accountRow.
-            //
-            //      using accountRow.PropID and TractID find the corresponding row in tblTract
-            //          translate the appropriate columns in tblTract to AbMarionImport columns.
-            //          add (update) the translated columns to accountRow.           
-            //
-            //      using accountRow.PropID find the corresponding rows in tblTract and cycle through the tracts (usually only one)
-            //          translate the appropriate columns in tblTract to AbMarionImport columns.
-            //          add (update) the translated columns to accountRow.
-            //
-            //      using LeaseID to find the corresponding row in tblLease
-            //          translate the appropriate columns in tblLease to AbMarionImport columns.
-            //          add (update) the translated columns to accountRow. Repeat this for tblCadLease.           
-            //
-
-
-
-
-
-
         }
 
         public bool AgentsEnabled { get => _agentsEnabled; set { _agentsEnabled = value; Raise(nameof(AgentsEnabled)); } }

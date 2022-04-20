@@ -4,7 +4,7 @@ using System;
 namespace MarionUpload.Models
 {
     [Table("tblCadAccount")]
-    class mCadAccount
+    public class mCadAccount
     {
         [ExplicitKey]
         public int AcctID { get; set; }

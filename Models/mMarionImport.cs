@@ -1,6 +1,6 @@
 ﻿namespace MarionUpload.Models
 {
-    class mMarionImport
+    public class mMarionImport
     {
         //[Dapper.Key]
 
