@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using MarionUpload.Helpers;
@@ -10,10 +11,14 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+
 
 namespace MarionUpload.ViewModels
 {
@@ -77,13 +82,13 @@ namespace MarionUpload.ViewModels
                 //import tblAccount where Cad='MAR'
                 var acctSqlString = $"select * from tblAccount a where a.Cad='MAR' ";
                 var accountRows = db.Query<mAccount>(acctSqlString);
-                var translatedAccountRow = new mMarionImport();                
+                var translatedAccountRow = new mMarionImport();
                 foreach (mAccount accountRow in accountRows)
                 {
                     //      translate the appropriate columns to AbMarionImport type columns. Include 
                     translatedAccountRow = TranslateAccountRowToMarionImportRow(accountRow);
                     //      add (insert) the translated columns to accountRow. Repeat this for tblCadAccount
-                    //MarionExportRows.Add(translatedAccountRow);
+                    MarionExportRows.Add(translatedAccountRow);
                 }
 
                 //import tblName where Cad='MAR'
@@ -116,7 +121,7 @@ namespace MarionUpload.ViewModels
                 //      using accountRow.PropID and UnitID to  find the corresponding row in tblUnitProperty
                 //          translate the appropriate columns in tblUnitProperty to AbMarionImport columns.
                 //          add (update) the translated columns to accountRow.
-                
+
                 var tractSqlString = $"select * from tblTract t where t.CadID='MAR' ";
                 var tractRows = db.Query<mTract>(tractSqlString);
                 //      using accountRow.PropID and TractPropID to find the corresponding row in tblTract
@@ -126,7 +131,7 @@ namespace MarionUpload.ViewModels
                 //      using accountRow.PropID find the corresponding rows in tblTract and cycle through the tracts (usually only one)
                 //          translate the appropriate columns in tblTract to AbMarionImport columns.
                 //          add (update) the translated columns to accountRow.
-                
+
                 var leaseSqlString = $"select * from tblLease l join tblCadLease c on l.LeaseID = c.LeaseID where c.CadID='MAR'";
                 var leaseRows = db.Query(leaseSqlString);
                 //      using LeaseID to find the corresponding row in tblLease
@@ -162,7 +167,29 @@ namespace MarionUpload.ViewModels
             throw new NotImplementedException();
             //          don't forget to reverse:
             //          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
-        }
+            
+            var marionExportRow = new mMarionImport();
+            //public int AcctID { get; set; }
+            //public string AcctLegal { get; set; }
+            
+                marionExportRow.AccountNumber = accountRow.SeqNmbr;
+            
+        //public char PctType { get; set; }
+        //public float PctProp { get; set; }
+        //public bool Protest_YN { get; set; }
+        //public string PTDcode { get; set; }
+        //public long NameID { get; internal set; }
+        //public long PropID { get; internal set; }
+        //public string Cad { get; set; }
+        //public bool Stat_YN { get; set; }
+        //public string UpdateBy { get; set; }
+        //public DateTime UpdateDate { get; set; }
+        //public decimal ValAcctCur { get; set; }
+        //public decimal ValAcctCrt { get; set; }
+        //public decimal valacctPrYr { get; set; }
+        //public decimal AcctValPrYr { get; set; }
+        //public char division { get; set; }
+    }
 
         public bool AgentsEnabled { get => _agentsEnabled; set { _agentsEnabled = value; Raise(nameof(AgentsEnabled)); } }
         public bool OwnersEnabled { get => _ownersEnabled; set { _ownersEnabled = value; Raise(nameof(OwnersEnabled)); } }
