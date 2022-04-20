@@ -156,19 +156,56 @@ namespace MarionUpload.ViewModels
             //tblCadLeaseRows = null;
         }
 
-        private mOwner TranslateNameRowToMarionImportRow(mOwner owner)
+        private mMarionExport TranslateNameRowToMarionImportRow(mOwner owner)
         {
-            throw new NotImplementedException();
+            var marionExportRow = new mMarionExport();
 
+            marionExportRow.OwnerName = owner.NameSortCad;
+            marionExportRow.StreetAddress = owner.Mail1;
+            marionExportRow.CityStateZip = owner.MailCi + ", " + owner.MailSt + owner.MailZip;
+            //marionExportRow.InCareOf =                                    //from owner?                                   
+
+
+            //marionExportRow.GeoRef =                                      //this comes from CadAccountID
+
+            //marionExportRow.OperatorName = owner.NameSortCad;             //this comes from lease.            
+            //marionExportRow.RRC =                                         //this comes from lease.            
+            //marionExportRow.LeaseNumber =                                 //this comes from lease.             
+            //marionExportRow.acres =                                       //this comes from lease
+            //marionExportRow.AbsoluteExemptionCode =                       //this comes from lease.
+            //marionExportRow.LeaseName =                                   //this comes from lease. 
+            //marionExportRow.OperatorName =                                //this comes from lease.     
+            //marionExportRow.Description1 =                                //this comes from property or lease?   
+            //marionExportRow.Description2 =                                //this comes from property or lease?
+            //marionExportRow.YearLeaseStarted =                            //in don't know how to convert right now. tblWell??
+
+            //marionExportRow.PropertyType =                                //this comes from property     
+            //marionExportRow.SPTBCode = accountRow.PTDcode;                //this comes from property
+
+            //marionExportRow.RenderedCode =                                //this has no conversion    
+            //marionExportRow.SortCode =                                    //this has no conversion    
+
+            //marionExportRow.OwnerNumber =                                 //in don't know how to convert right now.
+            //marionExportRow.AgentNumber =                                 //in don't know how to convert right now.
+
+            //marionExportRow.PollutionControlValue =                       //in don't know how to convert right now.    
+            //marionExportRow.PreviousAccountNumber =                       //in don't know how to convert right now.
+            //marionExportRow.PreviousAccountSequence =                     //in don't know how to convert right now.    
+            //marionExportRow.PrivacyCode =                                 //in don't know how to convert right now.
+            //marionExportRow.ComplianceCode =                              //in don't know how to convert right now.
+            //marionExportRow.TCEQFlag =                                    //in don't know how to convert right now.
+
+            //marionExportRow.NewImprovementPercent =                       //in don't know how to convert right now.
+            return marionExportRow;
         }
 
         private mMarionExport TranslateAccountRowToMarionImportRow(mAccount accountRow)
         {
             var marionExportRow = new mMarionExport();
+            
             //          don't forget to reverse:
             //          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
-
-            int acctNum = 0;
+            int acctNum;
             bool res = int.TryParse(accountRow.SeqNmbr, out acctNum);
             marionExportRow.AccountNumber = res ? acctNum : 0;
 
