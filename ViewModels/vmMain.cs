@@ -162,34 +162,80 @@ namespace MarionUpload.ViewModels
 
         }
 
-        private mMarionImport TranslateAccountRowToMarionImportRow(mAccount accountRow)
+        private mMarionExport TranslateAccountRowToMarionImportRow(mAccount accountRow)
         {
-            throw new NotImplementedException();
+            var marionExportRow = new mMarionExport();
             //          don't forget to reverse:
             //          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
-            
-            var marionExportRow = new mMarionImport();
-            //public int AcctID { get; set; }
-            //public string AcctLegal { get; set; }
-            
-                marionExportRow.AccountNumber = accountRow.SeqNmbr;
-            
-        //public char PctType { get; set; }
-        //public float PctProp { get; set; }
-        //public bool Protest_YN { get; set; }
-        //public string PTDcode { get; set; }
-        //public long NameID { get; internal set; }
-        //public long PropID { get; internal set; }
-        //public string Cad { get; set; }
-        //public bool Stat_YN { get; set; }
-        //public string UpdateBy { get; set; }
-        //public DateTime UpdateDate { get; set; }
-        //public decimal ValAcctCur { get; set; }
-        //public decimal ValAcctCrt { get; set; }
-        //public decimal valacctPrYr { get; set; }
-        //public decimal AcctValPrYr { get; set; }
-        //public char division { get; set; }
-    }
+
+            int acctNum = 0;
+            bool res = int.TryParse(accountRow.SeqNmbr, out acctNum);
+            marionExportRow.AccountNumber = res ? acctNum : 0;
+
+
+            var dividerIndex = accountRow.SeqNmbr.IndexOf("|");
+            string acctNmbrPart = accountRow.SeqNmbr.Substring(0, dividerIndex);
+            string acctSeqPart = accountRow.SeqNmbr.Substring(dividerIndex);
+
+            int acctNumbr; int acctSeq;
+            bool res1 = int.TryParse(acctNmbrPart, out acctNumbr);
+            bool res2 = int.TryParse(acctSeqPart, out acctSeq);
+            marionExportRow.AccountNumber = res1 ? acctNumbr : 0;
+            marionExportRow.AccountSequence = res2 ? acctSeq : 0; ;
+
+            marionExportRow.CurrentTaxYear = 2022;
+
+            marionExportRow.Protest = "";       // at start of season there are no protests.
+            marionExportRow.DecimalInterest = (decimal)accountRow.PctProp;
+
+            switch (accountRow.PctType)
+            {
+                case 'R':
+                    marionExportRow.InterestType = 1;
+                    break;
+                case 'P':
+                    marionExportRow.InterestType = 2;
+                    break;
+            }
+
+            marionExportRow.InterestType = accountRow.PctType;
+
+            //marionExportRow.OperatorName = "";
+            //marionExportRow.OwnerName =
+            //marionExportRow.OwnerNumber =
+            //marionExportRow.RRC =
+            //marionExportRow.LeaseNumber =
+            //marionExportRow.RenderedCode =
+            //marionExportRow.PropertyType =
+
+            //marionExportRow.YearLeaseStarted =
+
+            //marionExportRow.SPTBCode = accountRow.PTDcode;
+            //marionExportRow.AgentNumber = 
+            //marionExportRow.SortCode =
+
+            //marionExportRow.LeaseName =
+            //marionExportRow.OperatorName =
+            //marionExportRow.Description1 =
+            //marionExportRow.Description2 =
+            //marionExportRow.InCareOf =
+            //marionExportRow.StreetAddress =
+            //marionExportRow.CityStateZip =
+
+            //marionExportRow.acres =
+            //marionExportRow.AbsoluteExemptionCode =
+            //marionExportRow.GeoRef =
+            //marionExportRow.PollutionControlValue =
+            //marionExportRow.PreviousAccountNumber =
+            //marionExportRow.PreviousAccountSequence =
+            //marionExportRow.PrivacyCode =
+            //marionExportRow.ComplianceCode =
+            //marionExportRow.TCEQFlag =
+
+            //marionExportRow.NewImprovementPercent =
+
+            return marionExportRow;
+        }
 
         public bool AgentsEnabled { get => _agentsEnabled; set { _agentsEnabled = value; Raise(nameof(AgentsEnabled)); } }
         public bool OwnersEnabled { get => _ownersEnabled; set { _ownersEnabled = value; Raise(nameof(OwnersEnabled)); } }
