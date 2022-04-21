@@ -92,6 +92,7 @@
     <Compile Include="Comparers\OperatorComparer.cs" />
     <Compile Include="Comparers\PersonalPropertyComparer.cs" />
     <Compile Include="Helpers\ConnectionStringHelper.cs" />
+    <Compile Include="Helpers\RRCHelper.cs" />
     <Compile Include="Helpers\RrcParser.cs" />
     <Compile Include="Messages\AccountsFinishedMessage.cs" />
     <Compile Include="Messages\AgentFinishedMessage.cs" />

@@ -161,26 +161,8 @@ namespace MarionUpload.ViewModels
                 {
                     var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease, MarionOperators);
 
-                    var formattedRRC = populatedLease.RrcLease;                    
-                    var rrcOperId = db.ExecuteScalar($"SELECT TOP 1 RrcOpr FROM tblWell where RrcLease = '{formattedRRC}'") as string;                    
-                    if (string.IsNullOrEmpty(rrcOperId))
-                    {
-                        formattedRRC = populatedLease.RrcLease.PadLeft(5, '0');  // oil well
-                        rrcOperId = db.ExecuteScalar($"SELECT TOP 1 RrcOpr FROM tblWell where RrcLease = '{formattedRRC}'") as string;
-                        //wellLpdID = db.ExecuteScalar($"SELECT TOP 1 LpdID FROM tblWell where RrcLease = '{formattedRRC}'") as string;
-
-                        if (string.IsNullOrEmpty(rrcOperId))
-                        {
-                            formattedRRC = populatedLease.RrcLease.PadLeft(6, '0');
-                            rrcOperId = db.ExecuteScalar($"SELECT TOP 1 RrcOpr FROM tblWell where RrcLease = '{formattedRRC}'") as string;
-                            //wellLpdID = db.ExecuteScalar($"SELECT TOP 1 LpdID FROM tblWell where RrcLease = '{formattedRRC}'") as string;
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(rrcOperId))
-                    {
-                        Log.Error($"There is no RRC Lease = {formattedRRC} in table well");
-                    }
+                    string rrcOperId = "";
+                    var formattedRRC = RRCHelper.FormatRRC(populatedLease.RrcLease, out rrcOperId);
 
                     if (!string.IsNullOrWhiteSpace(rrcOperId))
                     {
@@ -270,7 +252,16 @@ namespace MarionUpload.ViewModels
         {
             var cadLease = new mCadLease();
             cadLease.CadId = "MAR";
-            cadLease.CadLeaseId = marionLease.RRC;
+
+            var parsers = new RrcParser();
+           
+            var marionRrc = parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC);
+
+            string rrcOperId = "";
+            var formattedRRC = RRCHelper.FormatRRC(marionRrc, out rrcOperId);
+
+            marionRrc = formattedRRC;
+            cadLease.CadLeaseId = marionRrc;
 
             return cadLease;
         }
@@ -295,6 +286,7 @@ namespace MarionUpload.ViewModels
             var parser = new RrcParser();
             marionRrc = parser.GetRRCnumberFromImportRRCstring(marionRrc);
 
+
             var operatorData = new mWellOperatorData();
             if (OperatorDataMap.ContainsKey(marionRrc)) operatorData = OperatorDataMap[marionRrc];
                 //tract.OprDODate=operatorData.
@@ -309,9 +301,10 @@ namespace MarionUpload.ViewModels
         {
             var lease = new mLease();
             lease.LeaseNameWag = marionLease.LeaseName.Trim();
+            
             var parsers = new RrcParser();
-
             var marionRrc = parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC);
+            marionRrc = marionRrc.Length >= 5 ? marionRrc.PadLeft(5, '0'): marionRrc.PadLeft(6, '0');
             lease.RrcLease = marionRrc;
 
             

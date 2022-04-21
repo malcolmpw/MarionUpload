@@ -82,13 +82,13 @@ namespace MarionUpload.ViewModels
                 //import tblAccount where Cad='MAR'
                 var acctSqlString = $"select * from tblAccount a where a.Cad='MAR' ";
                 var accountRows = db.Query<mAccount>(acctSqlString);
-                var translatedAccountRow = new mMarionImport();
+                var translatedAccountRow = new mMarionExport();
                 foreach (mAccount accountRow in accountRows)
                 {
                     //      translate the appropriate columns to AbMarionImport type columns. Include 
                     translatedAccountRow = TranslateAccountRowToMarionImportRow(accountRow);
                     //      add (insert) the translated columns to accountRow. Repeat this for tblCadAccount
-                    MarionExportRows.Add(translatedAccountRow);
+                    //MarionExportRows.Add(translatedAccountRow);
                 }
 
                 //import tblName where Cad='MAR'
