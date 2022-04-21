@@ -34,7 +34,7 @@ namespace MarionUpload.Helpers
 
                 if (string.IsNullOrEmpty(rrcOperId))
                 {
-                    return rrcLease;
+                    return rrcLease;                    
                 }
                 else
                 {

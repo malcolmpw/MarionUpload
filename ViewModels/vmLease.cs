@@ -184,12 +184,9 @@ namespace MarionUpload.ViewModels
                         int rowsAffected = db.Execute(sql, new { rrc=formattedRRC, LeaseID = primaryLeaseKey });                        
                     }
 
-
                     var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
                     populatedCadLease.LeaseId = (long)primaryLeaseKey;
                     db.Insert<mCadLease>(populatedCadLease);
-
-
 
                     var marionTracts = MarionMineralAccounts.Where(a => a.RRC == marionLease.RRC).ToList();
                     var tractId = 0; var currentLeaseNumber = 0;
@@ -302,9 +299,10 @@ namespace MarionUpload.ViewModels
             var lease = new mLease();
             lease.LeaseNameWag = marionLease.LeaseName.Trim();
             
+            
             var parsers = new RrcParser();
             var marionRrc = parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC);
-            marionRrc = marionRrc.Length >= 5 ? marionRrc.PadLeft(5, '0'): marionRrc.PadLeft(6, '0');
+            //marionRrc = marionRrc.Length >= 5 ? marionRrc.PadLeft(5, '0'): marionRrc.PadLeft(6, '0');
             lease.RrcLease = marionRrc;
 
             
