@@ -11,7 +11,7 @@ namespace MarionUpload.Comparers
     {
         public bool Equals(mMarionLease x, mMarionLease y)
         {
-            return x.LeaseNumber == y.LeaseNumber;
+            return x.RRC == y.RRC;
         }
 
         public int GetHashCode(mMarionLease obj)
