@@ -11,7 +11,10 @@ namespace MarionUpload.Comparers
     {
         public bool Equals(mMarionLease x, mMarionLease y)
         {
-            return x.RRC == y.RRC;
+            var tupleX = new Tuple<string, int>(x.RRC, x.LeaseNumber);
+            var tupleY = new Tuple<string, int>(y.RRC, y.LeaseNumber);
+            return tupleX == tupleY;
+            //return x.RRC == y.RRC;
         }
 
         public int GetHashCode(mMarionLease obj)

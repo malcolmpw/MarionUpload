@@ -4,18 +4,18 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using log4net;
+using MarionUpload.Comparers;
 using MarionUpload.Helpers;
 using MarionUpload.Messages;
 using MarionUpload.Models;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using MarionUpload.Comparers;
-using System.Collections.Generic;
 
 namespace MarionUpload.ViewModels
 {
@@ -73,7 +73,7 @@ namespace MarionUpload.ViewModels
                     //if (!OperatorRrcDataMap.ContainsKey(operData.RrcLease))
                     //    OperatorRrcDataMap.Add(operData.RrcLease, operData.RrcOpr);
                 }
-            }
+            }            
         }
 
         private void GetOperatorDataFromWell()
@@ -140,6 +140,8 @@ namespace MarionUpload.ViewModels
 
                 distinctResults.ForEach(marionLease => MarionMineralAccounts.Add(marionLease));
             }
+
+            MarionMineralAccounts = new ObservableCollection<mMarionLease>(MarionMineralAccounts.OrderBy(x => x.RRC).ThenBy(x => x.LeaseNumber));
 
             LeaseImportEnabled = false;
             LeaseUploadEnabled = true;
@@ -267,13 +269,12 @@ namespace MarionUpload.ViewModels
 
         private mLease TranslateFrom_mMarionLeaseTo_mLease(mMarionLease marionLease, ObservableCollection<mMarionOperator> marionOperators)
         {
-            var lease = new mLease();
-            lease.LeaseNameWag = marionLease.LeaseName.Trim();
+            var lease = new mLease();            
 
-            var parsers = new RrcParser();
-            var marionRrc = parsers.GetRRCnumberFromImportRRCstring(marionLease.RRC);
-            lease.RrcLease = marionRrc;
-            lease.LeaseNameWag = marionLease.LeaseName;
+            var parser1 = new RrcParser();
+            var marionRrc = parser1.GetRRCnumberFromImportRRCstring(marionLease.RRC);
+            string rrcOperId = "";
+            lease.RrcLease = RRCHelper.FormatRRC( marionRrc,out rrcOperId);            
 
             //lease.LeaseOprID = int.Parse(OperatorRrcDataMap[lease.RrcLease]);
             //long rrcLeaseInt = 0;
