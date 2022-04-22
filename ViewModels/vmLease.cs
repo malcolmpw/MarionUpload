@@ -185,35 +185,47 @@ namespace MarionUpload.ViewModels
                     InsertTract(db, marionLease, primaryLeaseKey, tractId);
                 }
 
-                var kildareTractId = 0;
-                long oldKildareLeaseKey = 0;
+                var kildareTractId = 0;                
+                bool kildareLeaseAlreadyInserted = false;
+                long oldKildarePrimaryLeaseKey = 0;
                 foreach (var marionLease in KildareTracts)
                 {
                     string rrcOperId, formattedRRC; long primaryLeaseKey = 0;
-                    if (oldKildareLeaseKey == 0)
+                    if (!kildareLeaseAlreadyInserted)
                     {
                         InsertLease(db, marionLease, out rrcOperId, out formattedRRC, out primaryLeaseKey);
-                     
+                        oldKildarePrimaryLeaseKey = primaryLeaseKey;
+
                         InsertCadLease(db, marionLease, primaryLeaseKey);
                     }
-                    oldKildareLeaseKey = primaryLeaseKey;
+                    else
+                    {
+                        primaryLeaseKey = oldKildarePrimaryLeaseKey;
+                    }
+                    kildareLeaseAlreadyInserted = true;
 
                     ++kildareTractId;
                     InsertTract(db, marionLease, primaryLeaseKey, kildareTractId);
                 }
 
                 var greenFoxTractId = 0;
-                long oldGreenFoxLeaseKey = 0;
+                bool greenFoxLeaseAlreadyInserted = false;
+                long oldGreenFoxPrimaryLeaseKey = 0;
                 foreach (var marionLease in GreenFoxTracts)
                 {
                     string rrcOperId, formattedRRC; long primaryLeaseKey = 0;
-                    if (oldGreenFoxLeaseKey == 0)
+                    if (!greenFoxLeaseAlreadyInserted)
                     {
                         InsertLease(db, marionLease, out rrcOperId, out formattedRRC, out primaryLeaseKey);
-                     
-                        InsertCadLease(db, marionLease, primaryLeaseKey);
+                        oldGreenFoxPrimaryLeaseKey = primaryLeaseKey;
+
+                        InsertCadLease(db, marionLease, primaryLeaseKey);                        
                     }
-                    oldGreenFoxLeaseKey = primaryLeaseKey;
+                    else
+                    {
+                        primaryLeaseKey = oldGreenFoxPrimaryLeaseKey;
+                    }
+                    greenFoxLeaseAlreadyInserted = true;
 
                     ++greenFoxTractId;
                     InsertTract(db, marionLease, primaryLeaseKey, greenFoxTractId);
