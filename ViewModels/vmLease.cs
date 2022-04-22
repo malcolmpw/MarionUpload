@@ -136,9 +136,22 @@ namespace MarionUpload.ViewModels
                 var results = db.Query<mMarionLease>("use wagapp2_2021_Marion Select RRC, Description1, Description2, LeaseNumber, LeaseName, OperatorName, SPTBCode, Acres " +
                                                      "from AbMarionImport where SPTBCode = 'G1 ' or SPTBCode = 'XV ' order by LeaseName");
 
-                var distinctResults = results.Distinct(new LeaseComparer()).ToList();
+                var distinctResults = results.Distinct(new LeaseComparer()).OrderBy(x => x.RRC).ToList();
 
-                distinctResults.ForEach(marionLease => MarionMineralAccounts.Add(marionLease));
+                var multiTracts = distinctResults.GroupBy(x => x.RRC.Trim())
+                    .Where(y=>y.Count() > 1)
+                    .Select(y => new { Element = y.Key, Counter = y.Count() })
+                    .ToList();
+
+                var greenFoxTracts = distinctResults.Where(x => x.RRC.Trim() == "RRC #   5264").ToList();
+                var kildareTracts = distinctResults.Where(x => x.RRC.Trim() == "RRC #   4738").ToList();
+                var oneTractLeases = distinctResults.Where(x => x.RRC.Trim() != "RRC #   4738" && x.RRC.Trim() != "RRC #   5264").ToList();
+
+                //distinctResults.ForEach(marionLease => MarionMineralAccounts.Add(marionLease));
+                foreach (mMarionLease lease in distinctResults)
+                {
+                    MarionMineralAccounts.Add(lease);
+                }
             }
 
             MarionMineralAccounts = new ObservableCollection<mMarionLease>(MarionMineralAccounts.OrderBy(x => x.RRC).ThenBy(x => x.LeaseNumber));
@@ -165,30 +178,29 @@ namespace MarionUpload.ViewModels
                 var oldMarionLeaseName = "";
                 int tractId = 0;
                 int oldTractId = 0;
+                long oldPrimaryLeaseKey = 0;
+                string currentLeaseNameWag = "";
+
                 foreach (var marionLease in marionLeases)
                 {
+
                     marionRRC = marionLease.RRC;
                     marionLeaseNumber = marionLease.LeaseNumber;
 
-                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease, MarionOperators);
-
                     if (marionRRC != oldMarionRRC)
                     {
-                        populatedLease.LeaseNameWag = marionLease.LeaseName;
+                        currentLeaseNameWag = marionLease.LeaseName;
+                        tractId = 1;
+                        oldPrimaryLeaseKey = 0;
                     }
                     else
                     {
-                        populatedLease.LeaseNameWag = oldMarionLeaseName;
-                    }
-                    if (marionRRC != oldMarionRRC)
-                    {
-                        tractId = 0;
-                    }
-                    else
-                    {
+                        currentLeaseNameWag = oldMarionLeaseName;
                         tractId = oldTractId + 1;
                     }
 
+                    var populatedLease = TranslateFrom_mMarionLeaseTo_mLease(marionLease, MarionOperators);
+                    populatedLease.LeaseNameWag = currentLeaseNameWag;
                     string rrcOperId = "";
                     var formattedRRC = RRCHelper.FormatRRC(populatedLease.RrcLease, out rrcOperId);
 
@@ -203,7 +215,10 @@ namespace MarionUpload.ViewModels
                     var lpdLeaseName = db.ExecuteScalar($"SELECT TOP 1 LpdLeaseName FROM tblWell where RrcLease = '{formattedRRC}'") as string;
                     populatedLease.LeaseNameOpr = lpdLeaseName;
 
+
                     var primaryLeaseKey = db.Insert<mLease>(populatedLease);
+                    oldPrimaryLeaseKey = (int)primaryLeaseKey;
+
 
                     // after getting the primaryLeaseKey update tblWell with the matching 
                     if (!string.IsNullOrEmpty(rrcOperId))
@@ -212,15 +227,13 @@ namespace MarionUpload.ViewModels
                         int rowsAffected = db.Execute(sql, new { rrc = formattedRRC, LeaseID = primaryLeaseKey });
                     }
 
-                    var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
-                    populatedCadLease.LeaseId = (long)primaryLeaseKey;
+                    InsertCadLease(db, marionLeaseNumber, oldMarionLeaseNumber, marionLease, primaryLeaseKey);
 
-                    if (marionLeaseNumber != oldMarionLeaseNumber) db.Insert<mCadLease>(populatedCadLease);
 
                     if (marionLeaseNumber != oldMarionLeaseNumber)
                     {
                         var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(tractId);
-                        populatedTract.LeaseID = (long)primaryLeaseKey;
+                        populatedTract.LeaseID = oldPrimaryLeaseKey;
                         populatedTract.PropID = vmProperty.MineralPropertyIdMap[marionLease.LeaseNumber];
 
                         var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == marionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
@@ -244,6 +257,14 @@ namespace MarionUpload.ViewModels
                 Messenger.Default.Send<LeaseFinishedMessage>(new LeaseFinishedMessage());
             }
 
+        }
+
+        private void InsertCadLease(IDbConnection db, int marionLeaseNumber, int oldMarionLeaseNumber, mMarionLease marionLease, long primaryLeaseKey)
+        {
+            var populatedCadLease = TranslateFrom_mMarionLeaseTo_mCadLease(marionLease);
+            populatedCadLease.LeaseId = primaryLeaseKey;
+
+            if (marionLeaseNumber != oldMarionLeaseNumber) db.Insert<mCadLease>(populatedCadLease);
         }
 
         private void GetOperatorNamesFromCrwImport()
@@ -292,12 +313,6 @@ namespace MarionUpload.ViewModels
             var marionRrc = parser1.GetRRCnumberFromImportRRCstring(marionLease.RRC);
             string rrcOperId = "";
             lease.RrcLease = RRCHelper.FormatRRC(marionRrc, out rrcOperId);
-
-            //lease.LeaseOprID = int.Parse(OperatorRrcDataMap[lease.RrcLease]);
-            //long rrcLeaseInt = 0;
-            //if (vmAgentAndOperator.CrwOperRrcIDToNameIdMap.ContainsKey(lease.RrcLease))
-            //    rrcLeaseInt = vmAgentAndOperator.CrwOperRrcIDToNameIdMap[lease.RrcLease];
-            //lease.LeaseOprID = (int)rrcLeaseInt;
 
             lease.Stat_YN = true;
             lease.StatBy = UpdateByDefault;
