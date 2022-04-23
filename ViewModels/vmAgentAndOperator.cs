@@ -153,6 +153,7 @@ namespace MarionUpload.ViewModels
             owner.NameSortFirst = crwOperator.NameSort.Trim();
             owner.NameC = crwOperator.NameSort.Trim();            
             owner.NameSel_YN = true;
+            owner.AgentID = 66864;
 
             owner.UpdateDate = _updateDate;
             owner.UpdateBy = _updateBy;

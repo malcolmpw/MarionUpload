@@ -204,7 +204,8 @@ namespace MarionUpload.ViewModels
                     }
                     kildareLeaseAlreadyInserted = true;
 
-                    ++kildareTractId;
+                    //++kildareTractId;                    
+                    kildareTractId = int.Parse(marionLease.LeaseName.Trim().Substring(marionLease.LeaseName.IndexOf('#') + 1));
                     InsertTract(db, marionLease, primaryLeaseKey, kildareTractId);
                 }
 
@@ -227,7 +228,8 @@ namespace MarionUpload.ViewModels
                     }
                     greenFoxLeaseAlreadyInserted = true;
 
-                    ++greenFoxTractId;
+                    //++greenFoxTractId;
+                    greenFoxTractId = int.Parse(marionLease.LeaseName.Trim().Substring(marionLease.LeaseName.IndexOf('#') + 1));
                     InsertTract(db, marionLease, primaryLeaseKey, greenFoxTractId);
                 }
 
