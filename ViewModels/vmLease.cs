@@ -185,7 +185,7 @@ namespace MarionUpload.ViewModels
                     InsertTract(db, marionLease, primaryLeaseKey, tractId);
                 }
 
-                var kildareTractId = 0;                
+                var kildareTractId = 0;
                 bool kildareLeaseAlreadyInserted = false;
                 long oldKildarePrimaryLeaseKey = 0;
                 foreach (var marionLease in KildareTracts)
@@ -219,7 +219,7 @@ namespace MarionUpload.ViewModels
                         InsertLease(db, marionLease, out rrcOperId, out formattedRRC, out primaryLeaseKey);
                         oldGreenFoxPrimaryLeaseKey = primaryLeaseKey;
 
-                        InsertCadLease(db, marionLease, primaryLeaseKey);                        
+                        InsertCadLease(db, marionLease, primaryLeaseKey);
                     }
                     else
                     {
@@ -230,6 +230,9 @@ namespace MarionUpload.ViewModels
                     ++greenFoxTractId;
                     InsertTract(db, marionLease, primaryLeaseKey, greenFoxTractId);
                 }
+
+                //UpdateTblNameOperatorFlags(db);       //this is superceded by CRW list of operators
+
                 Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = null);
 
                 LeaseUploadEnabled = false;
@@ -238,6 +241,18 @@ namespace MarionUpload.ViewModels
                 Messenger.Default.Send<LeaseFinishedMessage>(new LeaseFinishedMessage());
             }
 
+        }
+
+        private static void UpdateTblNameOperatorFlags(IDbConnection db)
+        {
+            // For all operators in AbMarionOperators change their Oper_YN in tblName to true.
+            string sqlString = "update wagapp2_2021_Marion.dbo.tblName " +
+                               "set tblName.Oper_YN = o.OperatorFlag " +
+                               "from wagapp2_2021_Marion.dbo.AbMarionOperators o " +
+                               "inner join wagapp2_2021_Marion.dbo.tblName n " +
+                               "on o.CompanyID = n.NameID " +
+                               "where o.Active = 1";
+            var affectedRows = db.Execute(sqlString);
         }
 
         private void InsertTract(IDbConnection db, mMarionLease marionLease, long primaryLeaseKey, int tractId)
