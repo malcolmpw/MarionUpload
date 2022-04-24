@@ -326,10 +326,12 @@ namespace MarionUpload.ViewModels
         private mCadProperty TranslateFrom_mMarionPersonalPropertyTo_mCadProperty(mMarionPersonalProperty marionProperty, long primaryPropertyKey)
         {
             var cadProperty = new mCadProperty();
+
+            cadProperty.PropID = (int)primaryPropertyKey;
             cadProperty.CadID = "MAR";
             cadProperty.CadPropid = marionProperty.LeaseNumber.ToString();
             cadProperty.CadPct = 1.0;
-            cadProperty.PropID = (int)primaryPropertyKey;
+           
             cadProperty.delflag = false;
             return cadProperty;
         }

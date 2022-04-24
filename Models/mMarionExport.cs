@@ -16,14 +16,14 @@
         // tblAccount
         public decimal DecimalInterest { get; set; }         //34,40  N,76    DECIMAL INTEREST  //tblAccount.PctProp
         public int InterestType { get; set; }                //17,17  N,10    INTEREST TYPE     //tblAccount.PctType
+        public char PropertyType { get; set; }               //16,16   A,1    TYPE PROPERTY     //tblAccount.PropType
         public string Protest { get; set; }                  //22,22  A,1     PROTEST=P         //tblAccount.Protest_YN
         public int AccountNumber { get; set; }               //668,674 S 7    MINERAL ACCOUNT NUMBER      //tblAccount.SeqNmbr
         public int AccountSequence { get; set; }             //675,681 S 7    MINERAL ACCOUNT SEQUENCE #  //tblAccount.SeqNmbr
-        public string GeoRef { get; set; }                   //622,646 A,25   CUSTOMER GEO#     //tblCadOwners.CadAcctID
+        public string GeoRef { get; set; }                   //622,646 A,25   CUSTOMER GEO#     //tblCadOwners.CadAcctID        
 
         // tblProperty
-        public string SPTBCode { get; set; }                 //23,25   A,3    S.P.T.B. CODE     //tblProperty.PtdClassSub
-        public char PropertyType { get; set; }               //16,16   A,1    TYPE PROPERTY     //tblProperty.PropType
+        public string SPTBCode { get; set; }                 //23,25   A,3    S.P.T.B. CODE     //tblProperty.PtdClassSub       
         public string Description1 { get; set; }             //91,120  A,30   DESCRIPTION 1     //tblProperty.Legal
         public string Description2 { get; set; }             //121,150 A,30   DESCRIPTION 2     //tblProperty.Legal
 
@@ -38,8 +38,9 @@
 
         // tblLease
         public string LeaseName { get; set; }                //41,70   A,30  LEASE NAME(DESC 3) IF TYPE=2,3
-                                                                                                //tblLease.LeaseNameWag
-        public int LeaseNumber { get; set; }                 //601,607 N,7,0 LEASE NUMBER       //tblCadLease.CadLeaseID                 
+                                                                                                //tblLease.LeaseNameWag                                                                                                
+        public int LeaseNumber { get; set; }                 //601,607 N,7,0 LEASE NUMBER       //tblCadLease.CadLeaseID
+                                                                                                //tblCadProperty.CadPropID
         public string OperatorName { get; set; }             //71,90   A,20  OPER NAME(DESC 4)  //tblName.NameSortCad 
 
         // tblTract
@@ -58,8 +59,13 @@
         public string ComplianceCode { get; set; }
         public string TCEQFlag { get; set; }                
         public decimal NewImprovementPercent {get;set;}
-        
+
         //public string NewTCEQflag { get; set; }
+        //public int MineralAccountNumber { get; set; }
+        //public int MineralAccountSequence { get; set; }
+        //public int PreviousMineralAccountSequence { get; set; }
+        //public int PreviousMineralAccount { get; set; }
+        //public decimal NewImprovementNumber { get; set; }
 
         //public List<string> Jurisdictions { get; set; }
         public string Jurisdiction1 { get; set; }            //297 298 JURISDICTION 1 2 0 N
@@ -112,9 +118,7 @@
         public string ExemptionMinOwnerFlagJuris9 { get; set; }
         public string ExemptionMinOwnerFlagJuris10 { get; set; }
         public string ExemptionMinOwnerFlagJuris11 { get; set; }
-        public string ExemptionMinOwnerFlagJuris12 { get; set; }
-
-        public string CustomerGeo { get; set; }
+        public string ExemptionMinOwnerFlagJuris12 { get; set; }        
 
         public string PnAMinOwnerFlagJuris1 { get; set; }
         public string PnAMinOwnerFlagJuris2 { get; set; }
@@ -128,11 +132,6 @@
         public string PnAMinOwnerFlagJuris10 { get; set; }
         public string PnAMinOwnerFlagJuris11 { get; set; }
         public string PnAMinOwnerFlagJuris12 { get; set; }
-
-        //public int MineralAccountNumber { get; set; }
-        //public int MineralAccountSequence { get; set; }
-        //public int PreviousMineralAccountSequence { get; set; }
-        //public int PreviousMineralAccount { get; set; }
 
         public string TaxableValueNewJuris1 { get; set; }
         public string TaxableValueNewJuris2 { get; set; }
@@ -173,7 +172,7 @@
         public decimal NewExemptValueJuris11 { get; set; }
         public decimal NewExemptValueJuris12 { get; set; }
 
-        //public decimal NewImprovementNumber { get; set; }
+       
 
     }
 }

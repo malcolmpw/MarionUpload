@@ -176,37 +176,58 @@ namespace MarionUpload.ViewModels
 
         private mMarionExport TranslateWellRowToMarionImportRow(string wellRrc)
         {
-            throw new NotImplementedException();
+            var marionExportRow = new mMarionExport();
+            marionExportRow.RRC = "RRC #  " + int.Parse(wellRrc).ToString();
+            return marionExportRow;
         }
 
         private mMarionExport TranslateTractRowToMarionImportRow(mTract tractRow)
         {
-            throw new NotImplementedException();
-        }
-
-        private mMarionExport TranslateLeaseRowToMarionImportRow(mLease leaseRow)
-        {
-            throw new NotImplementedException();
+            var marionExportRow = new mMarionExport();
+            //marionExportRow.acres = tractRow.LeasePct;      //store this in Memo(not in model because it is nvarchar type)
+            return marionExportRow;
         }
 
         private mMarionExport TranslateCadLeaseRowToMarionImportRow(mCadLease cadLeaseRow)
         {
-            throw new NotImplementedException();
+            var marionExportRow = new mMarionExport();
+            marionExportRow.LeaseNumber = int.Parse(cadLeaseRow.CadLeaseId);
+            return marionExportRow;
         }
+
+        private mMarionExport TranslateLeaseRowToMarionImportRow(mLease leaseRow)
+        {
+            var marionExportRow = new mMarionExport();
+            marionExportRow.LeaseName = leaseRow.LeaseNameWag;
+            //marionExportRow.OperatorName = leaseRow.LeaseOprID;
+            return marionExportRow;
+        }        
 
         private mMarionExport TranslateUnitPropertyRowToMarionImportRow(mUnitProperty unitPropertyRow)
         {
-            throw new NotImplementedException();
+            var marionExportRow = new mMarionExport();
+            marionExportRow.Jurisdiction1=unitPropertyRow.UnitID;
+            return marionExportRow;
         }
 
         private mMarionExport TranslateCadPropertyRowToMarionImportRow(mCadOwner cadPropertyRow)
         {
-            throw new NotImplementedException();
+            var marionExportRow = new mMarionExport();
+            marionExportRow.LeaseNumber = int.Parse(cadPropertyRow.CadOwnerID);
+            return marionExportRow;
         }
 
         private mMarionExport TranslatePropertyRowToMarionImportRow(mProperty propertyRow)
         {
             var marionExportRow = new mMarionExport();
+            marionExportRow.SPTBCode = propertyRow.PtdClassSub;
+            var legalHyphenIndex = propertyRow.Legal.IndexOf("-");
+            marionExportRow.Description1 = propertyRow.Legal.Substring(0, legalHyphenIndex);
+            marionExportRow.Description2 = propertyRow.Legal.Substring(legalHyphenIndex + 1);
+            
+            //Description1 has abstract and survey for minerals, property description for U&Is
+            //Description2 has well and rrc# for minerals, unit count and taxing unit for U&Is
+
             return marionExportRow;
         }
 
