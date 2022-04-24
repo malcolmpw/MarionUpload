@@ -48,7 +48,7 @@ namespace MarionUpload.ViewModels
         public ICommand CommandStartImportWizard => new RelayCommand(OnStartImportWizard);
         public ICommand CommandStartExportWizard => new RelayCommand(OnStartExportWizard);
 
-        public ObservableCollection<mMarionImport> MarionExportRows { get; set; }
+        public ObservableCollection<mMarionExport> MarionExportRows { get; set; }
         public ObservableCollection<mAccount> tblAccountRows { get; set; }
         public ObservableCollection<mCadAccount> tblCadAccountRows { get; set; }
         public ObservableCollection<mOwner> tblNameRows { get; set; }
@@ -64,7 +64,7 @@ namespace MarionUpload.ViewModels
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 //create an empty collection of type AbMarionImport table that will later be saved as the export file
-                MarionExportRows = new ObservableCollection<mMarionImport>();
+                MarionExportRows = new ObservableCollection<mMarionExport>();
 
                 tblAccountRows = new ObservableCollection<mAccount>();
                 tblCadAccountRows = new ObservableCollection<mCadAccount>();
@@ -85,130 +85,167 @@ namespace MarionUpload.ViewModels
                 var translatedAccountRow = new mMarionExport();
                 foreach (mAccount accountRow in accountRows)
                 {
-                    //      translate the appropriate columns to AbMarionImport type columns. Include 
                     translatedAccountRow = TranslateAccountRowToMarionImportRow(accountRow);
-                    //      add (insert) the translated columns to accountRow. Repeat this for tblCadAccount
-                    //MarionExportRows.Add(translatedAccountRow);
+                    MarionExportRows.Add(translatedAccountRow);//change this to update instead of add
+
+                    var cadAcctSqlString = $"select top 1 * from tblCadAccount a where a.Acct={accountRow.AcctID} ";
+                    var cadAccountRow = db.Query<mCadAccount>(acctSqlString).FirstOrDefault();
+                    var translatedCadAccountRow = new mMarionExport();
+                    translatedCadAccountRow = TranslateCadAccountRowToMarionImportRow(cadAccountRow);
+                    MarionExportRows.Add(translatedCadAccountRow);//change this to update instead of add
                 }
 
                 //import tblName where Cad='MAR'
-                var nameSqlString = $"select * from tblName n join tblCadOwners c on n.NameID = c.NameID where c.CadID='MAR'";
-                var nameRows = db.Query<mOwner>(nameSqlString);
+                var ownerSqlString = $"select * from tblName n join tblCadOwners c on n.NameID = c.NameID where c.CadID='MAR'";
+                var ownerRows = db.Query<mOwner>(ownerSqlString);
+                var translatedOwnerRow = new mMarionExport();
 
-                foreach (mAccount accountRow in accountRows)
+                foreach (mOwner ownerRow in ownerRows)
                 {
-                    //      using accountRow.NameID find the corresponding row in tblName.
-                    var nameRow = (from n in tblNameRows where accountRow.NameID == n.NameID select n).FirstOrDefault();
-                    //          translate the appropriate columns in tblName to AbMarionImport columns.
-                    var translatedNameRow = TranslateNameRowToMarionImportRow(nameRow);
-                    //          add (update) the translated columns to accountRow. Repeat this for tblCadOwners
+                    translatedOwnerRow = TranslateOwnerRowToMarionImportRow(ownerRow);
+                    MarionExportRows.Add(translatedOwnerRow);
+
+                    var cadOwnerSqlString = $"select top 1 * from tblCadOwners a where a.Acct={ownerRow.NameID} and a.CadID='MAR' ";
+                    var cadOwnerRow = db.Query<mCadOwner>(cadOwnerSqlString).FirstOrDefault();
+                    var translatedCadOwnerRow = new mMarionExport();
+                    translatedCadOwnerRow = TranslateCadOwnerRowToMarionImportRow(cadOwnerRow);
+                    MarionExportRows.Add(translatedCadOwnerRow);//change this to update instead of add
+
                 }
 
+                //import tblProperty where Cad='MAR'
                 var propertySqlString = $"select * from tblProperty p join tblCadProperty c on p.PropID = c.PropID where c.CadID='MAR'";
-                var propertyRows = db.Query<mProperty>(nameSqlString);
+                var propertyRows = db.Query<mProperty>(propertySqlString);
+                var translatedPropertyRow = new mMarionExport();
 
-                foreach (mAccount accountRow in accountRows)
+                foreach (mProperty propertyRow in propertyRows)
                 {
-                    var propertyRow = (from n in tblNameRows where accountRow.NameID == n.NameID select n).FirstOrDefault();
-                    //var translatedNameRow = TranslateNameRowToMarionImportRow(nameRow);
-                }
-                //      using accountRow.PropID find the corresponding row in tblProperty
-                //          translate the appropriate columns in tblProperty to AbMarionImport columns.
-                //          add (update) the translated columns to accountRow. Repeat this for tblCadProperty.
+                    translatedPropertyRow = TranslatePropertyRowToMarionImportRow(propertyRow);
+                    MarionExportRows.Add(translatedPropertyRow);//change this to update instead of add
 
+                    var cadPropertySqlString = $"select top 1 * from tblCadProperty p where p.PropID={propertyRow.PropId} and a.CadID='MAR' ";
+                    var cadPropertyRow = db.Query<mCadOwner>(cadPropertySqlString).FirstOrDefault();
+                    var translatedCadPropertyRow = new mMarionExport();
+                    translatedCadPropertyRow = TranslateCadPropertyRowToMarionImportRow(cadPropertyRow);
+                    MarionExportRows.Add(translatedAccountRow);//change this to update instead of add
+                }
+
+                //import tblUnitProperty where Cad='MAR'
                 var unitPropertySqlString = $"select * from tblUnitProperty u join tlkpCadUnit c on u.UnitID = c.UnitID where c.CadID='MAR'";
                 var unitPropertyRows = db.Query<mUnitProperty>(unitPropertySqlString);
-                //      using accountRow.PropID and UnitID to  find the corresponding row in tblUnitProperty
-                //          translate the appropriate columns in tblUnitProperty to AbMarionImport columns.
-                //          add (update) the translated columns to accountRow.
+                var translatedUnitPropertyRow = new mMarionExport();
+                foreach (mUnitProperty unitPropertyRow in unitPropertyRows)
+                {
+                    translatedUnitPropertyRow = TranslateUnitPropertyRowToMarionImportRow(unitPropertyRow);
+                    MarionExportRows.Add(translatedUnitPropertyRow);//change this to update instead of add
 
-                var tractSqlString = $"select * from tblTract t where t.CadID='MAR' ";
-                var tractRows = db.Query<mTract>(tractSqlString);
-                //      using accountRow.PropID and TractPropID to find the corresponding row in tblTract
-                //          translate the appropriate columns in tblTract to AbMarionImport columns.
-                //          add (update) the translated columns to accountRow.           
-                //
-                //      using accountRow.PropID find the corresponding rows in tblTract and cycle through the tracts (usually only one)
-                //          translate the appropriate columns in tblTract to AbMarionImport columns.
-                //          add (update) the translated columns to accountRow.
+                    //what about tlkpCadUnit??
+                }
 
+
+                //import tblLease where Cad='MAR'
                 var leaseSqlString = $"select * from tblLease l join tblCadLease c on l.LeaseID = c.LeaseID where c.CadID='MAR'";
                 var leaseRows = db.Query(leaseSqlString);
-                //      using LeaseID to find the corresponding row in tblLease
-                //          translate the appropriate columns in tblLease to AbMarionImport columns.
-                //          add (update) the translated columns to accountRow. Repeat this for tblCadLease.           
-                //
+                var translatedLeaseRow = new mMarionExport();
+                foreach (mLease leaseRow in leaseRows)
+                {
+                    translatedLeaseRow = TranslateLeaseRowToMarionImportRow(leaseRow);
+                    MarionExportRows.Add(translatedUnitPropertyRow);//change this to update instead of add
 
+                    var cadLeaseSqlString = $"select top 1 * from tblCadLease c where c.LeaseID={leaseRow.LeaseID} and a.CadID='MAR' ";
+                    var cadLeaseRow = db.Query<mCadLease>(cadLeaseSqlString).FirstOrDefault();
+                    var translatedCadLeaseRow = new mMarionExport();
+                    translatedCadLeaseRow = TranslateCadLeaseRowToMarionImportRow(cadLeaseRow);
+                    MarionExportRows.Add(translatedAccountRow);//change this to update instead of add
+
+                    var wellRrc = cadLeaseRow.CadLeaseId;
+                    var translatedWellRow = TranslateWellRowToMarionImportRow(wellRrc);
+                    MarionExportRows.Add(translatedWellRow);//change this to update instead of add
+
+                    var tractSqlString = $"select * from tblTract t where t.CadID='MAR' and t.LeaseID={leaseRow.LeaseID} ";
+                    var tractRows = db.Query<mTract>(tractSqlString);
+                    var translatedTractRow = new mMarionExport();
+                    foreach (mTract tractRow in tractRows)
+                    {
+                        translatedTractRow = TranslateTractRowToMarionImportRow(tractRow);
+                        MarionExportRows.Add(translatedTractRow);//change this to update instead of add
+                    }
+                }
             }
-            //MarionExportRows = null;
-
-            //tblAccountRows = null;
-            //tblCadAccountRows = null;
-
-            //tblNameRows = null;
-            //tblCadOwnerRows = null;
-
-            //tblPropertyRows = null;
-            //tblCadPropertyRows = null;
-
-            //tblTractRows = null;
-            //tblLeaseRows = null;
-            //tblCadLeaseRows = null;
         }
 
-        private mMarionExport TranslateNameRowToMarionImportRow(mOwner owner)
+        private mMarionExport TranslateWellRowToMarionImportRow(string wellRrc)
+        {
+            throw new NotImplementedException();
+        }
+
+        private mMarionExport TranslateTractRowToMarionImportRow(mTract tractRow)
+        {
+            throw new NotImplementedException();
+        }
+
+        private mMarionExport TranslateLeaseRowToMarionImportRow(mLease leaseRow)
+        {
+            throw new NotImplementedException();
+        }
+
+        private mMarionExport TranslateCadLeaseRowToMarionImportRow(mCadLease cadLeaseRow)
+        {
+            throw new NotImplementedException();
+        }
+
+        private mMarionExport TranslateUnitPropertyRowToMarionImportRow(mUnitProperty unitPropertyRow)
+        {
+            throw new NotImplementedException();
+        }
+
+        private mMarionExport TranslateCadPropertyRowToMarionImportRow(mCadOwner cadPropertyRow)
+        {
+            throw new NotImplementedException();
+        }
+
+        private mMarionExport TranslatePropertyRowToMarionImportRow(mProperty propertyRow)
+        {
+            var marionExportRow = new mMarionExport();
+            return marionExportRow;
+        }
+
+        private mMarionExport TranslateCadOwnerRowToMarionImportRow(mCadOwner cadOwnerRow)
+        {
+            var marionExportRow = new mMarionExport();
+            marionExportRow.OwnerNumber = int.Parse(cadOwnerRow.CadOwnerID);
+            return marionExportRow;
+        }
+
+        private mMarionExport TranslateOwnerRowToMarionImportRow(mOwner owner)
         {
             var marionExportRow = new mMarionExport();
 
             marionExportRow.OwnerName = owner.NameSortCad;
             marionExportRow.StreetAddress = owner.Mail1;
             marionExportRow.CityStateZip = owner.MailCi + ", " + owner.MailSt + owner.MailZip;
-            //marionExportRow.InCareOf =                                    //from owner?                                   
 
+            return marionExportRow;
+        }
 
-            //marionExportRow.GeoRef =                                      //this comes from CadAccountID
+        private mMarionExport TranslateCadAccountRowToMarionImportRow(mCadAccount accountRow)
+        {
+            var marionExportRow = new mMarionExport();
 
-            //marionExportRow.OperatorName = owner.NameSortCad;             //this comes from lease.            
-            //marionExportRow.RRC =                                         //this comes from lease.            
-            //marionExportRow.LeaseNumber =                                 //this comes from lease.             
-            //marionExportRow.acres =                                       //this comes from lease
-            //marionExportRow.AbsoluteExemptionCode =                       //this comes from lease.
-            //marionExportRow.LeaseName =                                   //this comes from lease. 
-            //marionExportRow.OperatorName =                                //this comes from lease.     
-            //marionExportRow.Description1 =                                //this comes from property or lease?   
-            //marionExportRow.Description2 =                                //this comes from property or lease?
-            //marionExportRow.YearLeaseStarted =                            //in don't know how to convert right now. tblWell??
-
-            //marionExportRow.PropertyType =                                //this comes from property     
-            //marionExportRow.SPTBCode = accountRow.PTDcode;                //this comes from property
-
-            //marionExportRow.RenderedCode =                                //this has no conversion    
-            //marionExportRow.SortCode =                                    //this has no conversion    
-
-            //marionExportRow.OwnerNumber =                                 //in don't know how to convert right now.
-            //marionExportRow.AgentNumber =                                 //in don't know how to convert right now.
-
-            //marionExportRow.PollutionControlValue =                       //in don't know how to convert right now.    
-            //marionExportRow.PreviousAccountNumber =                       //in don't know how to convert right now.
-            //marionExportRow.PreviousAccountSequence =                     //in don't know how to convert right now.    
-            //marionExportRow.PrivacyCode =                                 //in don't know how to convert right now.
-            //marionExportRow.ComplianceCode =                              //in don't know how to convert right now.
-            //marionExportRow.TCEQFlag =                                    //in don't know how to convert right now.
-
-            //marionExportRow.NewImprovementPercent =                       //in don't know how to convert right now.
+            //public string GeoRef { get; set; }                   //622,646 A,25   CUSTOMER GEO#     //tblCadOwners.CadAcctID
+            marionExportRow.GeoRef = accountRow.CadAcctID;
             return marionExportRow;
         }
 
         private mMarionExport TranslateAccountRowToMarionImportRow(mAccount accountRow)
         {
             var marionExportRow = new mMarionExport();
-            
+
             //          don't forget to reverse:
             //          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
             int acctNum;
             bool res = int.TryParse(accountRow.SeqNmbr, out acctNum);
             marionExportRow.AccountNumber = res ? acctNum : 0;
-
 
             var dividerIndex = accountRow.SeqNmbr.IndexOf("|");
             string acctNmbrPart = accountRow.SeqNmbr.Substring(0, dividerIndex);
@@ -217,12 +254,17 @@ namespace MarionUpload.ViewModels
             int acctNumbr; int acctSeq;
             bool res1 = int.TryParse(acctNmbrPart, out acctNumbr);
             bool res2 = int.TryParse(acctSeqPart, out acctSeq);
+            //public int AccountNumber { get; set; }               //668,674 S 7    MINERAL ACCOUNT NUMBER      //tblAccount.SeqNmbr
             marionExportRow.AccountNumber = res1 ? acctNumbr : 0;
+            //public int AccountSequence { get; set; }             //675,681 S 7    MINERAL ACCOUNT SEQUENCE #  //tblAccount.SeqNmbr
             marionExportRow.AccountSequence = res2 ? acctSeq : 0; ;
 
             marionExportRow.CurrentTaxYear = 2022;
 
+            //public string Protest { get; set; }                  //22,22  A,1     PROTEST=P         //tblAccount.Protest_YN
             marionExportRow.Protest = "";       // at start of season there are no protests.
+
+            //public decimal DecimalInterest { get; set; }         //34,40  N,76    DECIMAL INTEREST  //tblAccount.PctProp
             marionExportRow.DecimalInterest = (decimal)accountRow.PctProp;
 
             switch (accountRow.PctType)
@@ -235,41 +277,8 @@ namespace MarionUpload.ViewModels
                     break;
             }
 
+            //public int InterestType { get; set; }                //17,17  N,10    INTEREST TYPE     //tblAccount.PctType
             marionExportRow.InterestType = accountRow.PctType;
-
-            //marionExportRow.OperatorName = "";
-            //marionExportRow.OwnerName =
-            //marionExportRow.OwnerNumber =
-            //marionExportRow.RRC =
-            //marionExportRow.LeaseNumber =
-            //marionExportRow.RenderedCode =
-            //marionExportRow.PropertyType =
-
-            //marionExportRow.YearLeaseStarted =
-
-            //marionExportRow.SPTBCode = accountRow.PTDcode;
-            //marionExportRow.AgentNumber = 
-            //marionExportRow.SortCode =
-
-            //marionExportRow.LeaseName =
-            //marionExportRow.OperatorName =
-            //marionExportRow.Description1 =
-            //marionExportRow.Description2 =
-            //marionExportRow.InCareOf =
-            //marionExportRow.StreetAddress =
-            //marionExportRow.CityStateZip =
-
-            //marionExportRow.acres =
-            //marionExportRow.AbsoluteExemptionCode =
-            //marionExportRow.GeoRef =
-            //marionExportRow.PollutionControlValue =
-            //marionExportRow.PreviousAccountNumber =
-            //marionExportRow.PreviousAccountSequence =
-            //marionExportRow.PrivacyCode =
-            //marionExportRow.ComplianceCode =
-            //marionExportRow.TCEQFlag =
-
-            //marionExportRow.NewImprovementPercent =
 
             return marionExportRow;
         }
