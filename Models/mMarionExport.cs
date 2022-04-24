@@ -4,47 +4,64 @@
     {
         //[Dapper.Key]
 
-        public int ImportID { get; set; }
-        public int AccountSequence { get; set; }
-        public int Job { get; set; }                      //2 
-        public int CurrentTaxYear { get; set; }              //9 
-        public int AccountNumber { get; set; }
-        public string OwnerName { get; set; }                //151 180 OWNER NAME 30 A
-        public int OwnerNumber { get; set; }
-        public string RRC { get; set; }                      //271 290 RRC# 20 A        
-        public int LeaseNumber { get; set; }
-        public char RenderedCode { get; set; }               //14
-        public char PropertyType { get; set; }               //16
-        public int InterestType { get; set; }               //17
-        public int YearLeaseStarted { get; set; }            //18
-        public string Protest { get; set; }                    //22
-        public string SPTBCode { get; set; }                 //23 3char        
-        public int AgentNumber { get; set; }              //26           
-        public string SortCode { get; set; }                   //29
-        public decimal DecimalInterest { get; set; }          //34 7
-        public string LeaseName { get; set; }                //41 (DESC 3) IF TYPE = 2,3 30 A
-        public string OperatorName { get; set; }             //71 90 OPER NAME(DESC 4) 20 A
-        public string Description1 { get; set; }             //91 120 DESCRIPTION 1 30 A
-        public string Description2 { get; set; }             //121 150 DESCRIPTION 2 30 A
-        public string InCareOf { get; set; }                 //181 210 IN CARE OF 30 A
-        public string StreetAddress { get; set; }            //211 240 STREET ADDRESS 30 A
-        public string CityStateZip { get; set; }             //241 270 CITY,ST,ZIP CDE OR OUT COUNTRY 30 A
+        // miscellaneous
+        public int ImportID { get; set; }                                                       //ignore
+        public int Job { get; set; }                         //2,8    N,7,0   JOB NUMBER        //ignore        
+        public char RenderedCode { get; set; }               //14,14  A 1     RENDERED CODE     //ignore
+        public string SortCode { get; set; }                 //29,29  A 1     SORT CODE         //ignore
 
-        public float acres { get; set; }
-        public string AbsoluteExemptionCode { get; set; }
-        public string GeoRef { get; set; }
+        // tlkpCurrentTaxYear                                                                   
+        public int CurrentTaxYear { get; set; }              //9,12   S,4,0   YEAR              //tlkpCurrentTaxYear.Tax Year
+
+        // tblAccount
+        public decimal DecimalInterest { get; set; }         //34,40  N,76    DECIMAL INTEREST  //tblAccount.PctProp
+        public int InterestType { get; set; }                //17,17  N,10    INTEREST TYPE     //tblAccount.PctType
+        public string Protest { get; set; }                  //22,22  A,1     PROTEST=P         //tblAccount.Protest_YN
+        public int AccountNumber { get; set; }               //668,674 S 7    MINERAL ACCOUNT NUMBER      //tblAccount.SeqNmbr
+        public int AccountSequence { get; set; }             //675,681 S 7    MINERAL ACCOUNT SEQUENCE #  //tblAccount.SeqNmbr
+        public string GeoRef { get; set; }                   //622,646 A,25   CUSTOMER GEO#     //tblCadOwners.CadAcctID
+
+        // tblProperty
+        public string SPTBCode { get; set; }                 //23,25   A,3    S.P.T.B. CODE     //tblProperty.PtdClassSub
+        public char PropertyType { get; set; }               //16,16   A,1    TYPE PROPERTY     //tblProperty.PropType
+        public string Description1 { get; set; }             //91,120  A,30   DESCRIPTION 1     //tblProperty.Legal
+        public string Description2 { get; set; }             //121,150 A,30   DESCRIPTION 2     //tblProperty.Legal
+
+        // tblName
+        public string OwnerName { get; set; }                //151,180 A,30  OWNER NAME         //tblName.NameSortCad
+        public string InCareOf { get; set; }                 //181,210 A,30  IN CARE OF         //ignore
+        public string StreetAddress { get; set; }            //211,240 A,30  STREET ADDRESS     //tblName.Mail1
+        public string CityStateZip { get; set; }             //241,270 A,30  CITY,ST,ZIP CDE OR OUT COUNTRY
+                                                                                                //tblName.MailCi,MailSt,MailZip
+        public int OwnerNumber { get; set; }                 //594,600 N,7,0 OWNER NUMBER       //tblCadOwners.CadOwnerID
+        public int AgentNumber { get; set; }                 //26,28   N,3,0 AGENT NUMBER       //tblCadOwners.CadOwnerID           
+
+        // tblLease
+        public string LeaseName { get; set; }                //41,70   A,30  LEASE NAME(DESC 3) IF TYPE=2,3
+                                                                                                //tblLease.LeaseNameWag
+        public int LeaseNumber { get; set; }                 //601,607 N,7,0 LEASE NUMBER       //tblCadLease.CadLeaseID                 
+        public string OperatorName { get; set; }             //71,90   A,20  OPER NAME(DESC 4)  //tblName.NameSortCad 
+
+        // tblTract
+        public float acres { get; set; }                     //585,593 N,9,3 ACRES              //tblTract.LeasePct or Memo
+
+        // tblWell
+        public string RRC { get; set; }                      //271,290 A,20  RRC#               //tblWell.RrcLease        
+        public int YearLeaseStarted { get; set; }            //18,21 N,4,0   YEAR LEASE STARTED //tblWell.ProdDateFirst
+
+
+        public string AbsoluteExemptionCode { get; set; }        
         public int PollutionControlValue { get; set; }
         public int PreviousAccountNumber { get; set; }
         public int PreviousAccountSequence { get; set; }
         public string PrivacyCode { get; set; }
         public string ComplianceCode { get; set; }
-        public string TCEQFlag { get; set; }        
-        
+        public string TCEQFlag { get; set; }                
         public decimal NewImprovementPercent {get;set;}
+        
         //public string NewTCEQflag { get; set; }
 
         //public List<string> Jurisdictions { get; set; }
-
         public string Jurisdiction1 { get; set; }            //297 298 JURISDICTION 1 2 0 N
         public string Jurisdiction2 { get; set; }            //299 298 JURISDICTION 2 2 0 N
         public string Jurisdiction3 { get; set; }            //301 298 JURISDICTION 3 2 0 N
