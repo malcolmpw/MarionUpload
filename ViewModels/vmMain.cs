@@ -157,10 +157,12 @@ namespace MarionUpload.ViewModels
                             marionExportRow = TranslateCadLeaseRowToMarionImportRow(cadLeaseRow, marionExportRow);
 
                             //import from tblWell
-                            //var wellSqlString = $"select top 1 from tblWell w where w.LeaseID={leaseRow.LeaseID}";
-                            //var wellRow = db.Query(wellSqlString).FirstOrDefault();
+                            var wellSqlString = $"select top 1 ProdDateFirst from tblWell w where w.LeaseID={leaseRow.LeaseID}";
+                            var ProdDateFirst = db.Query<DateTime>(wellSqlString).FirstOrDefault();                            
+                            marionExportRow.YearLeaseStarted = ProdDateFirst.Year;
+
                             var wellRrc = cadLeaseRow.CadLeaseId;
-                            marionExportRow = TranslateWellRowToMarionImportRow(wellRrc, marionExportRow);
+                            marionExportRow.RRC = "RRC #  " + int.Parse(wellRrc).ToString();
                         }
                     }
                     MarionExportRows.Add(marionExportRow);
@@ -174,9 +176,10 @@ namespace MarionUpload.ViewModels
             MessageBox.Show($"MarionExportCompleted");
         }
 
-        private mMarionExport TranslateWellRowToMarionImportRow(string wellRrc, mMarionExport marionExportRow)
+        private mMarionExport TranslateWellRowToMarionImportRow(DateTime prodDateFirst, mMarionExport marionExportRow)
         {
-            marionExportRow.RRC = "RRC #  " + int.Parse(wellRrc).ToString();
+            
+
             return marionExportRow;
         }
 
