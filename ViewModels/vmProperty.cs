@@ -307,7 +307,7 @@ namespace MarionUpload.ViewModels
 
             property.Stat_YN = true;
             property.PtdClassSub = importedMarionProperty.SPTBCode.Trim().Substring(0, 2);
-            property.PropType = "M";
+            property.PropType = "R";
             string rrcNumber = GetRRCnumberFromImportRRCstring(importedMarionProperty);
             property.Legal = importedMarionProperty.LeaseName.Trim() +
                 " (" + rrcNumber +
@@ -358,7 +358,7 @@ namespace MarionUpload.ViewModels
                 property.PtdClass = property.PtdClassSub.Substring(0, 1);
             }
 
-            //property.PropType = "P";
+            property.PropType = "P";
             //property.Legal = FetchPTDDescription(sptbCode) + "," +
             //                 FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
             property.Legal = importedMarionProperty.Description1.Trim() + "-" +

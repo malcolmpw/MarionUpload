@@ -18,7 +18,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-
+using MiniExcelLibs;
+using MiniExcelLibs.Csv;
+using System.IO;
+using System.Globalization;
+using CsvHelper;
 
 namespace MarionUpload.ViewModels
 {
@@ -64,6 +68,9 @@ namespace MarionUpload.ViewModels
 
         private void OnStartExportWizard()
         {
+            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase.csv");
+            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
+
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
                 //create an empty collection of type AbMarionImport table that will later be saved as the export file
@@ -85,9 +92,10 @@ namespace MarionUpload.ViewModels
                 //import tblAccount where Cad='MAR'
                 var acctSqlString = $"select * from tblAccount a where a.Cad='MAR' ";
                 var accountRows = db.Query<mAccount>(acctSqlString);
-                var marionExportRow = new mMarionExport();
+
                 foreach (mAccount accountRow in accountRows)
                 {
+                    var marionExportRow = new mMarionExport();
                     marionExportRow = TranslateAccountRowToMarionExportRow(accountRow, marionExportRow);
 
                     var cadAcctSqlString = $"select top 1 * from tblCadAccount a where a.AcctID={accountRow.AcctID} ";
@@ -126,37 +134,42 @@ namespace MarionUpload.ViewModels
                     //    //what about tlkpCadUnit??
                     //}
 
-                    
+
                     if (propertyRow.PtdClassSub.Trim() == "G1" || propertyRow.PtdClassSub.Trim() == "XV")
                     {
+
                         //import from tblTract
                         var tractSqlString = $"select top 1 t.LeasePct,t.LeaseID from tblTract t where t.PropID = {accountRow.PropID}";
                         var tractRow = db.Query<mTract>(tractSqlString).FirstOrDefault();
                         marionExportRow = TranslateTractRowToMarionExportRow(tractRow, marionExportRow);
 
-                        //import tblLease where Cad='MAR'
-                        //l.LeaseNameWag,l.LeaseOprID
-                        var leaseSqlString = $"select top 1 * from tblLease l where l.LeaseID = {tractRow.LeaseID}";
-                        var leaseRow = db.Query<mLease>(leaseSqlString).FirstOrDefault();
-                        marionExportRow = TranslateLeaseRowToMarionImportRow(leaseRow, marionExportRow);
+                        if (tractRow != null)
+                        {
+                            //import tblLease where Cad='MAR'
+                            //l.LeaseNameWag,l.LeaseOprID
+                            var leaseSqlString = $"select top 1 * from tblLease l where l.LeaseID = {tractRow.LeaseID}";
+                            var leaseRow = db.Query<mLease>(leaseSqlString).FirstOrDefault();
+                            marionExportRow = TranslateLeaseRowToMarionImportRow(leaseRow, marionExportRow);
 
-                        //import from tblCadLease
-                        var cadLeaseSqlString = $"select top 1 * from tblCadLease c where c.LeaseID={leaseRow.LeaseID}";
-                        var cadLeaseRow = db.Query<mCadLease>(cadLeaseSqlString).FirstOrDefault();
-                        marionExportRow = TranslateCadLeaseRowToMarionImportRow(cadLeaseRow, marionExportRow);
+                            //import from tblCadLease
+                            var cadLeaseSqlString = $"select top 1 * from tblCadLease c where c.LeaseID={leaseRow.LeaseID}";
+                            var cadLeaseRow = db.Query<mCadLease>(cadLeaseSqlString).FirstOrDefault();
+                            marionExportRow = TranslateCadLeaseRowToMarionImportRow(cadLeaseRow, marionExportRow);
 
-                        //import from tblWell
-                        //var wellSqlString = $"select top 1 from tblWell w where w.LeaseID={leaseRow.LeaseID}";
-                        //var wellRow = db.Query(wellSqlString).FirstOrDefault();
-                        var wellRrc = cadLeaseRow.CadLeaseId;
-                        marionExportRow = TranslateWellRowToMarionImportRow(wellRrc, marionExportRow);
+                            //import from tblWell
+                            //var wellSqlString = $"select top 1 from tblWell w where w.LeaseID={leaseRow.LeaseID}";
+                            //var wellRow = db.Query(wellSqlString).FirstOrDefault();
+                            var wellRrc = cadLeaseRow.CadLeaseId;
+                            marionExportRow = TranslateWellRowToMarionImportRow(wellRrc, marionExportRow);
+                        }
                     }
-
                     MarionExportRows.Add(marionExportRow);
                 }
             }
-            //Convert MarionExportRows to text lines and add each to MarionExport text file.
-            //see mMarionExport for conversion rules.  Use these to build a conversion map.
+
+            csvWriter.WriteRecords(MarionExportRows);
+            csvWriter.Dispose();
+            writer.Dispose();
 
             MessageBox.Show($"MarionExportCompleted");
         }
@@ -177,7 +190,7 @@ namespace MarionUpload.ViewModels
 
         private mMarionExport TranslateCadLeaseRowToMarionImportRow(mCadLease cadLeaseRow, mMarionExport marionExportRow)
         {
-            marionExportRow.LeaseNumber = int.Parse(cadLeaseRow.CadLeaseId);
+            //marionExportRow.LeaseNumber = int.Parse(cadLeaseRow.CadLeaseId); this was already done with tblProperty
             return marionExportRow;
         }
 
@@ -209,7 +222,21 @@ namespace MarionUpload.ViewModels
             //marionExportRow.Description2 = propertyRow.Legal.Substring(legalHyphenIndex + 1);
 
             //Description1 has abstract and survey for minerals, property description for U&Is
-            //Description2 has well and rrc# for minerals, unit count and taxing unit for U&Is           
+            //Description2 has well and rrc# for minerals, unit count and taxing unit for U&Is
+            //
+
+            //TYPE PROPERTY CODES | INTEREST TYPE CODES
+            //1 = REAL VALUE            | 1 = RI
+            //2 = REAL VALUE NP         | 2 = OR
+            //3 = PERSONAL PROPERTY     | 3 = OP
+            //                          | 4 = WI
+            //                          | 5 = RA
+
+            marionExportRow.PropertyType = ConvertPropTypeToPropertyType(propertyRow);
+
+
+            //marionExportRow.PropertyType=
+
             return marionExportRow;
         }
 
@@ -272,20 +299,55 @@ namespace MarionUpload.ViewModels
             //public decimal DecimalInterest { get; set; }         //34,40  N,76    DECIMAL INTEREST  //tblAccount.PctProp
             marionExportRow.DecimalInterest = (decimal)accountRow.PctProp;
 
+            int intType = 0;
             switch (accountRow.PctType)
             {
-                case 'R':
-                    marionExportRow.InterestType = 1;
+
+                case "U":
+                    intType = 0;
                     break;
-                case 'P':
-                    marionExportRow.InterestType = 2;
+                case "R":
+                    intType = 1;
+                    break;
+                case "O":
+                    intType = 2;
+                    break;
+                case "W":
+                    intType = 4;
                     break;
             }
 
             //public int InterestType { get; set; }                //17,17  N,10    INTEREST TYPE     //tblAccount.PctType
-            marionExportRow.InterestType = accountRow.PctType;
+            marionExportRow.InterestType = intType;
 
             return marionExportRow;
+        }
+        private static string ConvertPropTypeToPropertyType(mProperty propRow)
+        {
+            //TYPE PROPERTY CODES | INTEREST TYPE CODES
+            //1 = REAL VALUE            | 1 = RI
+            //2 = REAL VALUE NP         | 2 = OR
+            //3 = PERSONAL PROPERTY     | 3 = OP
+            //                          | 4 = WI
+            //                          | 5 = RA
+            var propType = propRow.PropType;
+            string marionPropertyType = "";
+            switch (propType)
+            {
+                //case 0:
+                //    _intType = "U";
+                //    break;
+                case "R"://P&A REAL (includes minerals)
+                    marionPropertyType = "1";
+                    break;
+                //case //P&A REAL (Inspection of Marion Import shows Improvements, Wag treats this as Personal Property)
+                //    marionPropertyType = "P";
+                //    break;
+                case "P"://P&A PERSONAL PROPERTY
+                    marionPropertyType = "3";
+                    break;
+            }
+            return marionPropertyType;
         }
 
         public bool AgentsEnabled { get => _agentsEnabled; set { _agentsEnabled = value; Raise(nameof(AgentsEnabled)); } }

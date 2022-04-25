@@ -11,7 +11,7 @@ namespace MarionUpload.Models
     public class mAccountPrYr
     {
         public string AcctLegal { get; set; }
-        public char PctType { get; set; }
+        public string PctType { get; set; }
         public float PctProp { get; set; }
         public bool Protest_YN { get; set; }
         public string PTDcode { get; set; }

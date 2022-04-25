@@ -313,7 +313,7 @@ namespace MarionUpload.ViewModels
             account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ?
                 _marionAccount.DecimalInterest * 10.0 : 1.0);
             account.PctProp = (float)Math.Round(account.PctProp, 9);
-            account.PctType = ConvertInterestType(_marionAccount);
+            account.PctType = ConvertInterestType(_marionAccount);            
 
             account.Protest_YN = _marionAccount.Protest == "P";
             account.PTDcode = _marionAccount.SPTBCode.Trim();
@@ -364,34 +364,69 @@ namespace MarionUpload.ViewModels
             return aprslAdmin;
         }
 
-        private static char ConvertInterestType(mMarionAccount _marionAccount)
+        private static string ConvertInterestType(mMarionAccount _marionAccount)
         {
-            char _intType;
+            //TYPE PROPERTY CODES | INTEREST TYPE CODES
+            //1 = REAL VALUE            | 1 = RI
+            //2 = REAL VALUE NP         | 2 = OR
+            //3 = PERSONAL PROPERTY     | 3 = OP
+            //                          | 4 = WI
+            //                          | 5 = RA
+
+            string _intType;
             switch (_marionAccount.InterestType)
             {
                 case 0:
-                    _intType = 'U';
+                    _intType = "U";
                     break;
                 case 1:
-                    _intType = 'R';
+                    _intType = "R";
                     break;
                 case 2:
-                    _intType = 'O';
+                    _intType = "O";
                     break;
                 case 3:// Not used in Marion Import File
-                    _intType = 'W';
+                    _intType = "W";
                     break;
                 case 4:
-                    _intType = 'W';
+                    _intType = "W";
                     break;
                 case 5:// Not used in Marion Import File
-                    _intType = 'W';
+                    _intType = "W";
                     break;
                 default:
-                    _intType = 'U';// Should not occur in Marion Import File i.e. _marionAccount.InterestType should never be blank
+                    _intType = "U";// Should not occur in Marion Import File i.e. _marionAccount.InterestType should never be blank
                     break;
             }
             return _intType;
         }
+
+        private static string ConvertPropertyType(mMarionAccount _marionAccount)
+        {
+        //TYPE PROPERTY CODES | INTEREST TYPE CODES
+        //1 = REAL VALUE            | 1 = RI
+        //2 = REAL VALUE NP         | 2 = OR
+        //3 = PERSONAL PROPERTY     | 3 = OP
+        //                          | 4 = WI
+        //                          | 5 = RA
+            string _intType="";
+            switch (_marionAccount.InterestType)
+            {
+                //case 0:
+                //    _intType = "U";
+                //    break;
+                case 1://P&A REAL (includes minerals)
+                    _intType = "R";
+                    break;
+                case 2://P&A REAL (Inspection of Marion Import shows Improvements, Wag treats this as Personal Property)
+                    _intType = "P";
+                    break;
+                case 3://P&A PERSONAL PROPERTY
+                    _intType = "P";
+                    break;           
+            }
+            return _intType;
+        }
+        
     }
 }
