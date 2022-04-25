@@ -148,6 +148,9 @@ namespace MarionUpload.ViewModels
                     MarionExportRows.Add(marionExportRow);
                 }
             }
+            //Convert MarionExportRows to text lines and add each to MarionExport text file.
+            //see mMarionExport for conversion rules.  Use these to build a conversion map.
+
             MessageBox.Show($"MarionExportCompleted");
         }
 
