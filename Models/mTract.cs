@@ -17,6 +17,7 @@ namespace MarionUpload.Models
         public DateTime UpdateDate { get; set; }
         public string UpdateBy { get; set; }
         public bool Stat_YN { get; set; }
+        //public string Memo { get; set; }
         public string StatReason { get; set; }
         public DateTime StatDate { get; set; }
         public string StatBy { get; set; }

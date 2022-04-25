@@ -289,7 +289,7 @@ namespace MarionUpload.ViewModels
         {
             var cadProperty = new mCadProperty();
             cadProperty.CadID = "MAR";
-            cadProperty.CadPropid = marionProperty.LeaseNumber.ToString();
+            cadProperty.CadPropID = marionProperty.LeaseNumber.ToString();
             cadProperty.CadPct = 1.0;
             cadProperty.PropID = (int)primaryPropertyKey;
             cadProperty.delflag = false;
@@ -329,7 +329,7 @@ namespace MarionUpload.ViewModels
 
             cadProperty.PropID = (int)primaryPropertyKey;
             cadProperty.CadID = "MAR";
-            cadProperty.CadPropid = marionProperty.LeaseNumber.ToString();
+            cadProperty.CadPropID = marionProperty.LeaseNumber.ToString();
             cadProperty.CadPct = 1.0;
            
             cadProperty.delflag = false;

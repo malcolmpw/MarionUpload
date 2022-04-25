@@ -9,7 +9,7 @@ namespace MarionUpLoad.Models
         public int PropID { get; set; }
         [ExplicitKey]
         public string CadID { get; set; }
-        public string CadPropid { get; set; }
+        public string CadPropID { get; set; }
         public double CadPct { get; set; }
         public bool delflag { get; set; }
     }
