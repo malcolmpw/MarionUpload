@@ -197,7 +197,22 @@ namespace MarionUpload.ViewModels
         private mMarionExport TranslateLeaseRowToMarionImportRow(mLease leaseRow, mMarionExport marionExportRow)
         {
             marionExportRow.LeaseName = leaseRow.LeaseNameWag.Trim();
-            //marionExportRow.OperatorName = leaseRow.LeaseOprID;
+
+            var operatorKey = leaseRow.LeaseOprID;
+            var operNameSortCad = "";
+            if (operatorKey != null)
+            {
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+                {
+                    operNameSortCad = db.ExecuteScalar($"SELECT TOP 1 NameSortCad FROM tblName where NameID = '{operatorKey}'") as string;
+                }
+                marionExportRow.OperatorName = operNameSortCad;
+            }
+            else
+            {
+                marionExportRow.AgentNumber = 0;
+            }
+
             return marionExportRow;
         }
 
@@ -217,13 +232,12 @@ namespace MarionUpload.ViewModels
         {
 
             marionExportRow.SPTBCode = propertyRow.PtdClassSub;
-            var legalHyphenIndex = propertyRow.Legal.IndexOf("-");
+            //var legalHyphenIndex = propertyRow.Legal.IndexOf("-");
             //marionExportRow.Description1 = propertyRow.Legal.Substring(0, legalHyphenIndex);
             //marionExportRow.Description2 = propertyRow.Legal.Substring(legalHyphenIndex + 1);
 
             //Description1 has abstract and survey for minerals, property description for U&Is
-            //Description2 has well and rrc# for minerals, unit count and taxing unit for U&Is
-            //
+            //Description2 has well and rrc# for minerals, unit count and taxing unit for U&Is            
 
             //TYPE PROPERTY CODES | INTEREST TYPE CODES
             //1 = REAL VALUE            | 1 = RI
@@ -255,9 +269,19 @@ namespace MarionUpload.ViewModels
             marionExportRow.CityStateZip = owner.MailCi + ", " + owner.MailSt + owner.MailZip;
 
             var agentKey = owner.AgentID;
-            //var agentNameID = tblName where NameID = agentKey;
-            //var agentCadOwnerID = marion agent number;
-            marionExportRow.AgentNumber = 0;        //need to get this. how??
+            var agentCadOwnerID = "";
+            if (agentKey != 66864)
+            {
+                using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+                {
+                    agentCadOwnerID = db.ExecuteScalar($"SELECT TOP 1 CadOwnerID FROM tblCadOwners where NameID = '{agentKey}'") as string;
+                }
+                marionExportRow.AgentNumber = int.Parse(agentCadOwnerID);        //need to get this. how??
+            }
+            else
+            {
+                marionExportRow.AgentNumber = 0;
+            }
 
             return marionExportRow;
         }

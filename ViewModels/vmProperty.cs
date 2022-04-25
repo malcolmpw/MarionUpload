@@ -130,7 +130,7 @@ namespace MarionUpload.ViewModels
         }
 
         private void SelectMineralPropertyDataFromMarionImportTable()
-        {          
+        {
             MarionMineralProperties.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
@@ -309,9 +309,6 @@ namespace MarionUpload.ViewModels
             property.PtdClassSub = importedMarionProperty.SPTBCode.Trim().Substring(0, 2);
             property.PropType = "R";
             string rrcNumber = GetRRCnumberFromImportRRCstring(importedMarionProperty);
-            property.Legal = importedMarionProperty.LeaseName.Trim() +
-                " (" + rrcNumber +
-                "); Opr: " + importedMarionProperty.OperatorName.Trim();
             property.ControlCad = "MAR";
             property.UpdateWhy = _updateWhy;
             property.CreateBy = _updateBy;
@@ -320,6 +317,22 @@ namespace MarionUpload.ViewModels
             property.CreateWhy = _updateWhy;
             property.CreateDate = _updateDate;
 
+            var useWagStyleLegal = true;
+
+            if (useWagStyleLegal)
+            {
+                //this is to provide Wag with standard Property Legal
+                property.Legal = importedMarionProperty.LeaseName.Trim() +
+                    " (" + rrcNumber +
+                    "); Opr: " + importedMarionProperty.OperatorName.Trim();
+            }
+            else
+            {
+                //this is to keep a copy of Marion (P&A) Description1 and Description2
+                property.Legal = importedMarionProperty.Description1.Trim() + "-" +
+                                   importedMarionProperty.Description2.Trim();
+                property.Location = importedMarionProperty.Description2.Trim();
+            }
             return property;
         }
 
@@ -331,7 +344,7 @@ namespace MarionUpload.ViewModels
             cadProperty.CadID = "MAR";
             cadProperty.CadPropID = marionProperty.LeaseNumber.ToString();
             cadProperty.CadPct = 1.0;
-           
+
             cadProperty.delflag = false;
             return cadProperty;
         }
@@ -359,11 +372,6 @@ namespace MarionUpload.ViewModels
             }
 
             property.PropType = "P";
-            //property.Legal = FetchPTDDescription(sptbCode) + "," +
-            //                 FetchISDJurisdictionName(importedMarionProperty);  //importedMarionProperty.Description2;
-            property.Legal = importedMarionProperty.Description1.Trim() + "-" +
-                                importedMarionProperty.Description2.Trim();
-            property.Location = importedMarionProperty.Description2.Trim();
 
             property.ControlCad = "MAR";
 
@@ -374,6 +382,22 @@ namespace MarionUpload.ViewModels
             property.CreateWhy = _updateWhy;
             property.CreateDate = _updateDate;
 
+            var useWagStyleLegal = true;
+
+            if (useWagStyleLegal)
+            {
+                //this is to provide Wag with standard Property Legal
+                property.Legal = importedMarionProperty.LeaseName.Trim() +
+                                 FetchPTDDescription(property.PtdClassSub) + " - " +
+                                 FetchISDJurisdictionName(importedMarionProperty);
+            }
+            else
+            {
+                //this is to keep a copy of Marion (P&A) Description1 and Description2
+                property.Legal = importedMarionProperty.Description1.Trim() + "-" +
+                                    importedMarionProperty.Description2.Trim();
+                property.Location = importedMarionProperty.Description2.Trim();
+            }
             return property;
         }
 
@@ -402,7 +426,32 @@ namespace MarionUpload.ViewModels
             return "--";
         }
 
-        private string FetchISDJurisdictionName(mMarionMineralProperty importedMarionProperty)
+        private string FetchISDJurisdictionName(mMarionPersonalProperty importedMarionProperty)
+        {
+            var jurisdictions = new List<int>
+            {
+                importedMarionProperty.Jurisdiction1,
+                importedMarionProperty.Jurisdiction2,
+                importedMarionProperty.Jurisdiction3,
+                importedMarionProperty.Jurisdiction4,
+                importedMarionProperty.Jurisdiction5,
+                importedMarionProperty.Jurisdiction6,
+                importedMarionProperty.Jurisdiction7,
+                importedMarionProperty.Jurisdiction8,
+                importedMarionProperty.Jurisdiction9,
+                importedMarionProperty.Jurisdiction10,
+                importedMarionProperty.Jurisdiction11,
+                importedMarionProperty.Jurisdiction12
+            };
+
+            var ISDJurisdiction = jurisdictions.Where(j => (j / 10) * 10 == 30).FirstOrDefault();
+
+            if (!JurisdictionMap.ContainsKey(ISDJurisdiction)) return "No ISD";
+
+            return JurisdictionMap[ISDJurisdiction];
+
+        }
+        private string FetchISDJurisdictionNameForMinerals(mMarionMineralProperty importedMarionProperty)
         {
             var jurisdictions = new List<int>
             {
