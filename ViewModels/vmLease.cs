@@ -181,8 +181,9 @@ namespace MarionUpload.ViewModels
 
                     InsertCadLease(db, marionLease, primaryLeaseKey);
 
+                    bool isOneTractLease = true;
                     var tractId = 0;
-                    InsertTract(db, marionLease, primaryLeaseKey, tractId);
+                    InsertTract(db, marionLease, primaryLeaseKey, tractId, isOneTractLease);
                 }
 
                 var kildareTractId = 0;
@@ -204,9 +205,10 @@ namespace MarionUpload.ViewModels
                     }
                     kildareLeaseAlreadyInserted = true;
 
+                    bool isOneTractLease = false;
                     //++kildareTractId;                    
                     kildareTractId = int.Parse(marionLease.LeaseName.Trim().Substring(marionLease.LeaseName.IndexOf('#') + 1));
-                    InsertTract(db, marionLease, primaryLeaseKey, kildareTractId);
+                    InsertTract(db, marionLease, primaryLeaseKey, kildareTractId, isOneTractLease);
                 }
 
                 var greenFoxTractId = 0;
@@ -228,9 +230,10 @@ namespace MarionUpload.ViewModels
                     }
                     greenFoxLeaseAlreadyInserted = true;
 
+                    bool isOneTractLease = false;
                     //++greenFoxTractId;
                     greenFoxTractId = int.Parse(marionLease.LeaseName.Trim().Substring(marionLease.LeaseName.IndexOf('#') + 1));
-                    InsertTract(db, marionLease, primaryLeaseKey, greenFoxTractId);
+                    InsertTract(db, marionLease, primaryLeaseKey, greenFoxTractId, isOneTractLease);
                 }
 
                 //UpdateTblNameOperatorFlags(db);       //this is superceded by CRW list of operators
@@ -257,7 +260,7 @@ namespace MarionUpload.ViewModels
             var affectedRows = db.Execute(sqlString);
         }
 
-        private void InsertTract(IDbConnection db, mMarionLease marionLease, long primaryLeaseKey, int tractId)
+        private void InsertTract(IDbConnection db, mMarionLease marionLease, long primaryLeaseKey, int tractId,bool isOneTractLease)
         {
             var populatedTract = TranslateFrom_mMarionLeaseTo_mTract(tractId);
             populatedTract.LeaseID = primaryLeaseKey;
@@ -266,6 +269,7 @@ namespace MarionUpload.ViewModels
             var tractAcres = MarionMineralAccounts.Where(t => t.LeaseNumber == marionLease.LeaseNumber).FirstOrDefault().Acres; //tract acres
             var leaseAcres = (from m in MarionMineralAccounts where m.RRC == marionLease.RRC select m.Acres).Sum();//sum of tract acres in lease
             populatedTract.LeasePct = Math.Round(leaseAcres != 0 ? tractAcres / leaseAcres : 0.0, 3);
+            if (isOneTractLease) populatedTract.LeasePct = 1.0;
             //Note!! LeasePct needs to be inserted into tblAccount.Legal ??????? how? parse legal and re-build?
 
             db.Insert<mTract>(populatedTract);
