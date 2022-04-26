@@ -364,6 +364,7 @@ namespace MarionUpload.ViewModels
                 }
             }
 
+            if (owner.NameSort == null) owner.NameSort = owner.NameSortCad;
             owner.Addr1 = owner.NameSort;
 
 

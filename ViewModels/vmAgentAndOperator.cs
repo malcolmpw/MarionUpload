@@ -30,12 +30,12 @@ namespace MarionUpload.ViewModels
         private bool agentUploadEnabled = false;
 
         private mAgent Agent { get; set; }
-        public ObservableCollection<mMarionAgent> MarionAgents { get; set; }        
+        public ObservableCollection<mMarionAgent> MarionAgents { get; set; }
         public static IDictionary<int, long> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
 
         public static ObservableCollection<mCrwOperator> CrwOperators { get; set; }
         public static IDictionary<string, long> CrwOperRrcIDToNameIdMap { get; private set; } = new Dictionary<string, long>();
-        public static IDictionary<string, string> CrwRrcToOperIdMap { get; private set; } = new Dictionary<string, string>();              
+        public static IDictionary<string, string> CrwRrcToOperIdMap { get; private set; } = new Dictionary<string, string>();
 
         public ICommand CommandImportAgents => new RelayCommand(OnImportAgentsAndOperators);
         public ICommand CommandUploadAgentIDs => new RelayCommand(OnUploadAgentsAndOperators);
@@ -53,7 +53,7 @@ namespace MarionUpload.ViewModels
         public void OnImportAgentsAndOperators()       // note: following WagApp1, a segment is the same as an OwnerPersonalPropertySegment
         {
             ReadMarionAgentsFlatFileIntoMarionAgents();
-           
+
             GetOperatorsFromAbCrwOperators();
 
             agentImportEnabled = false;
@@ -96,9 +96,9 @@ namespace MarionUpload.ViewModels
 
                         var populatedCadOwner = TranslateFrom_mCrwOperatorTo_mCadOwner(crwOperator, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
-                       
+
                     }
-                
+
                 }
             }
             catch (Exception ex)
@@ -143,15 +143,16 @@ namespace MarionUpload.ViewModels
             owner.Agnt_YN = true;
             owner.CadID = "MAR";
             owner.NameSortCad = crwOperator.NameSort.Trim();
-            owner.NameC= crwOperator.NameSort.Trim();
-            owner.NameSort= crwOperator.NameSort.Trim();
-            owner.NameSortFirst= crwOperator.NameSort.Trim();
+            owner.NameC = crwOperator.NameSort.Trim();
+            owner.NameSort = crwOperator.NameSort.Trim();
+            owner.NameSortFirst = crwOperator.NameSort.Trim();
 
             owner.Stat_YN = true;
             owner.Oper_YN = true;
             owner.OperRrcID = crwOperator.OperRrcID.Trim();
             owner.NameSortFirst = crwOperator.NameSort.Trim();
-            owner.NameC = crwOperator.NameSort.Trim();            
+            owner.NameC = crwOperator.NameSort.Trim();
+            owner.Addr1 = crwOperator.NameSort.Trim();
             owner.NameSel_YN = true;
             owner.AgentID = 66864;
 
@@ -237,7 +238,7 @@ namespace MarionUpload.ViewModels
                     agent = ParseLineFromMarionAgentsFlatFile(line);
                     MarionAgents.Add(agent);
                 }
-            }           
+            }
         }
 
         static mMarionAgent ParseLineFromMarionAgentsFlatFile(string line)

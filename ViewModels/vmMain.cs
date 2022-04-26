@@ -203,7 +203,7 @@ namespace MarionUpload.ViewModels
 
             var operatorKey = leaseRow.LeaseOprID;
             var operNameSortCad = "";
-            if (operatorKey != null)
+            if (operatorKey != 0)
             {
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
                 {
