@@ -296,7 +296,7 @@ namespace MarionUpload.ViewModels
             }
 
             var lpdLeaseName = db.ExecuteScalar($"SELECT TOP 1 LpdLeaseName FROM tblWell where RrcLease = '{formattedRRC}'") as string;
-            populatedLease.LeaseNameOpr = lpdLeaseName;
+            populatedLease.LeaseNameOpr = lpdLeaseName;            
 
             primaryLeaseKey = db.Insert<mLease>(populatedLease);
 

@@ -333,13 +333,12 @@ namespace MarionUpload.ViewModels
                 owner.NameCP = matchingOwner.NameCP;
                 owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2017].[dbo].[tblName]
                                                    // these may be taken from WagData2017 for the old list of marion owners in tblName.               
-                owner.NameSel_YN = matchingOwner.NameSel_YN;
-
+                owner.NameSel_YN = matchingOwner.NameSel_YN;                
             }
             else
             {
                 owner.NameC = (importedMarionOwner.OwnerName).Trim();
-                owner.NameSel_YN = true;
+                owner.NameSel_YN = true;                
             }
 
             if (importedMarionOwner.AgentNumber == 0)
@@ -364,6 +363,8 @@ namespace MarionUpload.ViewModels
                     owner.Stmnt2Agent_YN = false;
                 }
             }
+
+            owner.Addr1 = owner.NameSort;
 
 
             // !!!! ASK CW ABOUT IN CARE OF

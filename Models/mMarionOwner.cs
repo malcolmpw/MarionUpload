@@ -14,6 +14,7 @@ namespace MarionUpload.Models
         public string CityStateZip { get; set; }
         public int AgentNumber { get; set; }  
         public string NameSortCad { get; set; }
-        public bool NameSel_YN { get; set; }       
+        public bool NameSel_YN { get; set; }   
+        public string Addr1 { get; set; }
     }
 }
