@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarionUpload", "MarionUploa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL scripts", "SQL scripts", "{7C4DD154-A42A-484C-9C99-993896284B79}"
 	ProjectSection(SolutionItems) = preProject
+		CrwOperatorAddress.sql = CrwOperatorAddress.sql
 		LeasePct.sql = LeasePct.sql
 		Marion Operators.sql = Marion Operators.sql
 		NameSel_YN.sql = NameSel_YN.sql

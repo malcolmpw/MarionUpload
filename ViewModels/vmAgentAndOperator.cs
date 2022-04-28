@@ -3,6 +3,7 @@ using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using MarionUpload.Comparers;
 using MarionUpload.Helpers;
 using MarionUpload.Messages;
 using MarionUpload.Models;
@@ -34,6 +35,7 @@ namespace MarionUpload.ViewModels
         public static IDictionary<int, long> MarionAgentNumberToNameIdMap { get; private set; } = new Dictionary<int, long>();
 
         public static ObservableCollection<mCrwOperator> CrwOperators { get; set; }
+        public ObservableCollection<mMarionOperator> OperatorsFromAbMarionOperators { get; private set; }
         public static IDictionary<string, long> CrwOperRrcIDToNameIdMap { get; private set; } = new Dictionary<string, long>();
         public static IDictionary<string, string> CrwRrcToOperIdMap { get; private set; } = new Dictionary<string, string>();
 
@@ -46,6 +48,7 @@ namespace MarionUpload.ViewModels
         public vmAgentAndOperator()
         {
             MarionAgents = new ObservableCollection<mMarionAgent>();
+            OperatorsFromAbMarionOperators = new ObservableCollection<mMarionOperator>();
             agentImportEnabled = true;
             agentUploadEnabled = false;
         }
@@ -55,6 +58,7 @@ namespace MarionUpload.ViewModels
             ReadMarionAgentsFlatFileIntoMarionAgents();
 
             GetOperatorsFromAbCrwOperators();
+            GetOperatorsFromMarionOperators();
 
             agentImportEnabled = false;
             agentUploadEnabled = true;
@@ -91,8 +95,8 @@ namespace MarionUpload.ViewModels
                         if (!CrwOperRrcIDToNameIdMap.ContainsKey(populatedOwner.OperRrcID))
                             CrwOperRrcIDToNameIdMap.Add(populatedOwner.OperRrcID, (int)primaryOwnerKey);
 
-                        //if (!CrwRrcToOperIdMap.ContainsKey(populatedOwner.OperRrcID))
-                        //    CrwRrcToOperIdMap.Add(crwOperator.OperRrcID, populatedOwner.OperRrcID);
+                        if (!CrwRrcToOperIdMap.ContainsKey(populatedOwner.OperRrcID))
+                            CrwRrcToOperIdMap.Add(crwOperator.OperRrcID, populatedOwner.OperRrcID);
 
                         var populatedCadOwner = TranslateFrom_mCrwOperatorTo_mCadOwner(crwOperator, primaryOwnerKey);
                         var primaryCadOwnerKey = db.Insert<mCadOwner>(populatedCadOwner);
@@ -132,7 +136,7 @@ namespace MarionUpload.ViewModels
                 MessageBox.Show($"Error Uploading Owner Data -> {ex}");
                 Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
             }
-        }
+        }    
 
         private mOwner TranslateFrom_mCrwOperatorTo_mOwner(mCrwOperator crwOperator)
         {
@@ -222,6 +226,27 @@ namespace MarionUpload.ViewModels
                 string sqlString = "select * from wagapp2_2021_Marion.dbo.AbMarionOperatorsFromCRW ";
                 var crwOperators = db.Query<mCrwOperator>(sqlString).ToList();
                 CrwOperators = new ObservableCollection<mCrwOperator>(crwOperators);
+            }
+        }
+
+        private void GetOperatorsFromMarionOperators()
+        {
+            OperatorsFromAbMarionOperators.Clear();
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
+            {
+                var operatorResults = db.Query<mMarionOperator>
+                    ("SELECT * from AbMarionOperators Where Active=1 order by OperatorName ");
+                var operatorDistinctResults = operatorResults.Distinct(new OperatorComparer()).ToList();
+                operatorDistinctResults.ForEach(marionOperator => OperatorsFromAbMarionOperators.Add(marionOperator));
+
+                //foreach (mMarionOperator oper in OperatorsFromAbMarionOperators)
+                //{
+                //    if (!OperatorNameIdMap.ContainsKey(oper.CompanyName))
+                //    {
+                //        OperatorNameIdMap = OperatorsFromAbMarionOperators.
+                //          ToDictionary(op => op.CompanyName, val => (long)val.CompanyID);
+                //    }
+                //}
             }
         }
 
