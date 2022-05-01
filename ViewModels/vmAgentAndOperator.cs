@@ -68,7 +68,7 @@ namespace MarionUpload.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
             UploadAgentsToOwners();
-            UploadOperatorsToOwners();
+            UploadCrwOperatorsToOwners();
 
             AgentUploadEnabled = false;
             MessageBox.Show($"Finished uploading {MarionAgents.Count()} owners(agents)");
@@ -81,7 +81,7 @@ namespace MarionUpload.ViewModels
             Messenger.Default.Send<AgentFinishedMessage>(new AgentFinishedMessage());
         }
 
-        private void UploadOperatorsToOwners()
+        private void UploadCrwOperatorsToOwners()
         {
             try
             {
