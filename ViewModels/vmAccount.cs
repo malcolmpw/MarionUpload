@@ -128,12 +128,17 @@ namespace MarionUpload.ViewModels
                         //++ProgressBarUpLoadMarionAccountsCurrentValue;
                         var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                         var primaryKey = db.Insert<mAccount>(populatedAccount);
+                        mAccountToImportMap map = new mAccountToImportMap();
+                        map.AcctID = (int)primaryKey;
+                        map.ImportID = _marionAccount.ImportID;
                         AccountList.Add(populatedAccount);
+                        if(primaryKey != null)
+                        db.Insert<mAccountToImportMap>((mAccountToImportMap)map);
 
                         var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
 
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
-                        var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
+                        var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);                        
                     }
 
                     // copy tblAccount rows just inserted into tlkp

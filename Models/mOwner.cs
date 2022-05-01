@@ -24,7 +24,7 @@ namespace MarionUpload.Models
         public string Name2 { get; set; }
         public string NameSort { get; set; }
         public string NameSortFirst { get; set; }
-        public string NameSortCad { get; set; }        
+        public string NameSortCad { get; set; } 
         public string Mail1 { get; set; } 
         public string MailCi { get; set; }
         public string MailSt { get; set; }
@@ -32,6 +32,8 @@ namespace MarionUpload.Models
         public string MailZ4 { get; set; }
         public string MailCo { get; set; }
         public string MailZip { get; set; }
+        public string MailTo { get; set; }
+        public string PhysTo { get; set; }
         public int AgentID { get; set; }
         public bool Agnt_YN { get; set; } 
         public string Addr1 { get; set; }

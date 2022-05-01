@@ -52,8 +52,9 @@ namespace MarionUpload.ViewModels
             OperatorsFromAbMarionImport = new ObservableCollection<mMarionOperator>();
             OperatorNamesFromAbMarionImport = new ObservableCollection<string>();
             
-            LeaseDataFromAbMarionImport = new ObservableCollection<mMarionLease>();            
+            LeaseDataFromAbMarionImport = new ObservableCollection<mMarionLease>();
             //WellOperatorRrcData = new ObservableCollection<mWellOperatorID>();
+              WellOperatorRrcData = new ObservableCollection<mWellOperatorID>();
         }
 
         private void OnImportLeases()

@@ -322,7 +322,8 @@ namespace MarionUpload.ViewModels
             bool hasValue = CadOwner2017NameSortMap.TryGetValue(owner.NameSortCad, out matchingOwner);
             if (hasValue)
             {
-                owner.NameSortFirst = owner.NameSortCad;
+                owner.NameSort = matchingOwner.NameSort;
+                owner.NameSortFirst = owner.NameSortCad;                
                 owner.NameH = matchingOwner.NameH; // search the NameSortCad for titles, use SELECT distinct[NameH] FROM[WagData2017].[dbo].[tblName]                
                 owner.NameF = matchingOwner.NameF; // split and parse
                 owner.NameM = matchingOwner.NameM; // split and parse
@@ -333,12 +334,20 @@ namespace MarionUpload.ViewModels
                 owner.NameCP = matchingOwner.NameCP;
                 owner.Name2 = matchingOwner.Name2; // search the NameSortCad for titles, use SELECT distinct[Name2] FROM[WagData2017].[dbo].[tblName]
                                                    // these may be taken from WagData2017 for the old list of marion owners in tblName.               
-                owner.NameSel_YN = matchingOwner.NameSel_YN;                
+                owner.NameSel_YN = matchingOwner.NameSel_YN;
+                owner.Addr1 = matchingOwner.Addr1;
+                owner.MailTo = matchingOwner.MailTo;
+                owner.PhysTo = matchingOwner.PhysTo;
             }
             else
             {
                 owner.NameC = (importedMarionOwner.OwnerName).Trim();
-                owner.NameSel_YN = true;                
+                owner.NameSel_YN = true;
+                owner.NameSort = owner.NameC;
+                owner.NameSortCad = owner.NameC;
+                owner.Addr1 = owner.NameC;
+                owner.MailTo= (importedMarionOwner.InCareOf).Trim();
+                owner.PhysTo = (importedMarionOwner.InCareOf).Trim();
             }
 
             if (importedMarionOwner.AgentNumber == 0)
@@ -366,10 +375,6 @@ namespace MarionUpload.ViewModels
 
             if (owner.NameSort == null) owner.NameSort = owner.NameSortCad;
             owner.Addr1 = owner.NameSort;
-
-
-            // !!!! ASK CW ABOUT IN CARE OF
-            // Problem: importedMarionOwner address info is for the Agent and not for the owner if importedMarionOwner.InCareOf is not blank
             owner.Mail1 = importedMarionOwner.StreetAddress.Trim();
             var cityStateZip = importedMarionOwner.CityStateZip.Trim();
             int cityLength;
