@@ -73,7 +73,6 @@ namespace MarionUpload.ViewModels
         }
 
         public List<mAccount> AccountList { get; set; }
-
         private void OnImportAccounts()
         {
             Application.Current.Dispatcher.Invoke(() => Mouse.OverrideCursor = Cursors.Wait);
@@ -128,17 +127,17 @@ namespace MarionUpload.ViewModels
                         //++ProgressBarUpLoadMarionAccountsCurrentValue;
                         var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                         var primaryKey = db.Insert<mAccount>(populatedAccount);
-                        mAccountToImportMap map = new mAccountToImportMap();
-                        map.AcctID = (int)primaryKey;
-                        map.ImportID = _marionAccount.ImportID;
+                        mAccountToImportMap mapRow = new mAccountToImportMap();
+                        mapRow.AcctID = (int)primaryKey;
+                        mapRow.ImportID = _marionAccount.ImportID;
                         AccountList.Add(populatedAccount);
-                        if(primaryKey != null)
-                        db.Insert<mAccountToImportMap>((mAccountToImportMap)map);
+                        if (primaryKey != null)
+                            db.Insert<mAccountToImportMap>((mAccountToImportMap)mapRow);
 
                         var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
 
                         var populatedCadAccount = TranslateFrom_mMarionAccountTo_mCadAccount(_marionAccount, (long)primaryKey);
-                        var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);                        
+                        var primaryCadAccountKey = db.Insert<mCadAccount>((mCadAccount)populatedCadAccount);
                     }
 
                     // copy tblAccount rows just inserted into tlkp
@@ -278,7 +277,7 @@ namespace MarionUpload.ViewModels
 
         private string BuildCadAccountId(mMarionAccount marionAccount)
         {
-            var cadAccountId = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +                              
+            var cadAccountId = marionAccount.OwnerNumber.ToString().PadLeft(7, '0') + "-" +
                                marionAccount.InterestType.ToString().Trim() + "-" +
                                marionAccount.LeaseNumber.ToString().PadLeft(7, '0');
             return cadAccountId;
@@ -298,15 +297,15 @@ namespace MarionUpload.ViewModels
 
             if (_marionAccount.SPTBCode == "G1 " || _marionAccount.SPTBCode == "XV ")
             {
-                if(vmProperty.MineralPropertyIdMap.ContainsKey(_marionAccount.LeaseNumber))
-                account.PropID = vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
+                if (vmProperty.MineralPropertyIdMap.ContainsKey(_marionAccount.LeaseNumber))
+                    account.PropID = vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
             }
             else
             {
                 Tuple<int, int> acctTuple = new Tuple<int, int>(_marionAccount.OwnerNumber, _marionAccount.LeaseNumber);
-                
-                if(vmProperty.PersonalPropertyIdMap.ContainsKey(acctTuple))
-                account.PropID = vmProperty.PersonalPropertyIdMap[acctTuple];
+
+                if (vmProperty.PersonalPropertyIdMap.ContainsKey(acctTuple))
+                    account.PropID = vmProperty.PersonalPropertyIdMap[acctTuple];
             }
 
             account.Stat_YN = true;
@@ -317,7 +316,7 @@ namespace MarionUpload.ViewModels
             account.PctProp = (float)(_marionAccount.SPTBCode.Trim() == "G1" || _marionAccount.SPTBCode.Trim() == "XV" ?
                 _marionAccount.DecimalInterest * 10.0 : 1.0);
             account.PctProp = (float)Math.Round(account.PctProp, 9);
-            account.PctType = ConvertInterestType(_marionAccount);            
+            account.PctType = ConvertInterestType(_marionAccount);
 
             account.Protest_YN = _marionAccount.Protest == "P";
             account.PTDcode = _marionAccount.SPTBCode.Trim();
@@ -407,13 +406,13 @@ namespace MarionUpload.ViewModels
 
         private static string ConvertPropertyType(mMarionAccount _marionAccount)
         {
-        //TYPE PROPERTY CODES | INTEREST TYPE CODES
-        //1 = REAL VALUE            | 1 = RI
-        //2 = REAL VALUE NP         | 2 = OR
-        //3 = PERSONAL PROPERTY     | 3 = OP
-        //                          | 4 = WI
-        //                          | 5 = RA
-            string _intType="";
+            //TYPE PROPERTY CODES | INTEREST TYPE CODES
+            //1 = REAL VALUE            | 1 = RI
+            //2 = REAL VALUE NP         | 2 = OR
+            //3 = PERSONAL PROPERTY     | 3 = OP
+            //                          | 4 = WI
+            //                          | 5 = RA
+            string _intType = "";
             switch (_marionAccount.InterestType)
             {
                 //case 0:
@@ -427,10 +426,10 @@ namespace MarionUpload.ViewModels
                     break;
                 case 3://P&A PERSONAL PROPERTY
                     _intType = "P";
-                    break;           
+                    break;
             }
             return _intType;
         }
-        
+
     }
 }
