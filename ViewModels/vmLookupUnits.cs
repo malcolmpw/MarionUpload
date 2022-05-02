@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Dapper;
 using GalaSoft.MvvmLight.Command;
@@ -17,10 +12,10 @@ namespace MarionUpload.ViewModels
         public ICommand CommandPopulateTlkpUnitWithMarion => new RelayCommand(OnPopulateTlkpUnitWithMarionCounty);
 
 
-        const string ImportIntoTlkpCadUnitTable = "Insert Into [wagapp2_2021_Marion].[dbo].[tlkpCadUnit] SELECT * " +
+        const string ImportIntoTlkpCadUnitTable = "Insert Into [dbo].[tlkpCadUnit] SELECT * " +
                                                     "from [WagData2017].[dbo].[tlkpCadUnit] where CadId = 'MAR' and CadAppraised = 1";
 
-        const string ImportIntoTlkpUnitTable = "Insert Into [wagapp2_2021_Marion].[dbo].[tlkpUnit] SELECT * " +
+        const string ImportIntoTlkpUnitTable = "Insert Into [dbo].[tlkpUnit] SELECT * " +
                                                     "from [WagData2017].[dbo].[tlkpUnit] where CadId = 'MAR'";
 
         private void OnPopulateTlkpUnitWithMarionCounty()

@@ -223,7 +223,7 @@ namespace MarionUpload.ViewModels
             {
                 CrwOperators = new ObservableCollection<mCrwOperator>();
                 //string sqlString = "select CadID,NameID,OprRrcID,NameSort,CountOfLpdID,Oper_YN from wagapp2_2021_Marion.dbo.AbMarionOperatorsFromCRW ";
-                string sqlString = "select * from wagapp2_2021_Marion.dbo.AbMarionOperatorsFromCRW ";
+                string sqlString = "select * from dbo.AbMarionOperatorsFromCRW ";
                 var crwOperators = db.Query<mCrwOperator>(sqlString).ToList();
                 CrwOperators = new ObservableCollection<mCrwOperator>(crwOperators);
             }

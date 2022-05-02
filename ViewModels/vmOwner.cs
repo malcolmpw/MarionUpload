@@ -135,7 +135,7 @@ namespace MarionUpload.ViewModels
         {
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
             {
-                string marionOperatorRrcSqlString = "select distinct RRC,OperatorName from wagapp2_2021_Marion.dbo.AbMarionImport where SPTBCode='G1 ' ";
+                string marionOperatorRrcSqlString = "select distinct RRC,OperatorName from dbo.AbMarionImport where SPTBCode='G1 ' ";
                 var wellMarionOperatorRRCs = db.Query<mMarionOperatorRrc>(marionOperatorRrcSqlString).ToList();
                 MarionOperatorRRCs = new ObservableCollection<mMarionOperatorRrc>(wellMarionOperatorRRCs);
                 foreach (mMarionOperatorRrc marionOperatorRrc in MarionOperatorRRCs)
@@ -166,9 +166,9 @@ namespace MarionUpload.ViewModels
 
         private void GetMarionOperatorNamesFromImport()
         {
-            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString2017))
+            using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                string operatorNamesQueryString = "use wagapp2_2021_Marion Select distinct OperatorName from AbMarionImport where sptbCode='G1 ' order by OperatorName ";
+                string operatorNamesQueryString = "Select distinct OperatorName from AbMarionImport where sptbCode='G1 ' order by OperatorName ";
                 var marionOperatorNames = db.Query<string>(operatorNamesQueryString).ToList();
                 MarionOperatorNames = new ObservableCollection<string>(marionOperatorNames);
                 foreach (string operatorName in marionOperatorNames)

@@ -186,7 +186,7 @@ namespace MarionUpload.ViewModels
                         try
                         {
                             // test to see if populatedAprslAdmin already exists.
-                            var adminQueryString = $"use wagapp2_2021_Marion Select * from tblAprslAdmin a where a.Year = '2022' and a.NameID = {acct.NameID} and a.CadID='MAR' ";
+                            var adminQueryString = $"Select * from tblAprslAdmin a where a.Year = '2022' and a.NameID = {acct.NameID} and a.CadID='MAR' ";
                             var affectedRows3 = db.Query(adminQueryString).Count();
                             if (affectedRows3 == 0)
                             {

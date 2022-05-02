@@ -120,7 +120,7 @@ namespace MarionUpload.ViewModels
             LeaseDataFromAbMarionImport.Clear();
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                var results = db.Query<mMarionLease>("use wagapp2_2021_Marion Select RRC, Description1, Description2, LeaseNumber, " +
+                var results = db.Query<mMarionLease>("Select RRC, Description1, Description2, LeaseNumber, " +
                                                      "LeaseName, OperatorName, SPTBCode, Acres " +
                                                      "from AbMarionImport where SPTBCode = 'G1 ' or SPTBCode = 'XV ' order by LeaseName");
 
@@ -235,10 +235,10 @@ namespace MarionUpload.ViewModels
         private static void UpdateTblNameOperatorFlags(IDbConnection db)
         {
             // For all operators in AbMarionOperators change their Oper_YN in tblName to true.
-            string sqlString = "update wagapp2_2021_Marion.dbo.tblName " +
+            string sqlString = "update dbo.tblName " +
                                "set tblName.Oper_YN = o.OperatorFlag " +
-                               "from wagapp2_2021_Marion.dbo.AbMarionOperators o " +
-                               "inner join wagapp2_2021_Marion.dbo.tblName n " +
+                               "from dbo.AbMarionOperators o " +
+                               "inner join dbo.tblName n " +
                                "on o.CompanyID = n.NameID " +
                                "where o.Active = 1";
             var affectedRows = db.Execute(sqlString);
