@@ -490,8 +490,6 @@ namespace MarionUpload.ViewModels
                     db.Execute("Delete from tblCadLease where CadID = 'MAR'");
 
                     db.Execute($"delete tblUnitProperty from tblUnitProperty u join tlkpCadUnit c on u.UnitId=c.UnitID where c.CadId='MAR'");
-
-//                    db.Execute($"delete tblName from tblName n join AbMarionOperatorsFromCRW c on n.OperRrcID=c.OperRrcID");
                 }
 
             }
