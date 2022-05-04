@@ -143,8 +143,7 @@ namespace MarionUpload.ViewModels
             _updateDate = DateTime.Now;
             _updateBy = "MPW";
 
-            var owner = new mOwner();
-            owner.Agnt_YN = true;
+            var owner = new mOwner();           
             owner.CadID = "MAR";
             owner.NameSortCad = crwOperator.NameSort.Trim();
             owner.NameC = crwOperator.NameSort.Trim();
