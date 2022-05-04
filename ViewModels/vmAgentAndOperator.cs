@@ -197,6 +197,7 @@ namespace MarionUpload.ViewModels
             var owner = new mOwner();
             owner.Agnt_YN = true;
             owner.CadID = "MAR";
+            owner.NameSort = marionAgent.AgentName.Trim();
             owner.NameSortCad = marionAgent.AgentName.Trim();
             owner.Stat_YN = true;
             owner.NameSortFirst = marionAgent.AgentName.Trim();
