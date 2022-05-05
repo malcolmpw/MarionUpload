@@ -127,12 +127,13 @@ namespace MarionUpload.ViewModels
                         //++ProgressBarUpLoadMarionAccountsCurrentValue;
                         var populatedAccount = TranslateFrom_mMarionAccountTo_mAccount(_marionAccount);
                         var primaryKey = db.Insert<mAccount>(populatedAccount);
-                        mAccountToImportMap mapRow = new mAccountToImportMap();
-                        mapRow.AcctID = (int)primaryKey;
-                        mapRow.ImportID = _marionAccount.ImportID;
                         AccountList.Add(populatedAccount);
-                        if (primaryKey != null)
-                            db.Insert<mAccountToImportMap>((mAccountToImportMap)mapRow);
+
+                        //mAccountToImportMap mapRow = new mAccountToImportMap();
+                        //mapRow.AcctID = (int)primaryKey;
+                        //mapRow.ImportID = _marionAccount.ImportID;
+                        //if (primaryKey != null)
+                        //    db.Insert<mAccountToImportMap>((mAccountToImportMap)mapRow);
 
                         var populatedAccountPrYr = ConvertFromAccountToAccountPrYr(populatedAccount);
 
