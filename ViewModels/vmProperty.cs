@@ -267,6 +267,7 @@ namespace MarionUpload.ViewModels
             oppSegment.PrsnlStatWhy = "conversion";
             oppSegment.PrsnlStat_YN = true;
 
+            oppSegment.PrsnlUnitCount = 1.0;
             oppSegment.PrsnlUnitModifier = 1.0d;
             oppSegment.PrsnlUtilPct = 1.0d;
             oppSegment.PrsnlApprMethod = "Flat value";

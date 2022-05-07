@@ -21,6 +21,7 @@ namespace MarionUpload.Models
         public string PrsnlStatWhy { get; set; }
         public bool PrsnlStat_YN { get; set; }
 
+        public double PrsnlUnitCount { get; set; }
         public double PrsnlUnitModifier { get; set; }
         public double PrsnlUtilPct { get; set; }
         public string PrsnlApprMethod { get; set; }

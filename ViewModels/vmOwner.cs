@@ -312,8 +312,7 @@ namespace MarionUpload.ViewModels
             _updateBy = "MPW";
 
             var owner = new mOwner();
-
-            owner.CadID = "MAR";
+            
             owner.NameSortCad = importedMarionOwner.OwnerName.Trim();
             //var matchingOwner = CadOwner2017NameSortMap[owner.NameSortCad];
             owner.Stat_YN = true;

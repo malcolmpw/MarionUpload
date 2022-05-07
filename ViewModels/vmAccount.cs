@@ -182,21 +182,24 @@ namespace MarionUpload.ViewModels
                             if (innerAcct.NameID == acct.NameID) sumOfOwnerCadValues += innerAcct.ValAcctCur;
                         }
 
-                        var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(acct, sumOfOwnerCadValues);
+                        if (acct.PctType != "U")
+                        {
+                            var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(acct, sumOfOwnerCadValues);
 
-                        try
-                        {
-                            // test to see if populatedAprslAdmin already exists.
-                            var adminQueryString = $"Select * from tblAprslAdmin a where a.Year = '2022' and a.NameID = {acct.NameID} and a.CadID='MAR' ";
-                            var affectedRows3 = db.Query(adminQueryString).Count();
-                            if (affectedRows3 == 0)
+                            try
                             {
-                                var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                                // test to see if populatedAprslAdmin already exists.
+                                var adminQueryString = $"Select * from tblAprslAdmin a where a.Year = '2022' and a.NameID = {acct.NameID} and a.CadID='MAR' ";
+                                var affectedRows3 = db.Query(adminQueryString).Count();
+                                if (affectedRows3 == 0)
+                                {
+                                    var primaryAprslAdminKey = db.Insert<mAprslAdmin>(populatedAprslAdmin);
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new Exception($"Error in inserting into Admin Appraisal table {ex.Message}");
+                            catch (Exception ex)
+                            {
+                                throw new Exception($"Error in inserting into Admin Appraisal table {ex.Message}");
+                            }
                         }
                     }
                 }
