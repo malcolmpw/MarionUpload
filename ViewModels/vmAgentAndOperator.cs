@@ -144,7 +144,7 @@ namespace MarionUpload.ViewModels
             _updateBy = "MPW";
 
             var owner = new mOwner();           
-            owner.CadID = "MAR";
+            //owner.CadID = "MAR";
             owner.NameSortCad = crwOperator.NameSort.Trim();
             owner.NameC = crwOperator.NameSort.Trim();
             owner.NameSort = crwOperator.NameSort.Trim();
@@ -195,7 +195,7 @@ namespace MarionUpload.ViewModels
 
             var owner = new mOwner();
             owner.Agnt_YN = true;
-            owner.CadID = "MAR";
+            //owner.CadID = "MAR";
             owner.NameSort = marionAgent.AgentName.Trim();
             owner.NameSortCad = marionAgent.AgentName.Trim();
             owner.Stat_YN = true;

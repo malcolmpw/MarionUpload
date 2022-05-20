@@ -182,7 +182,7 @@ namespace MarionUpload.ViewModels
                             if (innerAcct.NameID == acct.NameID) sumOfOwnerCadValues += innerAcct.ValAcctCur;
                         }
 
-                        if (acct.PctType != "U")
+                        if (acct.PctType == "U")
                         {
                             var populatedAprslAdmin = TranslateFrom_mOwnerTo_mAprslAdmin(acct, sumOfOwnerCadValues);
 
@@ -295,21 +295,21 @@ namespace MarionUpload.ViewModels
             //account.PropID= get this from a mapping of Marion LeaseNumber to Wag tblProperty.PropId for Mineral Properties
             //account.PropID= get this from a mapping of Marion OwnerNumber and LeaseNumber to Wag tblProperty.PropId for Non-Mineral Properties
 
-            account.NameID = vmOwner.MarionOwnerNumberToNameIdMap[_marionAccount.OwnerNumber];
+            account.NameID = (int)vmOwner.MarionOwnerNumberToNameIdMap[_marionAccount.OwnerNumber];
 
             account.SeqNmbr = _marionAccount.AccountNumber.ToString() + "|" + _marionAccount.AccountSequence.ToString();
 
             if (_marionAccount.SPTBCode == "G1 " || _marionAccount.SPTBCode == "XV ")
             {
                 if (vmProperty.MineralPropertyIdMap.ContainsKey(_marionAccount.LeaseNumber))
-                    account.PropID = vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
+                    account.PropID = (int)vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
             }
             else
             {
                 Tuple<int, int> acctTuple = new Tuple<int, int>(_marionAccount.OwnerNumber, _marionAccount.LeaseNumber);
 
                 if (vmProperty.PersonalPropertyIdMap.ContainsKey(acctTuple))
-                    account.PropID = vmProperty.PersonalPropertyIdMap[acctTuple];
+                    account.PropID = (int)vmProperty.PersonalPropertyIdMap[acctTuple];
             }
 
             account.Stat_YN = true;
@@ -328,15 +328,15 @@ namespace MarionUpload.ViewModels
             if (account.PTDcode == "G1" || account.PTDcode == "XV")
             {
                 if (vmProperty.MineralPropertyIdMap.ContainsKey(_marionAccount.LeaseNumber))
-                    account.PropID = vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
+                    account.PropID = (int)vmProperty.MineralPropertyIdMap[_marionAccount.LeaseNumber];
             }
             else
             {
                 Tuple<int, int> keyTuple = new Tuple<int, int>(_marionAccount.OwnerNumber, _marionAccount.LeaseNumber);
                 if (vmProperty.PersonalPropertyIdMap.ContainsKey(keyTuple))
-                    account.PropID = vmProperty.PersonalPropertyIdMap[keyTuple];
+                    account.PropID = (int)vmProperty.PersonalPropertyIdMap[keyTuple];
             }
-            account.NameID = vmOwner.NameIdMap[_marionAccount.OwnerNumber];
+            account.NameID = (int)vmOwner.NameIdMap[_marionAccount.OwnerNumber];
 
             if (vmProperty.PropertyLegalMap.ContainsKey((int)account.PropID))
                 account.AcctLegal = vmProperty.PropertyLegalMap[(int)account.PropID];

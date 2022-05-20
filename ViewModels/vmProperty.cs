@@ -267,10 +267,10 @@ namespace MarionUpload.ViewModels
             oppSegment.PrsnlStatWhy = "conversion";
             oppSegment.PrsnlStat_YN = true;
 
-            oppSegment.PrsnlUnitCount = 1.0;
+            oppSegment.PrsnlUnitCount = 1.0d;
             oppSegment.PrsnlUnitModifier = 1.0d;
             oppSegment.PrsnlUtilPct = 1.0d;
-            oppSegment.PrsnlApprMethod = "Flat value";
+            oppSegment.PrsnlApprMethod = "Schedule";
 
             oppSegment.PrsnlPtdPropClass = property.PtdClass;
             oppSegment.EqptClassID = 136;//inventory

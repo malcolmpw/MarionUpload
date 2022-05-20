@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Dapper.Contrib;
 using Dapper.Contrib.Extensions;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -23,6 +24,7 @@ using MiniExcelLibs.Csv;
 using System.IO;
 using System.Globalization;
 using CsvHelper;
+using System.Text.RegularExpressions;
 
 namespace MarionUpload.ViewModels
 {
@@ -53,6 +55,9 @@ namespace MarionUpload.ViewModels
         public ICommand CommandStartExportWizard => new RelayCommand(OnStartExportWizard);
 
         public ObservableCollection<mMarionExport> MarionExportRows { get; set; }
+        public ObservableCollection<mMarionImportRetrieve> MarionImportRowsRetrieve { get; set; }       
+        public static IDictionary<Tuple<int, int, int>, mMarionImportRetrieve> MarionImportRetrieveMap { get; private set; }
+
         //public ObservableCollection<mAccount> tblAccountRows { get; set; }
         //public ObservableCollection<mCadAccount> tblCadAccountRows { get; set; }
         //public ObservableCollection<mOwner> tblNameRows { get; set; }
@@ -73,26 +78,50 @@ namespace MarionUpload.ViewModels
 
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
             {
-                //create an empty collection of type AbMarionImport table that will later be saved as the export file
+                //import AbMarionImport to create a dictionary to retrieve matching data not imported originally
+                //where key value tuple is Geo-Ref (i.e. OwnerNumber, InterestType and LeaseNumber) and 
+                //values are from matching import row
+                //specifically: importID,AccountNumber,AccountSequenceNumber,Description1,Description2
+               
+                MarionImportRowsRetrieve = new ObservableCollection<mMarionImportRetrieve>();
+                MarionImportRetrieveMap = new Dictionary<Tuple<int, int, int>, mMarionImportRetrieve>();
+
+                var importSqlString = 
+                    $"Select ImportID,Job,AccountNumber,AccountSequence,OwnerNumber,LeaseNumber," +
+                    $"InterestType,Description1,Description2 from AbMarionImport";
+                var importRows = db.Query<mMarionImportRetrieve>(importSqlString).ToList();
+                MarionImportRowsRetrieve = new ObservableCollection<mMarionImportRetrieve>(importRows);
+                foreach (mMarionImportRetrieve importRow in importRows)
+                {
+                    Tuple<int, int, int> keyTuple = new Tuple<int, int, int>
+                        (importRow.OwnerNumber, importRow.InterestType, importRow.LeaseNumber);
+                    if (!MarionImportRetrieveMap.ContainsKey(keyTuple))
+                    {
+                        MarionImportRetrieveMap.Add(keyTuple, importRow);
+                    }
+                }
+
+                //create an empty collection of type AbMarionExport  table that will later be saved as the export file
                 MarionExportRows = new ObservableCollection<mMarionExport>();
                 //public static IDictionary<int, long> AccountToMap { get; private set; } = new Dictionary<int, long>();
 
 
-        //tblAccountRows = new ObservableCollection<mAccount>();
-        //tblCadAccountRows = new ObservableCollection<mCadAccount>();
+                //tblAccountRows = new ObservableCollection<mAccount>();
+                //tblCadAccountRows = new ObservableCollection<mCadAccount>();
 
-        //tblNameRows = new ObservableCollection<mOwner>();
-        //tblCadOwnerRows = new ObservableCollection<mCadOwner>();
+                //tblNameRows = new ObservableCollection<mOwner>();
+                //tblCadOwnerRows = new ObservableCollection<mCadOwner>();
 
-        //tblPropertyRows = new ObservableCollection<mProperty>();
-        //tblCadPropertyRows = new ObservableCollection<mCadProperty>();
+                //tblPropertyRows = new ObservableCollection<mProperty>();
+                //tblCadPropertyRows = new ObservableCollection<mCadProperty>();
 
-        //tblTractRows = new ObservableCollection<mTract>();
-        //tblLeaseRows = new ObservableCollection<mLease>();
-        //tblCadLeaseRows = new ObservableCollection<mCadLease>();
+                //tblTractRows = new ObservableCollection<mTract>();
+                //tblLeaseRows = new ObservableCollection<mLease>();
+                //tblCadLeaseRows = new ObservableCollection<mCadLease>();
 
-        //import tblAccount where Cad='MAR'
-        var acctSqlString = $"select * from tblAccount a where a.Cad='MAR' ";
+                //import tblAccount where Cad='MAR'
+                var acctSqlString = $"select AcctID,AcctLegal,SeqNmbr,PctType,PctProp,Protest_YN,PTDcode,NameID,PropID,Cad,Stat_YN," +
+                    $"UpdateBy,UpdateDate,ValAcctCur,ValAcctCrt,valacctPrYr,AcctValPrYr from tblAccount a where a.Cad='MAR' ";
                 var accountRows = db.Query<mAccount>(acctSqlString);
 
                 foreach (mAccount accountRow in accountRows)
@@ -164,6 +193,7 @@ namespace MarionUpload.ViewModels
                             marionExportRow.YearLeaseStarted = ProdDateFirst.Year;
 
                             var wellRrc = cadLeaseRow.CadLeaseId;
+                            wellRrc = Regex.Replace(wellRrc, @"[^\d]", "");
                             marionExportRow.RRC = "RRC #  " + int.Parse(wellRrc).ToString();
                         }
                     }
@@ -280,8 +310,8 @@ namespace MarionUpload.ViewModels
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
                 {
                     agentCadOwnerID = db.ExecuteScalar($"SELECT TOP 1 CadOwnerID FROM tblCadOwners where NameID = '{agentKey}'") as string;
-                }
-                marionExportRow.AgentNumber = int.Parse(agentCadOwnerID);        //need to get this. how??
+                }                
+                marionExportRow.AgentNumber = agentCadOwnerID==null?0:int.Parse(agentCadOwnerID);        //need to get this. how??
             }
             else
             {
@@ -314,24 +344,24 @@ namespace MarionUpload.ViewModels
             //var marionExportRow = new mMarionExport();
 
 
-            //          don't forget to reverse:
-            //          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
-            int acctNum;
-            bool res = int.TryParse(accountRow.SeqNmbr, out acctNum);
-            marionExportRow.AccountNumber = res ? acctNum : 0;
+            ////          don't forget to reverse:
+            ////          account.SeqNmbr = _marionAccount.AccountNumber.ToString() + " | " + _marionAccount.AccountSequence.ToString();
+            //int acctNum;
+            //bool res = int.TryParse(accountRow.SeqNmbr, out acctNum);
+            //marionExportRow.AccountNumber = res ? acctNum : 0;
 
-            var dividerIndex = accountRow.SeqNmbr.IndexOf("|");
-            string acctNmbrPart = accountRow.SeqNmbr.Substring(0, dividerIndex);
-            string acctSeqPart = accountRow.SeqNmbr.Substring(dividerIndex);
+            //var dividerIndex = accountRow.SeqNmbr.IndexOf("|");
+            //string acctNmbrPart = accountRow.SeqNmbr.Substring(0, dividerIndex);
+            //string acctSeqPart = accountRow.SeqNmbr.Substring(dividerIndex);
 
-            int acctNumbr; int acctSeq;
-            bool res1 = int.TryParse(acctNmbrPart, out acctNumbr);
-            bool res2 = int.TryParse(acctSeqPart, out acctSeq);
-            //public int AccountNumber { get; set; }               //668,674 S 7    MINERAL ACCOUNT NUMBER      //tblAccount.SeqNmbr
-            marionExportRow.AccountNumber = res1 ? acctNumbr : 0;
-            //public int AccountSequence { get; set; }             //675,681 S 7    MINERAL ACCOUNT SEQUENCE #  //tblAccount.SeqNmbr
-            marionExportRow.AccountSequence = res2 ? acctSeq : 0; ;
-            //******************************************
+            //int acctNumbr; int acctSeq;
+            //bool res1 = int.TryParse(acctNmbrPart, out acctNumbr);
+            //bool res2 = int.TryParse(acctSeqPart, out acctSeq);
+            ////public int AccountNumber { get; set; }               //668,674 S 7    MINERAL ACCOUNT NUMBER      //tblAccount.SeqNmbr
+            //marionExportRow.AccountNumber = res1 ? acctNumbr : 0;
+            ////public int AccountSequence { get; set; }             //675,681 S 7    MINERAL ACCOUNT SEQUENCE #  //tblAccount.SeqNmbr
+            //marionExportRow.AccountSequence = res2 ? acctSeq : 0; ;
+            ////******************************************
 
 
             marionExportRow.CurrentTaxYear = 2022;

@@ -7,14 +7,14 @@
         public int ImportID { get; set; }
         public string Job { get; set; }                      //2 
         public int CurrentTaxYear { get; set; }              //9 
-        public char RenderedCode { get; set; }               //14
-        public char PropertyType { get; set; }               //16
-        public char InterestType { get; set; }               //17
+        public string RenderedCode { get; set; }               //14
+        public string PropertyType { get; set; }               //16
+        public int InterestType { get; set; }               //17
         public int YearLeaseStarted { get; set; }            //18
-        public char Protest { get; set; }                    //22
+        public string Protest { get; set; }                    //22
         public string SPTBCode { get; set; }                 //23 3char        
         public string AgentNumber { get; set; }              //26           
-        public char SortCode { get; set; }                   //29
+        public string SortCode { get; set; }                   //29
         public string DecimalInterest { get; set; }          //34 7
         public string LeaseName { get; set; }                //41 (DESC 3) IF TYPE = 2,3 30 A
         public string OperatorName { get; set; }             //71 90 OPER NAME(DESC 4) 20 A

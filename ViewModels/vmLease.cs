@@ -259,15 +259,15 @@ namespace MarionUpload.ViewModels
             db.Insert<mTract>(populatedTract);
         }
 
-        private static void UpdateRrcOperId(IDbConnection db, string rrcOperId, string formattedRRC, long primaryLeaseKey)
-        {
-            // after getting the primaryLeaseKey update tblWell with the matching 
-            if (!string.IsNullOrEmpty(rrcOperId))
-            {
-                string sql = $"UPDATE tblWell SET LeaseID = @LeaseID WHERE RrcLease = @rrc;";
-                int rowsAffected = db.Execute(sql, new { rrc = formattedRRC, LeaseID = primaryLeaseKey });
-            }
-        }
+        //private static void UpdateRrcOperId(IDbConnection db, string rrcOperId, string formattedRRC, long primaryLeaseKey)
+        //{
+        //    // after getting the primaryLeaseKey update tblWell with the matching 
+        //    if (!string.IsNullOrEmpty(rrcOperId))
+        //    {
+        //        string sql = $"UPDATE tblWell SET LeaseID = @LeaseID WHERE RrcLease = @rrc;";
+        //        int rowsAffected = db.Execute(sql, new { rrc = formattedRRC, LeaseID = primaryLeaseKey });
+        //    }
+        //}
 
         private void InsertLease(IDbConnection db, mMarionLease marionLease, out string rrcOperId, out string formattedRRC, out long primaryLeaseKey)
         {
@@ -283,7 +283,7 @@ namespace MarionUpload.ViewModels
                     populatedLease.LeaseOprID = (int)vmAgentAndOperator.CrwOperRrcIDToNameIdMap[crwRrcOperId];
             }
 
-            var lpdLeaseName = db.ExecuteScalar($"SELECT TOP 1 LpdLeaseName FROM tblWell where RrcLease = '{formattedRRC}'") as string;
+            var lpdLeaseName = db.ExecuteScalar($"SELECT TOP 1 LpdLeaseName FROM tblWell where RrcDist = '06' and RrcLease = '{formattedRRC}'") as string;
             populatedLease.LeaseNameOpr = lpdLeaseName;
 
             primaryLeaseKey = db.Insert<mLease>(populatedLease);
