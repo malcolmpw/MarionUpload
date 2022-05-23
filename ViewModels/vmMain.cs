@@ -106,7 +106,7 @@ namespace MarionUpload.ViewModels
 
         private void ExportMarionTableIntoCSV()
         {
-            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase6.csv");
+            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase7.csv");
             var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
@@ -214,6 +214,15 @@ namespace MarionUpload.ViewModels
                         //what about tlkpCadUnit??
                     }
 
+                    string marketValue = accountRow.ValAcctCur.ToString("F0");
+                    marionExportRow.Juris1MarketValue = marketValue;  // jurisdiction 1 is always 00
+                    index = 1;
+                    foreach (var nextJurisdiction in sortedPropertyJurisdictions)
+                    {
+                        index++;
+                        marionExportRow = TranslateJurisdictionMarketValueToMarionExportRow(nextJurisdiction, marionExportRow, index, marketValue);
+                    }
+
 
                     if (propertyRow.PtdClassSub.Trim() == "G1" || propertyRow.PtdClassSub.Trim() == "XV")
                     {
@@ -278,6 +287,18 @@ namespace MarionUpload.ViewModels
             PropertyInfo prop = type.GetProperty($"Jurisdiction{index}");
 
             prop.SetValue(marionExportRow, nextJurisdiction.CadUnitIDText.PadLeft(2, '0'), null);
+
+            return marionExportRow;
+
+        }
+
+        private mMarionExport TranslateJurisdictionMarketValueToMarionExportRow(mMarionJurisdiction nextJurisdiction, mMarionExport marionExportRow, int index, string marketValue)
+        {
+            Type type = marionExportRow.GetType();
+
+            PropertyInfo prop = type.GetProperty($"Juris{index}MarketValue");
+
+            prop.SetValue(marionExportRow, marketValue, null);
 
             return marionExportRow;
 
