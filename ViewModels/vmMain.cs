@@ -25,6 +25,7 @@ using System.IO;
 using System.Globalization;
 using CsvHelper;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace MarionUpload.ViewModels
 {
@@ -55,7 +56,7 @@ namespace MarionUpload.ViewModels
         public ICommand CommandStartExportWizard => new RelayCommand(OnStartExportWizard);
 
         public ObservableCollection<mMarionExport> MarionExportRows { get; set; }
-        public ObservableCollection<mMarionImportRetrieve> MarionImportRowsRetrieve { get; set; }       
+        public ObservableCollection<mMarionImportRetrieve> MarionImportRowsRetrieve { get; set; }
         public static IDictionary<Tuple<int, int, int>, mMarionImportRetrieve> MarionImportRetrieveMap { get; private set; }
 
         //public ObservableCollection<mAccount> tblAccountRows { get; set; }
@@ -71,9 +72,41 @@ namespace MarionUpload.ViewModels
         //public string ConversionRules;
         //public 
 
+        BackgroundWorker _worker = new BackgroundWorker();
+        private int progressOfExport;
+
         private void OnStartExportWizard()
         {
-            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase.csv");
+            SetupBackgroundWorker();
+        }
+
+        private void SetupBackgroundWorker()
+        {
+            _worker.WorkerReportsProgress = true;
+            _worker.ProgressChanged += _worker_ProgressChanged;
+            _worker.RunWorkerCompleted += _worker_RunWorkerCompleted;
+            _worker.DoWork += _worker_DoWork;
+            _worker.RunWorkerAsync();
+        }
+
+        private void _worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            ExportMarionTableIntoCSV();
+        }
+
+        private void _worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show("Marion Export Completed");
+        }
+
+        private void _worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            ProgressOfExport = e.ProgressPercentage;
+        }
+
+        private void ExportMarionTableIntoCSV()
+        {
+            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase6.csv");
             var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
@@ -82,11 +115,11 @@ namespace MarionUpload.ViewModels
                 //where key value tuple is Geo-Ref (i.e. OwnerNumber, InterestType and LeaseNumber) and 
                 //values are from matching import row
                 //specifically: importID,AccountNumber,AccountSequenceNumber,Description1,Description2
-               
+
                 MarionImportRowsRetrieve = new ObservableCollection<mMarionImportRetrieve>();
                 MarionImportRetrieveMap = new Dictionary<Tuple<int, int, int>, mMarionImportRetrieve>();
 
-                var importSqlString = 
+                var importSqlString =
                     $"Select ImportID,Job,AccountNumber,AccountSequence,OwnerNumber,LeaseNumber," +
                     $"InterestType,Description1,Description2 from AbMarionImport";
                 var importRows = db.Query<mMarionImportRetrieve>(importSqlString).ToList();
@@ -124,8 +157,17 @@ namespace MarionUpload.ViewModels
                     $"UpdateBy,UpdateDate,ValAcctCur,ValAcctCrt,valacctPrYr,AcctValPrYr from tblAccount a where a.Cad='MAR' ";
                 var accountRows = db.Query<mAccount>(acctSqlString);
 
+                int numberOfRowsProcessed = 0;
+                int totalNumberOfRows = accountRows.Count();
                 foreach (mAccount accountRow in accountRows)
                 {
+                    numberOfRowsProcessed++;
+                    if (numberOfRowsProcessed % 100 == 0)
+                    {
+                        double percentComplete = ((float)numberOfRowsProcessed / (float)totalNumberOfRows) * 100.0;
+                        _worker.ReportProgress((int)percentComplete);
+                    }
+
                     var marionExportRow = new mMarionExport();
                     marionExportRow = TranslateAccountRowToMarionExportRow(accountRow, marionExportRow);
 
@@ -158,12 +200,19 @@ namespace MarionUpload.ViewModels
                     //import tblUnitProperty where Cad='MAR'
                     //var unitPropertySqlString = $"select * from tblUnitProperty where PropID={accountRow.PropID}";
                     //var unitPropertyRows = db.Query<mUnitProperty>(unitPropertySqlString);
-                    //
-                    //foreach (mUnitProperty unitPropertyRow in unitPropertyRows)
-                    //{
-                    //    marionExportRow  = TranslateUnitPropertyRowToMarionExportRow(unitPropertyRow);                       
-                    //    //what about tlkpCadUnit??
-                    //}
+
+                    var jurisdictionSqlString = $"select * from MarionJurisdictionView where PropID={accountRow.PropID}";
+                    var propertyJurisdictionList = db.Query<mMarionJurisdiction>(jurisdictionSqlString).ToList();
+                    var sortedPropertyJurisdictions = propertyJurisdictionList.OrderBy(j => j.CadUnitIDText);
+
+                    int index = 1;
+                    marionExportRow.Jurisdiction1 = "00";  // jurisdiction 1 is always 00
+                    foreach (var nextJurisdiction in sortedPropertyJurisdictions)
+                    {
+                        index++;
+                        marionExportRow = TranslateUnitPropertyRowToMarionExportRow(nextJurisdiction, marionExportRow, index);
+                        //what about tlkpCadUnit??
+                    }
 
 
                     if (propertyRow.PtdClassSub.Trim() == "G1" || propertyRow.PtdClassSub.Trim() == "XV")
@@ -197,6 +246,19 @@ namespace MarionUpload.ViewModels
                             marionExportRow.RRC = "RRC #  " + int.Parse(wellRrc).ToString();
                         }
                     }
+
+                    // add back in to export data retrieved from MarionImportRetrieve (the original import table)
+                    Tuple<int, int, int> keyTuple = new Tuple<int, int, int>
+                        ((int)marionExportRow.OwnerNumber, (int)marionExportRow.InterestType, (int)marionExportRow.LeaseNumber);
+                    if (MarionImportRetrieveMap.ContainsKey(keyTuple))
+                    {
+                        marionExportRow.AccountNumber = MarionImportRetrieveMap[keyTuple].AccountNumber;
+                        marionExportRow.AccountSequence = MarionImportRetrieveMap[keyTuple].AccountSequence;
+                        marionExportRow.Description1 = MarionImportRetrieveMap[keyTuple].Description1;
+                        marionExportRow.Description2 = MarionImportRetrieveMap[keyTuple].Description2;
+                        marionExportRow.ImportID = MarionImportRetrieveMap[keyTuple].ImportID;
+                        marionExportRow.Job = MarionImportRetrieveMap[keyTuple].Job;
+                    }
                     MarionExportRows.Add(marionExportRow);
                 }
             }
@@ -205,7 +267,20 @@ namespace MarionUpload.ViewModels
             csvWriter.Dispose();
             writer.Dispose();
 
-            MessageBox.Show($"MarionExportCompleted");
+
+        }
+
+        private mMarionExport TranslateUnitPropertyRowToMarionExportRow(mMarionJurisdiction nextJurisdiction, mMarionExport marionExportRow, int index)
+        {
+
+            Type type = marionExportRow.GetType();
+
+            PropertyInfo prop = type.GetProperty($"Jurisdiction{index}");
+
+            prop.SetValue(marionExportRow, nextJurisdiction.CadUnitIDText.PadLeft(2, '0'), null);
+
+            return marionExportRow;
+
         }
 
         private mMarionExport TranslateWellRowToMarionImportRow(DateTime prodDateFirst, mMarionExport marionExportRow)
@@ -310,8 +385,8 @@ namespace MarionUpload.ViewModels
                 using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
                 {
                     agentCadOwnerID = db.ExecuteScalar($"SELECT TOP 1 CadOwnerID FROM tblCadOwners where NameID = '{agentKey}'") as string;
-                }                
-                marionExportRow.AgentNumber = agentCadOwnerID==null?0:int.Parse(agentCadOwnerID);        //need to get this. how??
+                }
+                marionExportRow.AgentNumber = agentCadOwnerID == null ? 0 : int.Parse(agentCadOwnerID);        //need to get this. how??
             }
             else
             {
@@ -429,6 +504,14 @@ namespace MarionUpload.ViewModels
         public bool AccountsEnabled { get => _accountsEnabled; set { _accountsEnabled = value; Raise(nameof(AccountsEnabled)); } }
         public bool UnitsEnabled { get => _unitsEnabled; set { _unitsEnabled = value; Raise(nameof(UnitsEnabled)); } }
         public bool LeasesEnabled { get => _leasesEnabled; set { _leasesEnabled = value; Raise(nameof(LeasesEnabled)); } }
+
+        public int ProgressOfExport { get => progressOfExport; 
+            set  
+            { 
+                progressOfExport = value;
+                Raise(nameof(ProgressOfExport));
+            } 
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
