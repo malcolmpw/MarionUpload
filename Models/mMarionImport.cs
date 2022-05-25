@@ -42,85 +42,115 @@
         public string Jurisdiction11 { get; set; }           //317 318 JURISDICTION 11 2 0 N
         public string Jurisdiction12 { get; set; }
 
+        public string Juris1TaxableValue{ get; set; }
+        public string Juris2TaxableValue{ get; set; }
+        public string Juris3TaxableValue{ get; set; }
+        public string Juris4TaxableValue{ get; set; }
+        public string Juris5TaxableValue{ get; set; }
+        public string Juris6TaxableValue{ get; set; }
+        public string Juris7TaxableValue{ get; set; }
+        public string Juris8TaxableValue{ get; set; }
+        public string Juris9TaxableValue{ get; set; }
+        public string Juris10TaxableValue { get; set; }
+        public string Juris11TaxableValue { get; set; }
+        public string Juris12TaxableValue { get; set; }
+
+        public string Juris1MarketValue{ get; set; }
+        public string Juris2MarketValue{ get; set; }
+        public string Juris3MarketValue{ get; set; }
+        public string Juris4MarketValue{ get; set; }
+        public string Juris5MarketValue{ get; set; }
+        public string Juris6MarketValue{ get; set; }
+        public string Juris7MarketValue{ get; set; }
+        public string Juris8MarketValue{ get; set; }
+        public string Juris9MarketValue{ get; set; }
+        public string Juris10MarketValue { get; set; }
+        public string Juris11MarketValue { get; set; }
+        public string Juris12MarketValue { get; set; }
+
         public float acres { get; set; }
         public int OwnerNumber { get; set; }
         public int LeaseNumber { get; set; }
+        public string AbsoluteExemptionCode { get; set; }
 
-        public string ExemptionMinOwnerFlagJuris1 { get; set; }
-        public string ExemptionMinOwnerFlagJuris2 { get; set; }
-        public string ExemptionMinOwnerFlagJuris3 { get; set; }
-        public string ExemptionMinOwnerFlagJuris4 { get; set; }
-        public string ExemptionMinOwnerFlagJuris5 { get; set; }
-        public string ExemptionMinOwnerFlagJuris6 { get; set; }
-        public string ExemptionMinOwnerFlagJuris7 { get; set; }
-        public string ExemptionMinOwnerFlagJuris8 { get; set; }
-        public string ExemptionMinOwnerFlagJuris9 { get; set; }
-        public string ExemptionMinOwnerFlagJuris10 { get; set; }
-        public string ExemptionMinOwnerFlagJuris11 { get; set; }
-        public string ExemptionMinOwnerFlagJuris12 { get; set; }
+        public string Juris1ExemptionMinOwnerFlag{ get; set; }
+        public string Juris2ExemptionMinOwnerFlag{ get; set; }
+        public string Juris3ExemptionMinOwnerFlag{ get; set; }
+        public string Juris4ExemptionMinOwnerFlag{ get; set; }
+        public string Juris5ExemptionMinOwnerFlag{ get; set; }
+        public string Juris6ExemptionMinOwnerFlag{ get; set; }
+        public string Juris7ExemptionMinOwnerFlag{ get; set; }
+        public string Juris8ExemptionMinOwnerFlag{ get; set; }
+        public string Juris9ExemptionMinOwnerFlag{ get; set; }
+        public string Juris10ExemptionMinOwnerFlag { get; set; }
+        public string Juris11ExemptionMinOwnerFlag { get; set; }
+        public string Juris12ExemptionMinOwnerFlag { get; set; }
 
         public string CustomerGeo { get; set; }
+        public string TnrccValuePollutionControl { get; set; }
 
-        public string PnAMinOwnerFlagJuris1 { get; set; }
-        public string PnAMinOwnerFlagJuris2 { get; set; }
-        public string PnAMinOwnerFlagJuris3 { get; set; }
-        public string PnAMinOwnerFlagJuris4 { get; set; }
-        public string PnAMinOwnerFlagJuris5 { get; set; }
-        public string PnAMinOwnerFlagJuris6 { get; set; }
-        public string PnAMinOwnerFlagJuris7 { get; set; }
-        public string PnAMinOwnerFlagJuris8 { get; set; }
-        public string PnAMinOwnerFlagJuris9 { get; set; }
-        public string PnAMinOwnerFlagJuris10 { get; set; }
-        public string PnAMinOwnerFlagJuris11 { get; set; }
-        public string PnAMinOwnerFlagJuris12 { get; set; }
+        public string Juris1PnAMinimumOwnerFlag { get; set; }
+        public string Juris2PnAMinimumOwnerFlag { get; set; }
+        public string Juris3PnAMinimumOwnerFlag { get; set; }
+        public string Juris4PnAMinimumOwnerFlag { get; set; }
+        public string Juris5PnAMinimumOwnerFlag { get; set; }
+        public string Juris6PnAMinimumOwnerFlag { get; set; }
+        public string Juris7PnAMinimumOwnerFlag { get; set; }
+        public string Juris8PnAMinimumOwnerFlag { get; set; }
+        public string Juris9PnAMinimumOwnerFlag { get; set; }
+        public string Juris10PnAMinimumOwnerFlag { get; set; }
+        public string Juris11PnAMinimumOwnerFlag { get; set; }
+        public string Juris12PnAMinimumOwnerFlag { get; set; }
 
         public int MineralAccountNumber { get; set; }
         public int MineralAccountSequence { get; set; }
         public int PreviousMineralAccountSequence { get; set; }
         public int PreviousMineralAccount { get; set; }
+        public string PrivacyCode { get; set; }
+        public string ComplianceCode { get; set; }
 
-        public string TaxableValueNewJuris1 { get; set; }
-        public string TaxableValueNewJuris2 { get; set; }
-        public string TaxableValueNewJuris3 { get; set; }
-        public string TaxableValueNewJuris4 { get; set; }
-        public string TaxableValueNewJuris5 { get; set; }
-        public string TaxableValueNewJuris6 { get; set; }
-        public string TaxableValueNewJuris7 { get; set; }
-        public string TaxableValueNewJuris8 { get; set; }
-        public string TaxableValueNewJuris9 { get; set; }
-        public string TaxableValueNewJuris10 { get; set; }
-        public string TaxableValueNewJuris11 { get; set; }
-        public string TaxableValueNewJuris12 { get; set; }
+        public string Juris1NewTaxableValue { get; set; }
+        public string Juris2NewTaxableValue { get; set; }
+        public string Juris3NewTaxableValue { get; set; }
+        public string Juris4NewTaxableValue { get; set; }
+        public string Juris5NewTaxableValue { get; set; }
+        public string Juris6NewTaxableValue { get; set; }
+        public string Juris7NewTaxableValue { get; set; }
+        public string Juris8NewTaxableValue { get; set; }
+        public string Juris9NewTaxableValue { get; set; }
+        public string Juris10NewTaxableValue { get; set; }
+        public string Juris11NewTaxableValue { get; set; }
+        public string Juris12NewTaxableValue { get; set; }       
 
-        public decimal Abt1NewAbtValue { get; set; }
-        public decimal Abt2NewAbtValue { get; set; }
-        public decimal Abt3NewAbtValue { get; set; }
-        public decimal Abt4NewAbtValue { get; set; }
-        public decimal Abt5NewAbtValue { get; set; }
-        public decimal Abt6NewAbtValue { get; set; }
-        public decimal Abt7NewAbtValue { get; set; }
-        public decimal Abt8NewAbtValue { get; set; }
-        public decimal Abt9NewAbtValue { get; set; }
-        public decimal Abt10NewAbtValue { get; set; }
-        public decimal Abt11NewAbtValue { get; set; }
-        public decimal Abt12NewAbtValue { get; set; }
+        public decimal Juris1NewAbtAbtValue { get; set; }
+        public decimal Juris2NewAbtAbtValue { get; set; }
+        public decimal Juris3NewAbtAbtValue { get; set; }
+        public decimal Juris4NewAbtAbtValue { get; set; }
+        public decimal Juris5NewAbtAbtValue { get; set; }
+        public decimal Juris6NewAbtAbtValue { get; set; }
+        public decimal Juris7NewAbtAbtValue { get; set; }
+        public decimal Juris8NewAbtAbtValue { get; set; }
+        public decimal Juris9NewAbtAbtValue { get; set; }
+        public decimal Juris10NewAbtAbtValue { get; set; }
+        public decimal Juris11NewAbtAbtValue { get; set; }
+        public decimal Juris12NewAbtAbtValue { get; set; }
 
         public string NewTCEQflag { get; set; }
 
-        public decimal NewExemptValueJuris1 { get; set; }
-        public decimal NewExemptValueJuris2 { get; set; }
-        public decimal NewExemptValueJuris3 { get; set; }
-        public decimal NewExemptValueJuris4 { get; set; }
-        public decimal NewExemptValueJuris5 { get; set; }
-        public decimal NewExemptValueJuris6 { get; set; }
-        public decimal NewExemptValueJuris7 { get; set; }
-        public decimal NewExemptValueJuris8 { get; set; }
-        public decimal NewExemptValueJuris9 { get; set; }
-        public decimal NewExemptValueJuris10 { get; set; }
-        public decimal NewExemptValueJuris11 { get; set; }
-        public decimal NewExemptValueJuris12 { get; set; }
+        public decimal Juris1NewExemptValue { get; set; }
+        public decimal Juris2NewExemptValue { get; set; }
+        public decimal Juris3NewExemptValue { get; set; }
+        public decimal Juris4NewExemptValue { get; set; }
+        public decimal Juris5NewExemptValue { get; set; }
+        public decimal Juris6NewExemptValue { get; set; }
+        public decimal Juris7NewExemptValue { get; set; }
+        public decimal Juris8NewExemptValue { get; set; }
+        public decimal Juris9NewExemptValue { get; set; }
+        public decimal Juris10NewExemptValue { get; set; }
+        public decimal Juris11NewExemptValue { get; set; }
+        public decimal Juris12NewExemptValue { get; set; }
 
-        public decimal NewImprovementNumber { get; set; }
+        public decimal NewImprovementPercent { get; set; }
 
     }
 }

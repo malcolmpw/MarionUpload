@@ -173,6 +173,7 @@
     <Compile Include="Models\mTract.cs" />
     <Compile Include="Models\mSegment.cs" />
     <Compile Include="Models\mMarionWellOperatorID.cs" />
+    <Compile Include="Models\mUnitPct.cs" />
     <Compile Include="Models\mWellOperatorData.cs" />
     <Compile Include="Interfaces\IMarionWithRRC.cs" />
     <Compile Include="Models\mWellOperatorID.cs" />

@@ -15,7 +15,7 @@
 
         // tblAccount
         public decimal? DecimalInterest { get; set; }        //34,40  N,76    DECIMAL INTEREST  //tblAccount.PctProp
-        public int? InterestType { get; set; }               //17,17  N,10    INTEREST TYPE     //tblAccount.PctType
+        public int InterestType { get; set; }               //17,17  N,10    INTEREST TYPE     //tblAccount.PctType
         public string PropertyType { get; set; }             //16,16   A,1    TYPE PROPERTY     //tblAccount.PropType
         public string Protest { get; set; }                  //22,22  A,1     PROTEST=P         //tblAccount.Protest_YN
         public int? AccountNumber { get; set; }              //668,674 S 7    MINERAL ACCOUNT NUMBER      //tblAccount.SeqNmbr
@@ -33,13 +33,13 @@
         public string StreetAddress { get; set; }            //211,240 A,30  STREET ADDRESS     //tblName.Mail1
         public string CityStateZip { get; set; }             //241,270 A,30  CITY,ST,ZIP CDE OR OUT COUNTRY
                                                                                                 //tblName.MailCi,MailSt,MailZip
-        public int? OwnerNumber { get; set; }                //594,600 N,7,0 OWNER NUMBER       //tblCadOwners.CadOwnerID
+        public int OwnerNumber { get; set; }                //594,600 N,7,0 OWNER NUMBER       //tblCadOwners.CadOwnerID
         public int? AgentNumber { get; set; }                //26,28   N,3,0 AGENT NUMBER       //tblCadOwners.CadOwnerID           
 
         // tblLease
         public string LeaseName { get; set; }                //41,70   A,30  LEASE NAME(DESC 3) IF TYPE=2,3
                                                                                                 //tblLease.LeaseNameWag                                                                                                
-        public int? LeaseNumber { get; set; }                //601,607 N,7,0 LEASE NUMBER       //tblCadLease.CadLeaseID
+        public int LeaseNumber { get; set; }                //601,607 N,7,0 LEASE NUMBER       //tblCadLease.CadLeaseID
                                                                                                 //tblCadProperty.CadPropID
         public string OperatorName { get; set; }             //71,90   A,20  OPER NAME(DESC 4)  //tblName.NameSortCad 
 
@@ -120,18 +120,18 @@
         public string ExemptionMinOwnerFlagJuris11 { get; set; }
         public string ExemptionMinOwnerFlagJuris12 { get; set; }        
 
-        public string PnAMinOwnerFlagJuris1 { get; set; }
-        public string PnAMinOwnerFlagJuris2 { get; set; }
-        public string PnAMinOwnerFlagJuris3 { get; set; }
-        public string PnAMinOwnerFlagJuris4 { get; set; }
-        public string PnAMinOwnerFlagJuris5 { get; set; }
-        public string PnAMinOwnerFlagJuris6 { get; set; }
-        public string PnAMinOwnerFlagJuris7 { get; set; }
-        public string PnAMinOwnerFlagJuris8 { get; set; }
-        public string PnAMinOwnerFlagJuris9 { get; set; }
-        public string PnAMinOwnerFlagJuris10 { get; set; }
-        public string PnAMinOwnerFlagJuris11 { get; set; }
-        public string PnAMinOwnerFlagJuris12 { get; set; }
+        public string PnAMinimumOwnerFlagJuris1 { get; set; }
+        public string PnAMinimumOwnerFlagJuris2 { get; set; }
+        public string PnAMinimumOwnerFlagJuris3 { get; set; }
+        public string PnAMinimumOwnerFlagJuris4 { get; set; }
+        public string PnAMinimumOwnerFlagJuris5 { get; set; }
+        public string PnAMinimumOwnerFlagJuris6 { get; set; }
+        public string PnAMinimumOwnerFlagJuris7 { get; set; }
+        public string PnAMinimumOwnerFlagJuris8 { get; set; }
+        public string PnAMinimumOwnerFlagJuris9 { get; set; }
+        public string PnAMinimumOwnerFlagJuris10 { get; set; }
+        public string PnAMinimumOwnerFlagJuris11 { get; set; }
+        public string PnAMinimumOwnerFlagJuris12 { get; set; }
 
         public string TaxableValueNewJuris1 { get; set; }
         public string TaxableValueNewJuris2 { get; set; }
