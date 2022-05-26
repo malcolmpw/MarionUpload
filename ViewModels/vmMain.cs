@@ -108,7 +108,7 @@ namespace MarionUpload.ViewModels
 
         private void ExportMarionTableIntoCSV()
         {
-            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase12.csv");
+            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase01.csv");
             var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
