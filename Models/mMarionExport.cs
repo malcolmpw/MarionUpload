@@ -6,7 +6,7 @@
 
         // miscellaneous
         public int? ImportID { get; set; }                                                       //ignore
-        public int? Job { get; set; }                        //2,8    N,7,0   JOB NUMBER        //ignore        
+        public string Job { get; set; }                        //2,8    N,7,0   JOB NUMBER        //ignore        
         public char? RenderedCode { get; set; }              //14,14  A 1     RENDERED CODE     //ignore
         public string SortCode { get; set; }                 //29,29  A 1     SORT CODE         //ignore
 

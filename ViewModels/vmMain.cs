@@ -58,7 +58,6 @@ namespace MarionUpload.ViewModels
         public ObservableCollection<mMarionExport> MarionExportRows { get; set; }
         public ObservableCollection<mMarionImport> MarionImportRows { get; set; }
         public ObservableCollection<mMarionImportRetrieve> MarionImportRowsRetrieve { get; set; }
-        public static IDictionary<Tuple<int, int, int>, mMarionImportRetrieve> MarionImportRetrieveMap { get; private set; }
         public static IDictionary<Tuple<int, int, int>, mMarionImport> MarionImportMap { get; private set; }
 
         //public ObservableCollection<mAccount> tblAccountRows { get; set; }
@@ -108,7 +107,7 @@ namespace MarionUpload.ViewModels
 
         private void ExportMarionTableIntoCSV()
         {
-            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase7.csv");
+            var writer = new StreamWriter(@"C:\Users\malcolm.wardlaw\Desktop\Marion Download\MARION CAD FINAL MINERAL DATA\MarionExportFromDatabase9.csv");
             var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
             using (IDbConnection db = new SqlConnection(ConnectionStringHelper.ConnectionString))
@@ -221,9 +220,9 @@ namespace MarionUpload.ViewModels
                     //var unitPropertySqlString = $"select * from tblUnitProperty where PropID={accountRow.PropID}";
                     //var unitPropertyRows = db.Query<mUnitProperty>(unitPropertySqlString);
 
-                    //var jurisdictionSqlString = $"select * from MarionJurisdictionView where PropID={accountRow.PropID}";
-                    //var propertyJurisdictionList = db.Query<mMarionJurisdiction>(jurisdictionSqlString).ToList();
-                    //var sortedPropertyJurisdictions = propertyJurisdictionList.OrderBy(j => j.CadUnitIDText);
+                    var jurisdictionSqlString = $"select * from MarionJurisdictionView where PropID={accountRow.PropID}";
+                    var propertyJurisdictionList = db.Query<mMarionJurisdiction>(jurisdictionSqlString).ToList();
+                    var sortedPropertyJurisdictions = propertyJurisdictionList.OrderBy(j => j.CadUnitIDText);
 
                     //int index = 1;
                     //marionExportRow.Jurisdiction1 = "00";  // jurisdiction 1 is always 00
@@ -247,144 +246,55 @@ namespace MarionUpload.ViewModels
                     //BUILD KEY TO GET IMPORT ROW FROM DICTIONARY
                     Tuple<int, int, int> keyTuple3 = new Tuple<int, int, int>
                     (marionExportRow.OwnerNumber, marionExportRow.InterestType, marionExportRow.LeaseNumber);
-
-                    var marionImportRow = MarionImportMap[keyTuple3];
-                    var marionJurisdictions = new List<mUnitPct>()
+                    mMarionImport marionImportRow = null;
+                    if (!MarionImportMap.ContainsKey(keyTuple3))
                     {
-                        new mUnitPct()
-                        {
-                            ColumnName="Jurisdiction1",
-                            JurisdictionID= marionImportRow.Jurisdiction1,
-                            MarketValueString=marionImportRow.Juris1MarketValue,
-                            MarketValueFloat=float.Parse(marionImportRow.Juris1MarketValue),
-                            UnitPct=0
-                        },
-                        new mUnitPct()
-                        {
-                            ColumnName="Jurisdiction2",
-                            JurisdictionID= marionImportRow.Jurisdiction2,
-                            MarketValueString=marionImportRow.Juris2MarketValue,
-                            MarketValueFloat=float.Parse(marionImportRow.Juris2MarketValue),
-                            UnitPct=0
-                        },
-                        new mUnitPct()
-                        {
-                            ColumnName="Jurisdiction3",
-                            JurisdictionID= marionImportRow.Jurisdiction3,
-                            MarketValueString=marionImportRow.Juris3MarketValue,
-                            MarketValueFloat=float.Parse(marionImportRow.Juris3MarketValue),
-                            UnitPct=0
-                        },
-                        new mUnitPct()
-                        {
-                            ColumnName="Jurisdiction4",
-                            JurisdictionID= marionImportRow.Jurisdiction4,
-                            MarketValueString=marionImportRow.Juris4MarketValue,
-                            MarketValueFloat=float.Parse(marionImportRow.Juris4MarketValue),
-                            UnitPct=0
-                        },
-                        new mUnitPct()
-                        {
-                            ColumnName="Jurisdiction5",
-                            JurisdictionID= marionImportRow.Jurisdiction5,
-                            MarketValueString=marionImportRow.Juris5MarketValue,
-                            MarketValueFloat=float.Parse(marionImportRow.Juris5MarketValue),
-                            UnitPct=0
-                        },
-                        new mUnitPct()
-                        {
-                            ColumnName="Jurisdiction6",
-                            JurisdictionID= marionImportRow.Jurisdiction6,
-                            MarketValueString=marionImportRow.Juris6MarketValue,
-                            MarketValueFloat=float.Parse(marionImportRow.Juris6MarketValue),
-                            UnitPct=0
-                        }
-                    };
+                        marionImportRow = ProcessImportRowNotInMarionImport(db, accountRow, sortedPropertyJurisdictions);
+                    }
+                    else
+                    {
+                        marionImportRow = MarionImportMap[keyTuple3];
+                    }
+
+                    List<mUnitPct> marionJurisdictions = CreateMarionImportJurisdictionList(marionImportRow, sortedPropertyJurisdictions.ToList().Count());
 
                     bool isOutOfCountyProperty = false;
                     string outOfCountyJurisdictionColumn = null;
                     float marionMarketValue = 0;
                     float nonMarionMarketValue = 0;
 
-                    foreach (mUnitPct marionJurisdiction in marionJurisdictions)
-                    {
-                        switch (marionJurisdiction.JurisdictionID)
-                        {
-                            case "81":
-                                isOutOfCountyProperty = true; 
-                                outOfCountyJurisdictionColumn = marionJurisdiction.ColumnName;
-                                nonMarionMarketValue = marionJurisdiction.MarketValueFloat;
-                                break;
-                            case "82":
-                                isOutOfCountyProperty = true; 
-                                outOfCountyJurisdictionColumn = marionJurisdiction.ColumnName;
-                                nonMarionMarketValue = marionJurisdiction.MarketValueFloat;
-                                break;
-                            case "83":
-                                isOutOfCountyProperty = true; 
-                                outOfCountyJurisdictionColumn = marionJurisdiction.ColumnName;
-                                nonMarionMarketValue = marionJurisdiction.MarketValueFloat;
-                                break;
-                            default:
-                                isOutOfCountyProperty = false; outOfCountyJurisdictionColumn = null;
-                                marionMarketValue = marionJurisdiction.MarketValueFloat;
-                                break;
-                        }
-                    }
+                    string[] outOfCountyJurisdictions = new string[] { "81", "82", "83" };
+
+                   
+
 
 
                     //IF ISOUTOFCOUNTYPROPERTY IS TRUE THEN CALCULATE UNITPCT
-                    float outOfCountyUnitPct = 0;
-                    float inCountyUnitPct = 0;                    
-                    if (isOutOfCountyProperty)
+                    foreach (mUnitPct marionJurisdiction in marionJurisdictions)
                     {
-                        foreach(mUnitPct marionJurisdiction in marionJurisdictions)
+                     isOutOfCountyProperty = outOfCountyJurisdictions.Contains(marionJurisdiction.JurisdictionID);
+
+                    if (isOutOfCountyProperty)
                         {
-                            if (isOutOfCountyProperty )
-                            {
-                                marionJurisdiction.UnitPct = nonMarionMarketValue / (marionMarketValue + nonMarionMarketValue);                                
-                            }
-                            else
-                            {
-                                marionJurisdiction.UnitPct = marionMarketValue / (marionMarketValue + nonMarionMarketValue);
-                            }
-
-                            var currentJurisdiction = marionJurisdictions.Where(x => x.ColumnName == marionJurisdiction.ColumnName).FirstOrDefault();                          
-                            updateExportRow(currentJurisdiction, marionExportRow,accountRow);
-                            updateTblUnitProperty(marionJurisdiction, marionExportRow, accountRow);
+                            outOfCountyJurisdictionColumn = marionJurisdiction.ColumnName;
+                            nonMarionMarketValue = marionJurisdiction.MarketValueFloat;
+                            marionJurisdiction.UnitPct = nonMarionMarketValue / (marionMarketValue + nonMarionMarketValue);
+                            updateTblUnitProperty(db, marionJurisdiction, marionExportRow, accountRow);
                         }
-                    }
+                        else
+                        {
+                            outOfCountyJurisdictionColumn = null;
+                            marionMarketValue = marionJurisdiction.MarketValueFloat;
+                            marionJurisdiction.UnitPct = marionMarketValue / (marionMarketValue + nonMarionMarketValue);
+                        }
 
-                    //mMarionJurisdiction nonMarionJurisdiction = new mMarionJurisdiction();
-                    //index = 1;
-                    //foreach (mMarionJurisdiction nextJurisdiction in sortedPropertyJurisdictions)
-                    //
-                    //{
-                    //    index++;
-                    //    switch (nextJurisdiction.CadUnitIDText)
-                    //    {
-                    //        case "81":
-                    //            nonMarionJurisdiction = nextJurisdiction;
-                    //            break;
-                    //        case "82":
-                    //            nonMarionJurisdiction = nextJurisdiction;
-                    //            break;
-                    //        case "83":
-                    //            nonMarionJurisdiction = nextJurisdiction;
-                    //            break;
-                    //        default:
-                    //            nonMarionJurisdiction = null;
-                    //            break;
-                    //    }
-                    //    if (nonMarionJurisdiction != null)
-                    //    {
-                    //        var unitPctMarion = 0;
-                    //        var unitPctNonMarion = 0;
-                    //    }
-                    //    //Tuple<int, int, int> keyTuple1 = new Tuple<int, int, int>
-                    //   //(importRow.OwnerNumber, importRow.InterestType, importRow.LeaseNumber);
-                    //   // var 2021MarionImportRow = MarionImportRetrieveMap[KeyTuple1].Description1;
-                    //}
+                        var currentJurisdiction = marionJurisdictions.Where(x => x.ColumnName == marionJurisdiction.ColumnName).FirstOrDefault();
+
+                //        var jur = propertyJurisdictionList.Select((j1,jurIndex) => new { Index = jurIndex, Jurisdiction = j1}).FirstOrDefault(j => j.Jurisdiction.UnitID == currentJurisdiction.JurisdictionID);
+                //        marionExportRow = TranslateUnitPropertyRowToMarionExportRow(jur.Jurisdiction, marionExportRow, jur.Index);
+
+                        updateExportRow(currentJurisdiction, marionExportRow, accountRow);
+                    }                    
 
                     if (propertyRow.PtdClassSub.Trim() == "G1" || propertyRow.PtdClassSub.Trim() == "XV")
                     {
@@ -393,6 +303,7 @@ namespace MarionUpload.ViewModels
                         var tractSqlString = $"select top 1 t.LeasePct,t.LeaseID from tblTract t where t.PropID = {accountRow.PropID}";
                         var tractRow = db.Query<mTract>(tractSqlString).FirstOrDefault();
                         marionExportRow = TranslateTractRowToMarionExportRow(tractRow, marionExportRow);
+                        
 
                         if (tractRow != null)
                         {
@@ -421,14 +332,14 @@ namespace MarionUpload.ViewModels
                     // add back in to export data retrieved from MarionImportRetrieve (the original import table)
                     Tuple<int, int, int> keyTuple = new Tuple<int, int, int>
                         ((int)marionExportRow.OwnerNumber, (int)marionExportRow.InterestType, (int)marionExportRow.LeaseNumber);
-                    if (MarionImportRetrieveMap.ContainsKey(keyTuple))
+                    if (MarionImportMap.ContainsKey(keyTuple))
                     {
-                        marionExportRow.AccountNumber = MarionImportRetrieveMap[keyTuple].AccountNumber;
-                        marionExportRow.AccountSequence = MarionImportRetrieveMap[keyTuple].AccountSequence;
-                        marionExportRow.Description1 = MarionImportRetrieveMap[keyTuple].Description1;
-                        marionExportRow.Description2 = MarionImportRetrieveMap[keyTuple].Description2;
-                        marionExportRow.ImportID = MarionImportRetrieveMap[keyTuple].ImportID;
-                        marionExportRow.Job = MarionImportRetrieveMap[keyTuple].Job;
+                        marionExportRow.AccountNumber = MarionImportMap[keyTuple].MineralAccountNumber;
+                        marionExportRow.AccountSequence = MarionImportMap[keyTuple].MineralAccountSequence;
+                        marionExportRow.Description1 = MarionImportMap[keyTuple].Description1;
+                        marionExportRow.Description2 = MarionImportMap[keyTuple].Description2;
+                        marionExportRow.ImportID = MarionImportMap[keyTuple].ImportID;
+                        marionExportRow.Job = MarionImportMap[keyTuple].Job;
                     }
                     MarionExportRows.Add(marionExportRow);
                 }
@@ -439,10 +350,75 @@ namespace MarionUpload.ViewModels
             writer.Dispose();
         }
 
+        private static List<mUnitPct> CreateMarionImportJurisdictionList(mMarionImport marionImportRow, int numberOfJurisdictions)
+        {
+            var list = new List<mUnitPct>();
+
+            for (int index = 1; index <= numberOfJurisdictions; index++)
+            {
+                Type rowType = marionImportRow.GetType();
+
+                PropertyInfo jurisdictionProperty = rowType.GetProperty($"Jurisdiction{index}");
+                PropertyInfo jurisdictionMarketProperty = rowType.GetProperty($"Juris{index}MarketValue");
+
+                var pct = new mUnitPct()
+                {
+                    ColumnName = $"Jurisdiction{index}",
+                    UnitPct = 0
+                };
+
+                pct.JurisdictionID = jurisdictionProperty.GetValue(marionImportRow).ToString();
+                pct.MarketValueString = jurisdictionMarketProperty.GetValue(marionImportRow).ToString();
+                pct.MarketValueFloat = float.Parse(pct.MarketValueString);
+
+                list.Add(pct);
+            }
+
+            return list;
+                           
+        }
+
+        private static mMarionImport ProcessImportRowNotInMarionImport(IDbConnection db, mAccount accountRow, IOrderedEnumerable<mMarionJurisdiction> sortedPropertyJurisdictions)
+        {
+            mMarionImport marionImportRow = new mMarionImport();
+            var unitPropertySqlString = $"select * from tblUnitProperty where PropID={accountRow.PropID}";
+            var unitPropertyRows = db.Query<mUnitProperty>(unitPropertySqlString);
+
+            // check to see if it has out of county
+            var isAnyOutOfCounty = unitPropertyRows.Any(unit => unit.UnitID == "GHSN" || unit.UnitID == "SAVG_CAS" || unit.UnitID == "SLIN");
+            Type importRowType = marionImportRow.GetType();
+            if (isAnyOutOfCounty)
+            {
+
+                for (int index = 1; index <= sortedPropertyJurisdictions.Count(); index++)
+                {
+                    PropertyInfo prop = importRowType.GetProperty($"Juris{index}MarketValue");
+                    prop.SetValue(marionImportRow, (.50f * (float)accountRow.ValAcctCur).ToString());
+
+                    PropertyInfo jurisdictionProperty = importRowType.GetProperty($"Jurisdiction{index}");
+                    jurisdictionProperty.SetValue(marionImportRow, sortedPropertyJurisdictions.ToList()[index-1].UnitID);
+                }
+            }
+            else
+            {
+                for (int index = 1; index <= sortedPropertyJurisdictions.Count(); index++)
+                {
+                    PropertyInfo prop = importRowType.GetProperty($"Juris{index}MarketValue");
+                    prop.SetValue(marionImportRow, accountRow.ValAcctCur.ToString());
+
+                    PropertyInfo jurisdictionProperty = importRowType.GetProperty($"Jurisdiction{index}");
+                    jurisdictionProperty.SetValue(marionImportRow, sortedPropertyJurisdictions.ToList()[index-1].UnitID);
+                }
+            }
+
+            return marionImportRow;
+        }
+
         private void updateExportRow(mUnitPct marionJurisdiction, mMarionExport exportRow,mAccount account)
         {
+
             //update marionExportRow market values = tblAccount.ValAcctCur * UnitPct
-           switch (marionJurisdiction.ColumnName)
+            switch (marionJurisdiction.ColumnName)
             {
                 case "Jurisdiction1":
                     exportRow.Juris1MarketValue = (marionJurisdiction.UnitPct * (float)account.ValAcctCur).ToString();
@@ -465,11 +441,11 @@ namespace MarionUpload.ViewModels
             }           
         }
 
-        private void updateTblUnitProperty(mUnitPct marionJurisdiction,mMarionExport exportRow,mAccount account)
+        private void updateTblUnitProperty(IDbConnection db, mUnitPct marionJurisdiction, mMarionExport exportRow,mAccount account)
         {
             //update tblUnitProperty set UnitPct = marionJurisdiction.UnitPct
             
-            throw new NotImplementedException();
+           // throw new NotImplementedException();
         }
 
         private mMarionExport TranslateUnitPropertyRowToMarionExportRow(mMarionJurisdiction nextJurisdiction, mMarionExport marionExportRow, int index)
@@ -491,7 +467,7 @@ namespace MarionUpload.ViewModels
 
             PropertyInfo prop = type.GetProperty($"Juris{index}MarketValue");
 
-            //now get the previous year data for this property from the MarionImport File using MarionImportRetrieveMap
+            //now get the previous year data for this property from the MarionImport File using MarionImportMap
 
             //search this row for out of county jurisdictions:
             //SAVG_CAS(81)Avinger ISD(Cass County),SLIN(82)Linden-Kildare ISD AND GHSN(83)Harrison County.
